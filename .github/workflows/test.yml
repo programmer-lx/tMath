@@ -15,12 +15,17 @@ jobs:
 
       # 配置 CMake
       - name: Configure CMake
-        run: cmake -S . -B build-${{ matrix.config }}
+        run: cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }} -DTMATH_BUILD_TESTS=ON
 
       # 编译
       - name: Build
-        run: cmake --build build-${{ matrix.config }} --config ${{ matrix.config }}
+        run: cmake --build build-${{ matrix.os }}-${{ matrix.config }} --config ${{ matrix.config }}
 
       # 运行测试
       - name: Run CTest
-        run: ctest --test-dir build-${{ matrix.config }} -C ${{ matrix.config }} --output-on-failure
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} -C ${{ matrix.config }} --output-on-failure
+          else
+            ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} --output-on-failure
+          fi
