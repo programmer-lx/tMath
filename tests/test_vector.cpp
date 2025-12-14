@@ -246,6 +246,25 @@ void test_vector2()
         }
     }
 
+    {
+        // zero divide
+        {
+            Vector2f zero = {0, 0};
+            Vector2f n = tMath::safe_normalized(zero, {5, 5});
+            TEST_BOOL(tMath::approximately(n, {5, 5}));
+        }
+        {
+            Vector2i32 zero = {0, 0};
+            Vector2f n = tMath::safe_normalized<Vector2f>(zero, {10, 5});
+            TEST_BOOL(tMath::approximately(n, {10, 5}));
+        }
+        {
+            Vector2f zero = {0, 0};
+            tMath::safe_normalize_inplace(zero, {5, 10});
+            TEST_BOOL(tMath::approximately(zero, {5, 10}));
+        }
+    }
+
     TEST_END("test vector2");
 }
 

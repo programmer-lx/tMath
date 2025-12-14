@@ -37,4 +37,35 @@ bool approximately(const F a, const F b, const F tolerance = MinTolerance<F>)
     return TMATH_NAMESPACE_NAME::abs(a - b) < tolerance;
 }
 
+template<is_floating_point N>
+static constexpr bool is_infinity(N n)
+{
+    return std::isinf(n);
+}
+
+template<is_floating_point N>
+static constexpr bool is_finite(N n)
+{
+    return std::isfinite(n);
+}
+
+template<is_floating_point N>
+static constexpr bool is_nan(N n)
+{
+    return std::isnan(n);
+}
+
+// 无效除数
+template<is_floating_point F>
+static constexpr bool is_invalid_divisor(F f)
+{
+    return !is_finite(f) || (abs(f) <= MinTolerance<F>);
+}
+
+template<is_signed_int I>
+static constexpr bool is_invalid_divisor(I i)
+{
+    return i == static_cast<I>(0);
+}
+
 TMATH_NAMESPACE_END

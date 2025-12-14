@@ -16,6 +16,19 @@ int main()
     {
         TEST_BOOL(tMath::abs(-1) == 1);
     }
+    {
+        // zero divide
+        {
+            int t = 0;
+            float f = 10.0 / t;
+            TEST_BOOL(tMath::is_infinity(f));
+        }
+        {
+            int t = 0;
+            float f = 0.0 / t;
+            TEST_BOOL(tMath::is_nan(f));
+        }
+    }
 
     return 0;
 }
