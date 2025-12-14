@@ -68,4 +68,27 @@ static constexpr bool is_invalid_divisor(I i)
     return i == static_cast<I>(0);
 }
 
+template<is_number N>
+void safe_divide_inplace(N& val, const N divisor, const N fallback)
+{
+    if (is_invalid_divisor(divisor))
+    {
+        val = fallback;
+        return;
+    }
+
+    val /= divisor;
+}
+
+template<is_number N>
+N safe_divide(const N val, const N divisor, const N fallback)
+{
+    if (is_invalid_divisor(divisor))
+    {
+        return fallback;
+    }
+
+    return val / divisor;
+}
+
 TMATH_NAMESPACE_END

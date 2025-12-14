@@ -111,6 +111,13 @@ void test_vector2()
             TEST_BOOL(tMath::approximately(v1, { 0.5, 2.0/3.0 }));
         }
         {
+            // safe /=
+            Vector2f v1 = {1.5, 2};
+            const float zero = 0;
+            tMath::safe_divide_inplace(v1, zero, {5, 6});
+            TEST_BOOL(tMath::approximately({5, 6}, v1));
+        }
+        {
             // +
             Vector2f v1 = { 1.5, 2 };
             Vector2f v2 = { 3.5, 2.5 };
@@ -133,6 +140,12 @@ void test_vector2()
             Vector2f v1 = { 1.5, 2 };
             const float f = 3;
             TEST_BOOL(tMath::approximately(v1 / f, { 0.5, 2.0/3.0 }));
+        }
+        {
+            // safe /
+            Vector2f v = {1.5, 2};
+            const float zero = 0;
+            TEST_BOOL(tMath::approximately(tMath::safe_divide(v, zero, {5, 6}), {5, 6}));
         }
         {
             // dot

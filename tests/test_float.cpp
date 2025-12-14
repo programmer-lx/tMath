@@ -28,6 +28,17 @@ int main()
             float f = 0.0 / t;
             TEST_BOOL(tMath::is_nan(f));
         }
+        {
+            float f = 1;
+            float zero = 0;
+            TEST_BOOL(tMath::safe_divide(f, zero, 100.0f) == 100.0f);
+        }
+        {
+            float f = 1;
+            float zero = 0;
+            tMath::safe_divide_inplace(f, zero, 666.0f);
+            TEST_BOOL(f == 666.0f);
+        }
     }
 
     return 0;

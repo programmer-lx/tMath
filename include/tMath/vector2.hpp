@@ -53,6 +53,18 @@ TVec2& operator/=(TVec2& lhs, const vector_field_t<TVec2> rhs)
 }
 
 template<is_vector2 TVec2>
+void safe_divide_inplace(TVec2& val, const vector_field_t<TVec2> divisor, const TVec2& fallback)
+{
+    if (is_invalid_divisor(divisor))
+    {
+        val = fallback;
+        return;
+    }
+
+    val /= divisor;
+}
+
+template<is_vector2 TVec2>
 TVec2 operator+(const TVec2& lhs, const TVec2& rhs)
 {
     TVec2 v = lhs;
@@ -82,6 +94,14 @@ TVec2 operator/(const TVec2& lhs, const vector_field_t<TVec2> rhs)
     TVec2 v = lhs;
     v /= rhs;
     return v;
+}
+
+template<is_vector2 TVec2>
+TVec2 safe_divide(const TVec2& val, const vector_field_t<TVec2> divisor, const TVec2& fallback)
+{
+    TVec2 result = val;
+    safe_divide_inplace(result, divisor, fallback);
+    return result;
 }
 
 template<is_vector2 TVec2>
