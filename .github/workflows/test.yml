@@ -1,0 +1,25 @@
+name: CMake build & test
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        config: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # 配置 CMake
+      - name: Configure CMake
+        run: cmake -S . -B build-${{ matrix.config }}
+
+      # 编译
+      - name: Build
+        run: cmake --build build-${{ matrix.config }} --config ${{ matrix.config }}
+
+      # 运行测试
+      - name: Run CTest
+        run: ctest --test-dir build-${{ matrix.config }} -C ${{ matrix.config }} --output-on-failure
