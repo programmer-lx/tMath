@@ -27,9 +27,6 @@ target_link_libraries(test_operators_override PRIVATE tMath)
 add_o3_optimization(test_operators_override)
 
 
-# 启用 CTest
-enable_testing()
-
 # 添加测试
 add_test(NAME TestFloat COMMAND $<TARGET_FILE:test_float>)
 add_test(NAME TestVector COMMAND $<TARGET_FILE:test_vector>)

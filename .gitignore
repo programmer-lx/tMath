@@ -2,5 +2,5 @@ cmake-build-debug-msvc/
 cmake-build-release-msvc/
 cmake-build-debug-mingw/
 cmake-build-release-mingw/
-build/
 .idea/
+build/

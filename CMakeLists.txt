@@ -20,5 +20,6 @@ endif()
 option(TMATH_BUILD_TESTS "Build tests?" OFF)
 
 if(TMATH_BUILD_TESTS)
+    enable_testing()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()

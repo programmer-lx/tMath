@@ -22,10 +22,10 @@ jobs:
         run: cmake --build build-${{ matrix.os }}-${{ matrix.config }} --config ${{ matrix.config }}
 
       # 运行测试
-      - name: Run CTest
-        run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} -C ${{ matrix.config }} --output-on-failure
-          else
-            ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} --output-on-failure
-          fi
+      - name: Run CTest (Windows)
+        if: runner.os == 'Windows'
+        run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} -C ${{ matrix.config }} --output-on-failure
+
+      - name: Run CTest (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} --output-on-failure
