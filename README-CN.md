@@ -1,4 +1,4 @@
-# tMath - 0类型入侵、基于模板的 C++ 数学库
+# tMath - 支持任意结构体的数学库
 
 [English](README.md)
 

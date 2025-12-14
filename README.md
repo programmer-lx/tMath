@@ -1,4 +1,4 @@
-# tMath - Zero Type Intrusion, Generic C++ Math Library
+# tMath - A math library that works with ANY struct
 
 [中文](README-CN.md)
 
