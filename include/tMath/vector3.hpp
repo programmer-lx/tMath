@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <tMath/math_defs.hpp>
+#include "math_defs.hpp"
 
 TMATH_NAMESPACE_BEGIN
 
