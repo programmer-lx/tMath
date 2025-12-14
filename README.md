@@ -86,3 +86,14 @@ Vector2i32 b = { 2, -5 };
 auto dis = tMath::distance(a, b); 
 // The type of dis is double, and the result is 15.29705854077835449
 ```
+
+## CMake Integration
+1. Add tMath as sub_directory
+```cmake
+add_subdirectory(${your_project_path}/3rdparty/tMath)
+```
+2. link tMath
+```cmake
+add_executable(my_project source.cpp)
+target_link_libraries(my_project PRIVATE tMath)
+```

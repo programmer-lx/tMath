@@ -87,3 +87,14 @@ Vector2i32 b = { 2, -5 };
 auto dis = tMath::distance(a, b); 
 // dis 的类型是 double，结果为 15.29705854077835449
 ```
+
+## CMake集成
+1. 添加tMath作为sub_directory
+```cmake
+add_subdirectory(${your_project_path}/3rdparty/tMath)
+```
+2. 链接 tMath 库
+```cmake
+add_executable(my_project source.cpp)
+target_link_libraries(my_project PRIVATE tMath)
+```
