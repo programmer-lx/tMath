@@ -194,7 +194,7 @@ template<is_vector2_floating_point TVec2>
 TVec2 normalized(const TVec2& v)
 {
     TVec2 result = v;
-    TMATH_NAMESPACE_NAME::normalize_inplace(result);
+    normalize_inplace(result);
     return result;
 }
 
@@ -249,7 +249,7 @@ RetVec2 safe_normalized(const TVec2Int& v, const RetVec2& fallback)
 template<is_vector2_floating_point TVec2>
 vector_field_t<TVec2> distance(const TVec2& a, const TVec2& b)
 {
-    return TMATH_NAMESPACE_NAME::magnitude(a - b);
+    return magnitude(a - b);
 }
 
 template<is_vector2_sint TVec2Int>
@@ -257,7 +257,7 @@ sint_to_floating_point_t<vector_field_t<TVec2Int>> distance(const TVec2Int& a, c
 {
     using F = sint_to_floating_point_t<vector_field_t<TVec2Int>>;
     const TVec2Int delta = a - b;
-    return TMATH_NAMESPACE_NAME::magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y));
+    return magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y));
 }
 
 template<is_vector2_floating_point TVec2>

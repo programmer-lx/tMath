@@ -1,19 +1,19 @@
-# tMath - Highly Type-Decoupled, Generic C++ Math Library
+# tMath - Zero Type Intrusion, Generic C++ Math Library
+
 [中文](README-CN.md)
 
 tMath is a header-only, C++20 Concepts-based highly generalized math library, focusing on **Template-based Decoupling** and **High-Performance Computation (SIMD-ready)**.
 
 It allows developers to use **ANY** struct that conforms to a specific memory layout (e.g., `struct { float x, y; }`) for vector operations without inheriting from any base classes in the library, achieving **zero-intrusion** abstraction.
 
-
 ## ✨ Highlights
+
 | **Feature**                        | **Description**                                                                                                                                                                                                          |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | ✨**Zero Type Intrusion**           | Developers can bring their own data types. Your custom struct (e.g., `Vector2f`) can be used directly in all `tMath` functions without inheritance or wrapping, achieving complete separation of type and functionality. |
-| ✨**SIMD Optimization Ready**       | Provide SIMD functions and specialized SIMD concepts to significantly boost the performance of mathematical operations.     |
+| ✨**SIMD Optimization Ready**       | Provide SIMD functions and specialized SIMD concepts to significantly boost the performance of mathematical operations.                                                                                                  |
 | **Safe Integer Arithmetic**        | Intelligently handles vector calculations involving integers. Automatic type promotion (e.g., `int32_t` promoted to `double`) eliminates overflow risks and precision issues in calculations.                            |
 | **Zero-Cost Quat Differentiation** | Uses the **Tag Type** mechanism to differentiate between `Vector4` and `Quat`, which share the same memory layout, ensuring correct mathematical dispatch without increasing struct size.                                |
-
 
 ## 📐 Design Philosophy: Highly Type Decoupling
 
@@ -88,12 +88,15 @@ auto dis = tMath::distance(a, b);
 ```
 
 ## CMake Integration
+
 1. Add tMath as sub_directory
-```cmake
-add_subdirectory(${your_project_path}/3rdparty/tMath)
-```
+   
+   ```cmake
+   add_subdirectory(${your_project_path}/3rdparty/tMath)
+   ```
 2. link tMath
-```cmake
-add_executable(my_project source.cpp)
-target_link_libraries(my_project PRIVATE tMath)
-```
+   
+   ```cmake
+   add_executable(my_project source.cpp)
+   target_link_libraries(my_project PRIVATE tMath)
+   ```
