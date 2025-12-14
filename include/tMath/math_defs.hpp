@@ -9,24 +9,40 @@
 #define TMATH_NAMESPACE_BEGIN namespace TMATH_NAMESPACE_NAME {
 #define TMATH_NAMESPACE_END }
 
+// force inline
+#if defined (_MSC_VER)
+    #define TMATH_FORCE_INLINE __forceinline
+#elif defined (__GNUC__) || defined (__clang__)
+    #define TMATH_FORCE_INLINE inline __attribute__((__always_inline__))
+#else
+    #error "TMATH_FORCE_INLINE has not defined!"
+#endif
+
 
 #define TMATH_NODISCARD [[nodiscard]]
 
 
-// clang-format off
-// 自动匹配运算符重载的宏
-#define TMATH_ENABLE_OPERATORS              \
-    using TMATH_NAMESPACE_NAME::operator==; \
-    using TMATH_NAMESPACE_NAME::operator!=; \
-    using TMATH_NAMESPACE_NAME::operator+=; \
-    using TMATH_NAMESPACE_NAME::operator-=; \
-    using TMATH_NAMESPACE_NAME::operator*=; \
-    using TMATH_NAMESPACE_NAME::operator/=; \
-    using TMATH_NAMESPACE_NAME::operator+;  \
-    using TMATH_NAMESPACE_NAME::operator-;  \
-    using TMATH_NAMESPACE_NAME::operator*;  \
-    using TMATH_NAMESPACE_NAME::operator/;
-// clang-format on
+#define TMATH_REGISTER_VECTOR_TYPE(vector_type_name) \
+    TMATH_FORCE_INLINE bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
+    TMATH_FORCE_INLINE bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name& operator*=(vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
+    { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name& operator/=(vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
+    { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name operator*(const vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
+    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
+    TMATH_FORCE_INLINE vector_type_name operator/(const vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
+    { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
 
 
 
@@ -268,7 +284,7 @@ concept is_vector_n = is_vector2<T> || is_vector3<T> || is_vector4<T>;
 template<is_vector_n V>
 struct vector_traits
 {
-    using field_type = typename decltype(std::declval<V>().x);
+    using field_type = decltype(std::declval<V>().x);
 };
 
 template<is_vector_n V>

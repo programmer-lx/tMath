@@ -3,46 +3,59 @@
 
 #include "test.hpp"
 
-TMATH_ENABLE_OPERATORS
-
 struct Vector2f
 {
     float x = 0, y = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector2f)
+
 struct Vector2d
 {
     double x = 0, y = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector2d)
+
 struct Vector2i16
 {
     int16_t x = 0, y = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector2i16)
+
 struct Vector2i32
 {
     int32_t x = 0, y = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector2i32)
 
 struct Vector3f
 {
     float x = 0, y = 0, z = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector3f)
+
 struct Vector3d
 {
     double x = 0, y = 0, z = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector3d)
+
 struct Vector3i32
 {
     int32_t x = 0, y = 0, z = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector3i32)
+
 struct Vector3i16
 {
     int16_t x = 0, y = 0, z = 0;
 };
+TMATH_REGISTER_VECTOR_TYPE(Vector3i16)
 
 struct Vector4f
 {
     float x = 0, y = 0, z = 0, w = 0;
 };
+// TMATH_REGISTER_VECTOR_TYPE(Vector4f)
 
 void test_vector2()
 {
