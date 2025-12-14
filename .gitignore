@@ -1,0 +1,4 @@
+cmake-build-debug-msvc/
+cmake-build-release-msvc/
+build/
+.idea/
