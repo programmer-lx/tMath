@@ -2,6 +2,10 @@
 
 [English](README.md)
 
+## 一个数学库，居然没有Vector类 ?!
+## 是的，只要你的结构体有 `x, y, z, w`，这个库就能运行!!!
+
+
 tMath 是一个header-only，基于 C++20 Concepts 的高度泛型化数学库，专注于类型解耦（Template-based Decoupling）和高性能运算（SIMD-ready）。
 
 它允许开发者使用任何符合特定内存布局的结构体（例如 struct { float x, y; }）进行向量运算，无需继承库内基类，实现了零侵入性的抽象。

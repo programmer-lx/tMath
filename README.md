@@ -2,6 +2,10 @@
 
 [中文](README-CN.md)
 
+## This math-library has not built-in Vector type? No problem!!!
+## As long as your struct has `x, y, z, w` fields, this library will just work.
+
+
 tMath is a header-only, C++20 Concepts-based highly generalized math library, focusing on **Template-based Decoupling** and **High-Performance Computation (SIMD-ready)**.
 
 It allows developers to use **ANY** struct that conforms to a specific memory layout (e.g., `struct { float x, y; }`) for vector operations without inheriting from any base classes in the library, achieving **zero-intrusion** abstraction.
