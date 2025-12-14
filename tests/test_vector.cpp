@@ -1,4 +1,5 @@
 #include <tMath/vector2.hpp>
+#include <tMath/vector3.hpp>
 
 #include "test.hpp"
 
@@ -21,9 +22,21 @@ struct Vector2i32
     int32_t x = 0, y = 0;
 };
 
-struct Vector3
+struct Vector3f
 {
     float x = 0, y = 0, z = 0;
+};
+struct Vector3d
+{
+    double x = 0, y = 0, z = 0;
+};
+struct Vector3i32
+{
+    int32_t x = 0, y = 0, z = 0;
+};
+struct Vector3i16
+{
+    int16_t x = 0, y = 0, z = 0;
 };
 
 struct Vector4f
@@ -233,7 +246,164 @@ void test_vector2()
 
 void test_vector3()
 {
+    TEST_TITLE("test vector3");
 
+    {
+        // operators TODO
+        {
+            // ==
+            {
+                Vector3f v1 = {1.5, 2.5, 5.5};
+                Vector3f v2 = { 1.5, 2.5, 5.5 };
+                TEST_BOOL(v1 == v2);
+            }
+            {
+                Vector3f v1 = {1.5, 2.50001, 1};
+                Vector3f v2 = { 1.5, 2.5, 1 };
+                TEST_BOOL(!(v1 == v2));
+            }
+        }
+        {
+            // !=
+            {
+                Vector3f v1 = {1.5, 2.5, 5.5};
+                Vector3f v2 = { 1.58, 2.5, 5.5 };
+                TEST_BOOL(v1 != v2);
+            }
+            {
+                Vector3f v1 = {1.5, 2.5, 5.5};
+                Vector3f v2 = { 1.5, 2.51, 5.5 };
+                TEST_BOOL(v1 != v2);
+            }
+        }
+        {
+            // +=
+            Vector3f v1 = { 1.5, 2, 5.5 };
+            constexpr Vector3f v2 = { 3.5, 2.5, 5.5 };
+            v1 += v2;
+            TEST_BOOL(tMath::approximately(v1, { 5, 4.5, 11.0 }));
+        }
+        {
+            // -=
+            Vector3f v1 = { 1.5, 2, 5.5 };
+            constexpr Vector3f v2 = { 3.5, 2.5, 15.2 };
+            v1 -= v2;
+            TEST_BOOL(tMath::approximately(v1, { -2, -0.5, -9.7 }));
+        }
+        {
+            // *=
+            Vector3f v1 = { 1.5, 2, 5.5 };
+            const float f = 3;
+            v1 *= f;
+            TEST_BOOL(tMath::approximately(v1, { 4.5, 6, 16.5 }));
+        }
+        {
+            // /=
+            Vector3f v1 = { 1.5, 2, 5.5 };
+            const float f = 3;
+            v1 /= f;
+            TEST_BOOL(tMath::approximately(v1, { 0.5, 2.0/3.0, 5.5/3.0 }));
+        }
+        {
+            // +
+            Vector3f v1 = { 1.5, 2, 5.5 };
+            Vector3f v2 = { 3.5, 2.5, 5.5 };
+            TEST_BOOL(tMath::approximately(v1 + v2, { 5, 4.5, 11.0 }));
+        }
+        {
+            // -
+            Vector3f v1 = { 1.5, 2, 15.5 };
+            constexpr Vector3f v2 = { 3.5, 2.5, 5.2 };
+            TEST_BOOL(tMath::approximately(v1 - v2, { -2, -0.5, 10.3 }));
+        }
+        {
+            // *
+            Vector3f v1 = { 1.5, 2, 5.5 };
+            const float f = 3;
+            TEST_BOOL(tMath::approximately(v1 * f, { 4.5, 6, 16.5 }));
+        }
+        {
+            // /
+            Vector3f v1 = { 1.5, 2, 5.5 };
+            const float f = 3;
+            TEST_BOOL(tMath::approximately(v1 / f, { 0.5, 2.0/3.0, 5.5/3.0 }));
+        }
+        {
+            // dot
+            Vector3f v1 = { 1, 2, 3 };
+            Vector3f v2 = { 2, 3, 4 };
+            float f = tMath::dot(v1, v2);
+            TEST_BOOL(tMath::approximately(f, 20.0f));
+        }
+        {
+            // cross
+            Vector3f v1 = { -1, 1, 6 };
+            Vector3f v2 = { 1, 1, -10 };
+            TEST_BOOL(tMath::approximately(tMath::cross(v1, v2), { -16, -4, -2 }));
+        }
+
+        {
+            // casts
+            {
+                Vector3f v3f = { 1.1, 2.2, 3.3 };
+                Vector3i16 test = { 1, 2, 3 };
+                TEST_BOOL(tMath::precision_cast<Vector3i16>(v3f) == test);
+            }
+            {
+                const float x = 1.111111f;
+                const float y = 2.222222f;
+                const float z = 3.333333f;
+                Vector3f v3f = { x, y, z };
+                Vector3d test = { static_cast<double>(x), static_cast<double>(y), static_cast<double>(z) };
+                TEST_BOOL(tMath::approximately(tMath::precision_cast<Vector3d>(v3f), test));
+                TEST_BOOL(tMath::precision_cast<Vector3d>(v3f) == test);
+            }
+        }
+    }
+
+    {
+        Vector3f v3{};
+        TEST_BOOL(tMath::approximately(v3, {0, 0, 0}));
+    }
+    {
+        // to degrees
+        Vector3f degrees = { 180, 180, 360 };
+        TEST_BOOL(tMath::approximately(tMath::to_radians(degrees), { tMath::PI<float>, tMath::PI<float>, tMath::PI<float> * 2 }));
+    }
+    {
+        Vector3f radians = { 2 * tMath::PI<float>, tMath::PI<float>, tMath::PI<float> };
+        TEST_BOOL(tMath::approximately(tMath::to_degrees(radians), { 360, 180, 180 }));
+    }
+    {
+        Vector3f negative = { -180, -3, -150.123f };
+        TEST_BOOL(tMath::approximately(tMath::abs(negative), { 180, 3, 150.123f }));
+    }
+    {
+        {
+            Vector3f vec = { -1, 1, -1 };
+            auto f = tMath::magnitude(vec);
+            TEST_BOOL(tMath::approximately(f, 1.732050f));
+        }
+        {
+            // Vector3f vec = { -1, 1, -1 };
+            auto f = tMath::magnitude(-1.0f, 1.0f, -1.0f);
+            TEST_BOOL(tMath::approximately(f, 1.732050f));
+        }
+    }
+    {
+        Vector3f vec = { 1000, 0, 1000 };
+        TEST_BOOL(tMath::approximately(tMath::normalized(vec), { 0.707106f, 0, 0.707106f }));
+    }
+    {
+        Vector3f vec = { 1000, 0, 1000 };
+        tMath::normalize_inplace(vec);
+        TEST_BOOL(tMath::approximately(vec, { 0.707106f, 0, 0.707106f }));
+    }
+    {
+        // distance TODO
+    }
+
+    TEST_END("test vector3");
 }
 
 void test_vector4()
