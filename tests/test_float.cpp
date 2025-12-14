@@ -17,6 +17,14 @@ int main()
         TEST_BOOL(tMath::abs(-1) == 1);
     }
     {
+        float a = 10;
+        constexpr float e = tMath::Epsilon<float>;
+        TEST_BOOL(tMath::clamp(a, 0.0f, tMath::Epsilon<float>) == tMath::Epsilon<float>);
+    }
+    {
+        TEST_BOOL(tMath::approximately(tMath::lerp(-10.0f, 10.0f, 0.6), 2.0f));
+    }
+    {
         // zero divide
         {
             int t = 0;

@@ -258,6 +258,12 @@ void test_vector2()
             TEST_BOOL(tMath::approximately(dis, 15.297058f));
         }
     }
+    {
+        // lerp
+        Vector2f a = { -10, 10 };
+        Vector2f b = { 10, 30 };
+        TEST_BOOL(tMath::approximately(tMath::lerp(a, b, 0.6f), { 2.0f, 22.0f }));
+    }
 
     {
         // zero divide

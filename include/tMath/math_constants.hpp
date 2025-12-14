@@ -13,7 +13,7 @@ template<is_floating_point F>
 static constexpr F PI = std::numbers::pi_v<F>;
 
 template<is_floating_point F>
-static constexpr F InvPI = static_cast<F>(1) / PI<F>;
+static constexpr F InvPI = std::numbers::inv_pi_v<F>;
 
 template<is_floating_point F>
 static constexpr F TwoPI = static_cast<F>(2) * PI<F>;
@@ -58,6 +58,9 @@ static constexpr F Deg2Rad = PI<F> / static_cast<F>(180);
 // ======================================== precision ========================================
 template<is_floating_point F>
 static constexpr F MinTolerance = static_cast<F>(10) * std::numeric_limits<F>::epsilon();
+
+template<is_number N>
+static constexpr N Epsilon = std::numeric_limits<N>::epsilon();
 
 template<is_number N>
 static constexpr N Max = std::numeric_limits<N>::max();

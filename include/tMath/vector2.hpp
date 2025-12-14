@@ -53,15 +53,15 @@ TVec2& operator/=(TVec2& lhs, const vector_field_t<TVec2> rhs)
 }
 
 template<is_vector2 TVec2>
-void safe_divide_inplace(TVec2& val, const vector_field_t<TVec2> divisor, const TVec2& fallback)
+void safe_divide_inplace(TVec2& v, const vector_field_t<TVec2> divisor, const TVec2& fallback)
 {
     if (is_invalid_divisor(divisor))
     {
-        val = fallback;
+        v = fallback;
         return;
     }
 
-    val /= divisor;
+    v /= divisor;
 }
 
 template<is_vector2 TVec2>
@@ -97,9 +97,9 @@ TVec2 operator/(const TVec2& lhs, const vector_field_t<TVec2> rhs)
 }
 
 template<is_vector2 TVec2>
-TVec2 safe_divide(const TVec2& val, const vector_field_t<TVec2> divisor, const TVec2& fallback)
+TVec2 safe_divide(const TVec2& v, const vector_field_t<TVec2> divisor, const TVec2& fallback)
 {
-    TVec2 result = val;
+    TVec2 result = v;
     safe_divide_inplace(result, divisor, fallback);
     return result;
 }
@@ -258,6 +258,15 @@ sint_to_floating_point_t<vector_field_t<TVec2Int>> distance(const TVec2Int& a, c
     using F = sint_to_floating_point_t<vector_field_t<TVec2Int>>;
     const TVec2Int delta = a - b;
     return TMATH_NAMESPACE_NAME::magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y));
+}
+
+template<is_vector2_floating_point TVec2>
+TVec2 lerp(const TVec2& a, const TVec2& b, const f32 t)
+{
+    return {
+        lerp(a.x, b.x, t),
+        lerp(a.y, b.y, t)
+    };
 }
 
 TMATH_NAMESPACE_END

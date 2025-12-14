@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 
 #include "math_constants.hpp"
@@ -29,6 +30,18 @@ template<is_floating_point F>
 F sqrt(const F f)
 {
     return std::sqrt(f);
+}
+
+template<is_number N>
+N clamp(const N n, const N min, const N max)
+{
+    return std::clamp(n, min, max);
+}
+
+template<is_floating_point F>
+F lerp(const F a, const F b, const f32 t)
+{
+    return std::lerp(a, b, t);
 }
 
 template<is_floating_point F>
