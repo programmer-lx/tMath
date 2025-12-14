@@ -2,7 +2,7 @@
 
 [中文](README-CN.md)
 
-## This math-library has not built-in Vector type? No problem!!!
+## This math-library does not have a built-in Vector type? No problem!!!
 ## As long as your struct has `x, y, z, w` fields, this library will just work.
 
 
