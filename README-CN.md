@@ -32,14 +32,13 @@ struct MyVector2
     float x;
     float y;
 };
+TMATH_REGISTER_VECTOR_TYPE(MyVector2)
 
 struct MyVec2 
 {
     float x = 0, y = 0;
 };
-
-// 一行代码支持自定义类型的运算符重载 (可以全局定义，也可以定义在函数作用域内)
-TMATH_ENABLE_OPERATORS
+TMATH_REGISTER_VECTOR_TYPE(MyVec2)
 
 // tMath 自动识别并提供所有运算
 MyVector2 p1 = { 1.5f, 2.5f };

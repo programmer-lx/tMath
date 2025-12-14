@@ -32,14 +32,13 @@ struct MyVector2
     float x;
     float y;
 };
+TMATH_REGISTER_VECTOR_TYPE(MyVector2)
 
 struct MyVec2 
 {
     float x = 0, y = 0;
 };
-
-// One line of code enables operator overloading for custom types (can be defined globally or within a function scope)
-TMATH_ENABLE_OPERATORS
+TMATH_REGISTER_VECTOR_TYPE(MyVec2)
 
 // tMath automatically recognizes and provides all operations
 MyVector2 p1 = { 1.5f, 2.5f };
