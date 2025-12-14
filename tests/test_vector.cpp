@@ -217,6 +217,11 @@ void test_vector2()
         TEST_BOOL(tMath::approximately(vec, { 1, 0 }));
     }
     {
+        // sint normalized
+        Vector2i32 vi = { 1234, 1234 };
+        TEST_BOOL(tMath::approximately(tMath::normalized<Vector2f>(vi), { 0.707106f, 0.707106f }));
+    }
+    {
         // distance
         {
             // f32
@@ -398,6 +403,11 @@ void test_vector3()
         Vector3f vec = { 1000, 0, 1000 };
         tMath::normalize_inplace(vec);
         TEST_BOOL(tMath::approximately(vec, { 0.707106f, 0, 0.707106f }));
+    }
+    {
+        // sint normalized
+        Vector3i32 vi = { 1234, 1234, 1234 };
+        TEST_BOOL(tMath::approximately(tMath::normalized<Vector3f>(vi), { 0.577350f, 0.577350f, 0.577350f }));
     }
     {
         // distance TODO

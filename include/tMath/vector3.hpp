@@ -156,7 +156,7 @@ vector_field_t<TVec3> magnitude(const TVec3& v)
     return std::hypot(v.x, v.y, v.z);
 }
 
-template<is_vector3 TVec3>
+template<is_vector3_floating_point TVec3>
 void normalize_inplace(TVec3& v)
 {
     using F = vector_field_t<TVec3>;
@@ -166,12 +166,25 @@ void normalize_inplace(TVec3& v)
     v.z *= inv_mag;
 }
 
-template<is_vector3 TVec3>
+template<is_vector3_floating_point TVec3>
 TVec3 normalized(const TVec3& v)
 {
     TVec3 result = v;
     TMATH_NAMESPACE_NAME::normalize_inplace(result);
     return result;
+}
+
+template<is_vector3_floating_point RetVec3, is_vector3_sint TVec3Int>
+RetVec3 normalized(const TVec3Int& v)
+{
+    using F = vector_field_t<RetVec3>;
+    const F inv_mag = static_cast<F>(1) / magnitude(static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z));
+
+    return {
+        static_cast<F>(v.x * inv_mag),
+        static_cast<F>(v.y * inv_mag),
+        static_cast<F>(v.z * inv_mag)
+    };
 }
 
 template<is_vector3_floating_point TVec3>
