@@ -15,12 +15,19 @@ struct Vector4f32
 
 int main()
 {
+    try
     {
-        // quat tag
-        TEST_BOOL(tMath::is_vector4_f32<Vector4f32> == true);
-        TEST_BOOL(tMath::is_vector4_f32<Quat> == false);
-        TEST_BOOL(tMath::is_quat<Quat> == true);
+        {
+            // quat tag
+            TEST_BOOL(tMath::is_vector4_f32<Vector4f32> == true);
+            TEST_BOOL(tMath::is_vector4_f32<Quat> == false);
+            TEST_BOOL(tMath::is_quat<Quat> == true);
+        }
+    }
+    catch (...)
+    {
+        return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

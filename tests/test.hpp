@@ -1,7 +1,10 @@
 #pragma once
 
+#include <stdexcept>
+#include <exception>
 #include <iostream>
-#include <cstdlib> // std::abort
+#include <string>
+
 
 #define TEST_TITLE(title) \
     do { \
@@ -15,7 +18,7 @@
             std::cerr << "  Condition: " << #condition << std::endl; \
             std::cerr << "  File:      " << __FILE__ << std::endl; \
             std::cerr << "  Line:      " << __LINE__ << std::endl; \
-            std::abort(); \
+            throw std::runtime_error(""); \
         } else { \
             std::cout << "SUCCEED: " << #condition << std::endl; \
         } \

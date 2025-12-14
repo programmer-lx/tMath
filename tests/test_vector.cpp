@@ -482,8 +482,16 @@ void test_vector4()
 
 int main()
 {
-    test_vector2();
-    test_vector3();
-    test_vector4();
-    return 0;
+    try
+    {
+        test_vector2();
+        test_vector3();
+        test_vector4();
+    }
+    catch (...)
+    {
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
 }
