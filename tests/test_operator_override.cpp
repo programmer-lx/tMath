@@ -8,7 +8,7 @@ struct Vector2f
 };
 TMATH_REGISTER_VECTOR_TYPE(Vector2f)
 
-static_assert(tMath::is_vector2_f32<Vector2f>);
+static_assert(tMath::is_vector2_float<Vector2f>);
 
 int main()
 {

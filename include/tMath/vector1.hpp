@@ -38,8 +38,8 @@ N clamp(const N n, const N min, const N max)
     return std::clamp(n, min, max);
 }
 
-template<is_floating_point F>
-F lerp(const F a, const F b, const f32 t)
+template<is_floating_point F, is_floating_point T>
+F lerp(const F a, const F b, const T t)
 {
     return std::lerp(a, b, t);
 }

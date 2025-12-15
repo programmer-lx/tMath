@@ -63,14 +63,6 @@ namespace detail
  */
 #define TMATH_MARK_AS_QUAT using is_quat = TMATH_NAMESPACE_NAME::detail::quat_tag;
 
-using f32 = float;
-static_assert(sizeof(f32) == 4);
-
-using f64 = double;
-static_assert(sizeof(f64) == 8);
-
-using long_double = long double;
-
 template<typename T>
 concept is_signed_int = std::is_integral_v<T> && std::is_signed_v<T>;
 
@@ -114,15 +106,6 @@ namespace detail
         typename T::is_quat;
         requires std::is_same_v<typename T::is_quat, TMATH_NAMESPACE_NAME::detail::quat_tag>;
     };
-
-    template<typename T>
-    concept is_f32 = std::is_same_v<T, f32>;
-
-    template<typename T>
-    concept is_f64 = std::is_same_v<T, f64>;
-
-    template<typename T>
-    concept is_long_double = std::is_same_v<T, long_double>;
 
     template<typename TVec, typename TField>
     concept is_generic_vector2 = requires(TVec v)
@@ -177,13 +160,13 @@ namespace detail
 // Vector2<T>
 // ----------------------------------------------------
 template<typename T>
-concept is_vector2_f32 = detail::is_generic_vector2<T, f32>;
+concept is_vector2_float = detail::is_generic_vector2<T, float>;
 template<typename T>
-concept is_vector2_f64 = detail::is_generic_vector2<T, f64>;
+concept is_vector2_double = detail::is_generic_vector2<T, double>;
 template<typename T>
-concept is_vector2_long_double = detail::is_generic_vector2<T, long_double>;
+concept is_vector2_long_double = detail::is_generic_vector2<T, long double>;
 template<typename T>
-concept is_vector2_floating_point = is_vector2_f32<T> || is_vector2_f64<T> || is_vector2_long_double<T>;
+concept is_vector2_floating_point = is_vector2_float<T> || is_vector2_double<T> || is_vector2_long_double<T>;
 
 template<typename T>
 concept is_vector2_i8 = detail::is_generic_vector2<T, int8_t>;
@@ -205,13 +188,13 @@ concept is_vector2 = is_vector2_floating_point<T> || is_vector2_sint<T>;
 // Vector3<T>
 // ----------------------------------------------------
 template<typename T>
-concept is_vector3_f32 = detail::is_generic_vector3<T, f32>;
+concept is_vector3_float = detail::is_generic_vector3<T, float>;
 template<typename T>
-concept is_vector3_f64 = detail::is_generic_vector3<T, f64>;
+concept is_vector3_double = detail::is_generic_vector3<T, double>;
 template<typename T>
-concept is_vector3_long_double = detail::is_generic_vector3<T, long_double>;
+concept is_vector3_long_double = detail::is_generic_vector3<T, long double>;
 template<typename T>
-concept is_vector3_floating_point = is_vector3_f32<T> || is_vector3_f64<T> || is_vector3_long_double<T>;
+concept is_vector3_floating_point = is_vector3_float<T> || is_vector3_double<T> || is_vector3_long_double<T>;
 
 template<typename T>
 concept is_vector3_i8 = detail::is_generic_vector3<T, int8_t>;
@@ -233,13 +216,13 @@ concept is_vector3 = is_vector3_floating_point<T> || is_vector3_sint<T>;
 // Vector4<T>
 // ----------------------------------------------------
 template<typename T>
-concept is_vector4_f32 = detail::is_generic_vector4<T, f32>;
+concept is_vector4_float = detail::is_generic_vector4<T, float>;
 template<typename T>
-concept is_vector4_f64 = detail::is_generic_vector4<T, f64>;
+concept is_vector4_double = detail::is_generic_vector4<T, double>;
 template<typename T>
-concept is_vector4_long_double = detail::is_generic_vector4<T, long_double>;
+concept is_vector4_long_double = detail::is_generic_vector4<T, long double>;
 template<typename T>
-concept is_vector4_floating_point = is_vector4_f32<T> || is_vector4_f64<T> || is_vector4_long_double<T>;
+concept is_vector4_floating_point = is_vector4_float<T> || is_vector4_double<T> || is_vector4_long_double<T>;
 
 template<typename T>
 concept is_vector4_i8 = detail::is_generic_vector4<T, int8_t>;
@@ -259,13 +242,13 @@ concept is_vector4 = is_vector4_floating_point<T> || is_vector4_sint<T>;
 // Quat<T> T only floating point
 // ----------------------------------------------------
 template<typename T>
-concept is_quat_f32 = detail::is_generic_quat<T, f32>;
+concept is_quat_float = detail::is_generic_quat<T, float>;
 template<typename T>
-concept is_quat_f64 = detail::is_generic_quat<T, f64>;
+concept is_quat_double = detail::is_generic_quat<T, double>;
 template<typename T>
-concept is_quat_long_double = detail::is_generic_quat<T, long_double>;
+concept is_quat_long_double = detail::is_generic_quat<T, long double>;
 template<typename T>
-concept is_quat = is_quat_f32<T> || is_quat_f64<T> || is_quat_long_double<T>;
+concept is_quat = is_quat_float<T> || is_quat_double<T> || is_quat_long_double<T>;
 
 
 
@@ -300,18 +283,18 @@ template<is_signed_int I>
 struct sint_to_floating_point
 {
 private:
-    static constexpr bool requires_f64 = std::numeric_limits<I>::digits > std::numeric_limits<f32>::digits;
-    static constexpr bool requires_long_double = std::numeric_limits<I>::digits > std::numeric_limits<f64>::digits;
+    static constexpr bool requires_double = std::numeric_limits<I>::digits > std::numeric_limits<float>::digits;
+    static constexpr bool requires_long_double = std::numeric_limits<I>::digits > std::numeric_limits<double>::digits;
 
 public:
     using type = std::conditional_t<
-        requires_f64,
+        requires_double,
         std::conditional_t<
             requires_long_double,
-            long_double,
-            f64
+            long double,
+            double
         >,
-        f32
+        float
     >;
 };
 

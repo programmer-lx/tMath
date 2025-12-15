@@ -260,8 +260,8 @@ sint_to_floating_point_t<vector_field_t<TVec2Int>> distance(const TVec2Int& a, c
     return magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y));
 }
 
-template<is_vector2_floating_point TVec2>
-TVec2 lerp(const TVec2& a, const TVec2& b, const f32 t)
+template<is_vector2_floating_point TVec2, is_floating_point F>
+TVec2 lerp(const TVec2& a, const TVec2& b, const F t)
 {
     return {
         lerp(a.x, b.x, t),

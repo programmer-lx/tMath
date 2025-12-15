@@ -473,7 +473,7 @@ void test_vector4()
 
     {
         // quat tag
-        TEST_BOOL(tMath::is_vector4_f32<Vector4f>);
+        TEST_BOOL(tMath::is_vector4_float<Vector4f>);
         TEST_BOOL(!tMath::is_quat<Vector4f>);
     }
 

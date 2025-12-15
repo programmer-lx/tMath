@@ -19,8 +19,8 @@ int main()
     {
         {
             // quat tag
-            TEST_BOOL(tMath::is_vector4_f32<Vector4f32> == true);
-            TEST_BOOL(tMath::is_vector4_f32<Quat> == false);
+            TEST_BOOL(tMath::is_vector4_float<Vector4f32> == true);
+            TEST_BOOL(tMath::is_vector4_float<Quat> == false);
             TEST_BOOL(tMath::is_quat<Quat> == true);
         }
     }
