@@ -1,5 +1,6 @@
 #include <tMath/vector2.hpp>
 #include <tMath/vector3.hpp>
+#include <tMath/vector4.hpp>
 
 #include "test.hpp"
 
@@ -55,7 +56,26 @@ struct Vector4f
 {
     float x = 0, y = 0, z = 0, w = 0;
 };
-// TMATH_REGISTER_VECTOR_TYPE(Vector4f)
+TMATH_REGISTER_VECTOR_TYPE(Vector4f)
+
+struct Vector4d
+{
+    double x = 0, y = 0, z = 0, w = 0;
+};
+TMATH_REGISTER_VECTOR_TYPE(Vector4d)
+
+struct Vector4i16
+{
+    int16_t x = 0, y = 0, z = 0, w = 0;
+};
+TMATH_REGISTER_VECTOR_TYPE(Vector4i16)
+
+struct Vector4i32
+{
+    int32_t x = 0, y = 0, z = 0, w = 0;
+};
+TMATH_REGISTER_VECTOR_TYPE(Vector4i32)
+
 
 void test_vector2()
 {
@@ -317,7 +337,7 @@ void test_vector3()
     TEST_TITLE("test vector3");
 
     {
-        // operators TODO
+        // operators
         {
             // ==
             {
@@ -334,13 +354,8 @@ void test_vector3()
         {
             // !=
             {
-                Vector3f v1 = {1.5, 2.5, 5.5};
-                Vector3f v2 = { 1.58, 2.5, 5.5 };
-                TEST_BOOL(v1 != v2);
-            }
-            {
-                Vector3f v1 = {1.5, 2.5, 5.5};
-                Vector3f v2 = { 1.5, 2.51, 5.5 };
+                Vector3f v1 = {1.5, 2.5, 5.51};
+                Vector3f v2 = { 1.5, 2.5, 5.5 };
                 TEST_BOOL(v1 != v2);
             }
         }
@@ -545,6 +560,115 @@ void test_vector4()
         // quat tag
         TEST_BOOL(tMath::is_vector4_float<Vector4f>);
         TEST_BOOL(!tMath::is_quat<Vector4f>);
+    }
+
+    {
+        // operators
+        {
+            // ==
+            {
+                Vector4f v1 = { 1.5, 2.5, 5.5, 6.6 };
+                Vector4f v2 = { 1.5, 2.5, 5.5, 6.6 };
+                TEST_BOOL(v1 == v2);
+            }
+            {
+                Vector4f v1 = {1, 2, 1, 1.1};
+                Vector4f v2 = { 1, 2, 1, 1.2 };
+                TEST_BOOL(!(v1 == v2));
+            }
+        }
+        {
+            // !=
+            {
+                Vector4f v1 = {1.5, 2.5, 5.5, 1.1};
+                Vector4f v2 = { 1.5, 2.5, 5.5, 1.2 };
+                TEST_BOOL(v1 != v2);
+            }
+        }
+        {
+            // +=
+            Vector4f v1 = { 1.5, 2, 5.5, 1 };
+            constexpr Vector4f v2 = { 3.5, 2.5, 5.5, 5.678 };
+            v1 += v2;
+            TEST_BOOL(tMath::approximately(v1, { 5, 4.5, 11.0, 6.678 }));
+        }
+        {
+            // -=
+            Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
+            constexpr Vector4f v2 = { 3.5, 2.5, 15.2, 15.2 };
+            v1 -= v2;
+            TEST_BOOL(tMath::approximately(v1, { -2, -0.5, -9.7, -9.7 }));
+        }
+        {
+            // *=
+            Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
+            const float f = 3;
+            v1 *= f;
+            TEST_BOOL(tMath::approximately(v1, { 4.5, 6, 16.5, 16.5 }));
+        }
+        {
+            // /=
+            Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
+            const float f = 3;
+            v1 /= f;
+            TEST_BOOL(tMath::approximately(v1, { 0.5, 2.0/3.0, 5.5/3.0, 5.5/3.0 }));
+        }
+        {
+            // +
+            Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
+            Vector4f v2 = { 3.5, 2.5, 5.5, 5.5 };
+            TEST_BOOL(tMath::approximately(v1 + v2, { 5, 4.5, 11.0, 11.0 }));
+        }
+        {
+            // -
+            Vector4f v1 = { 1.5, 2, 15.5, 15.5 };
+            constexpr Vector4f v2 = { 3.5, 2.5, 5.2, 5.2 };
+            TEST_BOOL(tMath::approximately(v1 - v2, { -2, -0.5, 10.3, 10.3 }));
+        }
+        {
+            // *
+            Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
+            const float f = 3;
+            TEST_BOOL(tMath::approximately(v1 * f, { 4.5, 6, 16.5, 16.5 }));
+        }
+        {
+            // /
+            Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
+            const float f = 3;
+            TEST_BOOL(tMath::approximately(v1 / f, { 0.5, 2.0/3.0, 5.5/3.0, 5.5/3.0 }));
+        }
+        {
+            // dot
+            Vector4f v1 = { 1, 2, 3, 3 };
+            Vector4f v2 = { 2, 3, 4, 4 };
+            float f = tMath::dot(v1, v2);
+            TEST_BOOL(tMath::approximately(f, 32.0f));
+        }
+        {
+            // cross
+            Vector4f v1 = { -1, 1, 6, 5 };
+            Vector4f v2 = { 1, 1, -10, 10 };
+            TEST_BOOL(tMath::approximately(tMath::cross(v1, v2), { -16, -4, -2, 0 }));
+        }
+
+        {
+            // casts
+            {
+                Vector4f v4f = { 1.1, 2.2, 3.3, 4.4 };
+                Vector4i16 test = { 1, 2, 3, 4 };
+                TEST_BOOL(tMath::precision_cast<Vector4i16>(v4f) == test);
+            }
+            {
+                const float x = 1.111111f;
+                const float y = 2.222222f;
+                const float z = 3.333333f;
+                const float w = 4.444444f;
+                Vector4f v4f = { x, y, z, w };
+                Vector4d test = { static_cast<double>(x), static_cast<double>(y), static_cast<double>(z), static_cast<double>(w) };
+                TEST_BOOL(tMath::approximately(tMath::precision_cast<Vector4d>(v4f), test));
+                TEST_BOOL(tMath::precision_cast<Vector4d>(v4f) == test);
+            }
+        }
     }
 
     TEST_END("test vector4");
