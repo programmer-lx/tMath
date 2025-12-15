@@ -15,12 +15,6 @@ bool operator==(const TVec2& lhs, const TVec2& rhs)
 }
 
 template<is_vector2 TVec2>
-bool operator!=(const TVec2& lhs, const TVec2& rhs)
-{
-    return !(lhs == rhs);
-}
-
-template<is_vector2 TVec2>
 TVec2& operator+=(TVec2& lhs, const TVec2& rhs)
 {
     lhs.x += rhs.x;
@@ -53,58 +47,6 @@ TVec2& operator/=(TVec2& lhs, const vector_field_t<TVec2> rhs)
 }
 
 template<is_vector2 TVec2>
-void safe_divide_inplace(TVec2& v, const vector_field_t<TVec2> divisor, const TVec2& fallback)
-{
-    if (is_invalid_divisor(divisor))
-    {
-        v = fallback;
-        return;
-    }
-
-    v /= divisor;
-}
-
-template<is_vector2 TVec2>
-TVec2 operator+(const TVec2& lhs, const TVec2& rhs)
-{
-    TVec2 v = lhs;
-    v += rhs;
-    return v;
-}
-
-template<is_vector2 TVec2>
-TVec2 operator-(const TVec2& lhs, const TVec2& rhs)
-{
-    TVec2 v = lhs;
-    v -= rhs;
-    return v;
-}
-
-template<is_vector2 TVec2>
-TVec2 operator*(const TVec2& lhs, const vector_field_t<TVec2> rhs)
-{
-    TVec2 v = lhs;
-    v *= rhs;
-    return v;
-}
-
-template<is_vector2 TVec2>
-TVec2 operator/(const TVec2& lhs, const vector_field_t<TVec2> rhs)
-{
-    TVec2 v = lhs;
-    v /= rhs;
-    return v;
-}
-
-template<is_vector2 TVec2>
-TVec2 safe_divide(const TVec2& v, const vector_field_t<TVec2> divisor, const TVec2& fallback)
-{
-    TVec2 result = v;
-    safe_divide_inplace(result, divisor, fallback);
-    return result;
-}
-
-template<is_vector2 TVec2>
 vector_field_t<TVec2> dot(const TVec2& lhs, const TVec2& rhs)
 {
     return lhs.x * rhs.x + lhs.y * rhs.y;
@@ -117,10 +59,16 @@ vector_field_t<TVec2> cross(const TVec2& lhs, const TVec2& rhs)
 }
 
 
+TMATH_NAMESPACE_END
+#include "impl/vector_operators.inl"
+TMATH_NAMESPACE_BEGIN
+
+
+
 
 // ============================================= casts =============================================
 template<is_vector2 Ret, is_vector2 In>
-Ret precision_cast(const In& v)
+Ret vector_cast(const In& v)
 {
     using F = vector_field_t<Ret>;
     return { static_cast<F>(v.x), static_cast<F>(v.y) };

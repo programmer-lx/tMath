@@ -14,12 +14,6 @@ bool operator==(const TVec3& lhs, const TVec3& rhs)
 }
 
 template<is_vector3 TVec3>
-bool operator!=(const TVec3& lhs, const TVec3& rhs)
-{
-    return !(lhs == rhs);
-}
-
-template<is_vector3 TVec3>
 TVec3& operator+=(TVec3& lhs, const TVec3& rhs)
 {
     lhs.x += rhs.x;
@@ -56,58 +50,6 @@ TVec3& operator/=(TVec3& lhs, const vector_field_t<TVec3> rhs)
 }
 
 template<is_vector3 TVec3>
-void safe_divide_inplace(TVec3& v, const vector_field_t<TVec3> divisor, const TVec3& fallback)
-{
-    if (is_invalid_divisor(divisor))
-    {
-        v = fallback;
-        return;
-    }
-
-    v /= divisor;
-}
-
-template<is_vector3 TVec3>
-TVec3 operator+(const TVec3& lhs, const TVec3& rhs)
-{
-    TVec3 v = lhs;
-    v += rhs;
-    return v;
-}
-
-template<is_vector3 TVec3>
-TVec3 operator-(const TVec3& lhs, const TVec3& rhs)
-{
-    TVec3 v = lhs;
-    v -= rhs;
-    return v;
-}
-
-template<is_vector3 TVec3>
-TVec3 operator*(const TVec3& lhs, const vector_field_t<TVec3> rhs)
-{
-    TVec3 v = lhs;
-    v *= rhs;
-    return v;
-}
-
-template<is_vector3 TVec3>
-TVec3 operator/(const TVec3& lhs, const vector_field_t<TVec3> rhs)
-{
-    TVec3 v = lhs;
-    v /= rhs;
-    return v;
-}
-
-template<is_vector3 TVec3>
-TVec3 safe_divide(const TVec3& v, const vector_field_t<TVec3> divisor, const TVec3& fallback)
-{
-    TVec3 result = v;
-    safe_divide_inplace(result, divisor, fallback);
-    return result;
-}
-
-template<is_vector3 TVec3>
 vector_field_t<TVec3> dot(const TVec3& lhs, const TVec3& rhs)
 {
     return  lhs.x * rhs.x +
@@ -126,10 +68,15 @@ TVec3 cross(const TVec3& lhs, const TVec3& rhs)
 }
 
 
+TMATH_NAMESPACE_END
+#include "impl/vector_operators.inl"
+TMATH_NAMESPACE_BEGIN
+
+
 
 // ============================================= casts =============================================
 template<is_vector3 Ret, is_vector3 In>
-Ret precision_cast(const In& v)
+Ret vector_cast(const In& v)
 {
     using F = vector_field_t<Ret>;
     return { static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z) };
@@ -207,7 +154,7 @@ template<is_vector3_floating_point TVec3>
 TVec3 normalized(const TVec3& v)
 {
     TVec3 result = v;
-    TMATH_NAMESPACE_NAME::normalize_inplace(result);
+    normalize_inplace(result);
     return result;
 }
 
@@ -265,7 +212,7 @@ RetVec3 safe_normalized(const TVec3Int& v, const RetVec3& fallback)
 template<is_vector3_floating_point TVec3>
 vector_field_t<TVec3> distance(const TVec3& a, const TVec3& b)
 {
-    return TMATH_NAMESPACE_NAME::magnitude(a - b);
+    return magnitude(a - b);
 }
 
 template<is_vector3_sint TVec3Int>
@@ -273,7 +220,7 @@ sint_to_floating_point_t<vector_field_t<TVec3Int>> distance(const TVec3Int& a, c
 {
     using F = sint_to_floating_point_t<vector_field_t<TVec3Int>>;
     const TVec3Int delta = a - b;
-    return TMATH_NAMESPACE_NAME::magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y), static_cast<F>(delta.z));
+    return magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y), static_cast<F>(delta.z));
 }
 
 template<is_vector3_floating_point TVec3, is_floating_point F>

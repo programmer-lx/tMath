@@ -18,12 +18,6 @@ bool operator==(const TVec4& lhs, const TVec4& rhs)
 }
 
 template<is_vector4 TVec4>
-bool operator!=(const TVec4& lhs, const TVec4& rhs)
-{
-    return !(lhs == rhs);
-}
-
-template<is_vector4 TVec4>
 TVec4& operator+=(TVec4& lhs, const TVec4& rhs)
 {
     lhs.x += rhs.x;
@@ -64,58 +58,6 @@ TVec4& operator/=(TVec4& lhs, const vector_field_t<TVec4> rhs)
 }
 
 template<is_vector4 TVec4>
-void safe_divide_inplace(TVec4& v, const vector_field_t<TVec4> divisor, const TVec4& fallback)
-{
-    if (is_invalid_divisor(divisor))
-    {
-        v = fallback;
-        return;
-    }
-
-    v /= divisor;
-}
-
-template<is_vector4 TVec4>
-TVec4 operator+(const TVec4& lhs, const TVec4& rhs)
-{
-    TVec4 v = lhs;
-    v += rhs;
-    return v;
-}
-
-template<is_vector4 TVec4>
-TVec4 operator-(const TVec4& lhs, const TVec4& rhs)
-{
-    TVec4 v = lhs;
-    v -= rhs;
-    return v;
-}
-
-template<is_vector4 TVec4>
-TVec4 operator*(const TVec4& lhs, const vector_field_t<TVec4> rhs)
-{
-    TVec4 v = lhs;
-    v *= rhs;
-    return v;
-}
-
-template<is_vector4 TVec4>
-TVec4 operator/(const TVec4& lhs, const vector_field_t<TVec4> rhs)
-{
-    TVec4 v = lhs;
-    v /= rhs;
-    return v;
-}
-
-template<is_vector4 TVec4>
-TVec4 safe_divide(const TVec4& v, const vector_field_t<TVec4> divisor, const TVec4& fallback)
-{
-    TVec4 result = v;
-    safe_divide_inplace(result, divisor, fallback);
-    return result;
-}
-
-template<is_vector4 TVec4>
 vector_field_t<TVec4> dot(const TVec4& lhs, const TVec4& rhs)
 {
     return  lhs.x * rhs.x +
@@ -136,11 +78,14 @@ TVec4 cross(const TVec4& lhs, const TVec4& rhs)
     };
 }
 
+TMATH_NAMESPACE_END
+#include "impl/vector_operators.inl"
+TMATH_NAMESPACE_BEGIN
 
 
 // ============================================= casts =============================================
 template<is_vector4 Ret, is_vector4 In>
-Ret precision_cast(const In& v)
+Ret vector_cast(const In& v)
 {
     using F = vector_field_t<Ret>;
     return { static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z), static_cast<F>(v.w) };
@@ -149,6 +94,25 @@ Ret precision_cast(const In& v)
 
 
 
+// ============================================= functions =============================================
+template<is_vector4_floating_point TVec4>
+TVec4 to_degrees(const TVec4& radians)
+{
+    return { to_degrees(radians.x), to_degrees(radians.y), to_degrees(radians.z), to_degrees(radians.w) };
+}
+
+template<is_vector4_floating_point TVec4>
+TVec4 to_radians(const TVec4& degrees)
+{
+    return { to_radians(degrees.x), to_radians(degrees.y), to_radians(degrees.z), to_radians(degrees.w) };
+}
+
+template<is_vector4 TVec4>
+TVec4 abs(const TVec4& v)
+{
+    return { TMATH_NAMESPACE_NAME::abs(v.x), TMATH_NAMESPACE_NAME::abs(v.y), TMATH_NAMESPACE_NAME::abs(v.z), TMATH_NAMESPACE_NAME::abs(v.w) };
+}
+
 template<is_vector4_floating_point TVec4>
 bool approximately(const TVec4& a, const TVec4& b, const vector_field_t<TVec4> tolerance = MinTolerance<vector_field_t<TVec4>>)
 {
@@ -156,6 +120,144 @@ bool approximately(const TVec4& a, const TVec4& b, const vector_field_t<TVec4> t
             approximately(a.y, b.y, tolerance) &&
             approximately(a.z, b.z, tolerance) &&
             approximately(a.w, b.w, tolerance);
+}
+
+template<is_floating_point F>
+F magnitude(const F x, const F y, const F z, const F w)
+{
+    return std::sqrt(
+        x * x +
+        y * y +
+        z * z +
+        w * w
+    );
+}
+
+template<is_vector4_floating_point TVec4>
+vector_field_t<TVec4> magnitude(const TVec4& v)
+{
+    return std::sqrt(
+        v.x * v.x +
+        v.y * v.y +
+        v.z * v.z +
+        v.w * v.w
+    );
+}
+
+template<is_vector4_floating_point TVec4>
+void normalize_inplace(TVec4& v)
+{
+    using F = vector_field_t<TVec4>;
+    const F inv_mag = static_cast<F>(1) / magnitude(v);
+    v.x *= inv_mag;
+    v.y *= inv_mag;
+    v.z *= inv_mag;
+    v.w *= inv_mag;
+}
+
+template<is_vector4_floating_point TVec4>
+void safe_normalize_inplace(TVec4& v, const TVec4& fallback)
+{
+    using F = vector_field_t<TVec4>;
+    const F mag = magnitude(v);
+    if (is_invalid_divisor(mag))
+    {
+        v = fallback;
+        return;
+    }
+
+    const F inv_mag = static_cast<F>(1) / mag;
+    v.x *= inv_mag;
+    v.y *= inv_mag;
+    v.z *= inv_mag;
+    v.w *= inv_mag;
+}
+
+template<is_vector4_floating_point TVec4>
+TVec4 normalized(const TVec4& v)
+{
+    TVec4 result = v;
+    normalize_inplace(result);
+    return result;
+}
+
+template<is_vector4_floating_point RetVec3, is_vector4_sint TVec4Int>
+RetVec3 normalized(const TVec4Int& v)
+{
+    using F = vector_field_t<RetVec3>;
+    const F inv_mag = static_cast<F>(1) / magnitude(static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z), static_cast<F>(v.w));
+
+    return {
+        static_cast<F>(v.x * inv_mag),
+        static_cast<F>(v.y * inv_mag),
+        static_cast<F>(v.z * inv_mag),
+        static_cast<F>(v.w * inv_mag)
+    };
+}
+
+template<is_vector4_floating_point TVec4>
+TVec4 safe_normalized(const TVec4& v, const TVec4& fallback)
+{
+    using F = vector_field_t<TVec4>;
+    const F mag = magnitude(v);
+    if (is_invalid_divisor(mag))
+    {
+        return fallback;
+    }
+
+    const F inv_mag = static_cast<F>(1) / mag;
+
+    return {
+        static_cast<F>(v.x * inv_mag),
+        static_cast<F>(v.y * inv_mag),
+        static_cast<F>(v.z * inv_mag),
+        static_cast<F>(v.w * inv_mag)
+    };
+}
+
+template<is_vector4_floating_point RetVec3, is_vector4_sint TVec4Int>
+RetVec3 safe_normalized(const TVec4Int& v, const RetVec3& fallback)
+{
+    using F = vector_field_t<RetVec3>;
+    const F mag = magnitude(static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z), static_cast<F>(v.w));
+    if (is_invalid_divisor(mag))
+    {
+        return fallback;
+    }
+
+    const F inv_mag = static_cast<F>(1) / mag;
+
+    return {
+        static_cast<F>(v.x * inv_mag),
+        static_cast<F>(v.y * inv_mag),
+        static_cast<F>(v.z * inv_mag),
+        static_cast<F>(v.w * inv_mag)
+    };
+}
+
+template<is_vector4_floating_point TVec4>
+vector_field_t<TVec4> distance(const TVec4& a, const TVec4& b)
+{
+    return magnitude(a - b);
+}
+
+template<is_vector4_sint TVec4Int>
+sint_to_floating_point_t<vector_field_t<TVec4Int>> distance(const TVec4Int& a, const TVec4Int& b)
+{
+    using F = sint_to_floating_point_t<vector_field_t<TVec4Int>>;
+    const TVec4Int delta = a - b;
+    return magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y), static_cast<F>(delta.z), static_cast<F>(delta.w));
+}
+
+template<is_vector4_floating_point TVec4, is_floating_point F>
+TVec4 lerp(const TVec4& a, const TVec4& b, const F t)
+{
+    return {
+        lerp(a.x, b.x, t),
+        lerp(a.y, b.y, t),
+        lerp(a.z, b.z, t),
+        lerp(a.w, b.w, t)
+    };
 }
 
 
