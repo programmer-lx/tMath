@@ -9,14 +9,14 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest]
         config: [Debug, Release]
-        test_option: [TMATH_TEST_ENABLE_AVX2=ON, TMATH_TEST_ENABLE_AVX2=OFF]
+        avx2: [ON, OFF]
 
     steps:
       - uses: actions/checkout@v3
 
       # 配置 CMake
       - name: Configure CMake
-        run: cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }} -DTMATH_BUILD_TESTS=ON -D${{ matrix.test_option }}
+        run: cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }} -DTMATH_BUILD_TESTS=ON -DTMATH_TEST_ENABLE_AVX2=${{ matrix.avx2 }}
 
       # 编译
       - name: Build
