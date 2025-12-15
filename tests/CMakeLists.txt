@@ -26,9 +26,15 @@ add_executable(test_operators_override test_operator_override.cpp)
 target_link_libraries(test_operators_override PRIVATE tMath)
 add_o3_optimization(test_operators_override)
 
+# SIMD vec4 sse
+add_executable(test_simd_vector4_sse test_simd_vector4_sse.cpp)
+target_link_libraries(test_simd_vector4_sse PRIVATE tMath)
+add_o3_optimization(test_simd_vector4_sse)
+
 
 # 添加测试
 add_test(NAME TestFloat COMMAND $<TARGET_FILE:test_float>)
 add_test(NAME TestVector COMMAND $<TARGET_FILE:test_vector>)
 add_test(NAME TestQuat COMMAND $<TARGET_FILE:test_quat>)
 add_test(NAME TestOperatorOverride COMMAND $<TARGET_FILE:test_operators_override>)
+add_test(NAME TestSimdVector4_SSE COMMAND $<TARGET_FILE:test_simd_vector4_sse>)

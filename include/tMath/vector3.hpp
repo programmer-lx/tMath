@@ -56,6 +56,18 @@ TVec3& operator/=(TVec3& lhs, const vector_field_t<TVec3> rhs)
 }
 
 template<is_vector3 TVec3>
+void safe_divide_inplace(TVec3& v, const vector_field_t<TVec3> divisor, const TVec3& fallback)
+{
+    if (is_invalid_divisor(divisor))
+    {
+        v = fallback;
+        return;
+    }
+
+    v /= divisor;
+}
+
+template<is_vector3 TVec3>
 TVec3 operator+(const TVec3& lhs, const TVec3& rhs)
 {
     TVec3 v = lhs;
@@ -85,6 +97,14 @@ TVec3 operator/(const TVec3& lhs, const vector_field_t<TVec3> rhs)
     TVec3 v = lhs;
     v /= rhs;
     return v;
+}
+
+template<is_vector3 TVec3>
+TVec3 safe_divide(const TVec3& v, const vector_field_t<TVec3> divisor, const TVec3& fallback)
+{
+    TVec3 result = v;
+    safe_divide_inplace(result, divisor, fallback);
+    return result;
 }
 
 template<is_vector3 TVec3>
@@ -167,6 +187,23 @@ void normalize_inplace(TVec3& v)
 }
 
 template<is_vector3_floating_point TVec3>
+void safe_normalize_inplace(TVec3& v, const TVec3& fallback)
+{
+    using F = vector_field_t<TVec3>;
+    const F mag = magnitude(v);
+    if (is_invalid_divisor(mag))
+    {
+        v = fallback;
+        return;
+    }
+
+    const F inv_mag = static_cast<F>(1) / mag;
+    v.x *= inv_mag;
+    v.y *= inv_mag;
+    v.z *= inv_mag;
+}
+
+template<is_vector3_floating_point TVec3>
 TVec3 normalized(const TVec3& v)
 {
     TVec3 result = v;
@@ -188,6 +225,44 @@ RetVec3 normalized(const TVec3Int& v)
 }
 
 template<is_vector3_floating_point TVec3>
+TVec3 safe_normalized(const TVec3& v, const TVec3& fallback)
+{
+    using F = vector_field_t<TVec3>;
+    const F mag = magnitude(v);
+    if (is_invalid_divisor(mag))
+    {
+        return fallback;
+    }
+
+    const F inv_mag = static_cast<F>(1) / mag;
+
+    return {
+        static_cast<F>(v.x * inv_mag),
+        static_cast<F>(v.y * inv_mag),
+        static_cast<F>(v.z * inv_mag)
+    };
+}
+
+template<is_vector3_floating_point RetVec3, is_vector3_sint TVec3Int>
+RetVec3 safe_normalized(const TVec3Int& v, const RetVec3& fallback)
+{
+    using F = vector_field_t<RetVec3>;
+    const F mag = magnitude(static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z));
+    if (is_invalid_divisor(mag))
+    {
+        return fallback;
+    }
+
+    const F inv_mag = static_cast<F>(1) / mag;
+
+    return {
+        static_cast<F>(v.x * inv_mag),
+        static_cast<F>(v.y * inv_mag),
+        static_cast<F>(v.z * inv_mag)
+    };
+}
+
+template<is_vector3_floating_point TVec3>
 vector_field_t<TVec3> distance(const TVec3& a, const TVec3& b)
 {
     return TMATH_NAMESPACE_NAME::magnitude(a - b);
@@ -199,6 +274,16 @@ sint_to_floating_point_t<vector_field_t<TVec3Int>> distance(const TVec3Int& a, c
     using F = sint_to_floating_point_t<vector_field_t<TVec3Int>>;
     const TVec3Int delta = a - b;
     return TMATH_NAMESPACE_NAME::magnitude(static_cast<F>(delta.x), static_cast<F>(delta.y), static_cast<F>(delta.z));
+}
+
+template<is_vector3_floating_point TVec3, is_floating_point F>
+TVec3 lerp(const TVec3& a, const TVec3& b, const F t)
+{
+    return {
+        lerp(a.x, b.x, t),
+        lerp(a.y, b.y, t),
+        lerp(a.z, b.z, t)
+    };
 }
 
 TMATH_NAMESPACE_END

@@ -295,6 +295,18 @@ void test_vector2()
             tMath::safe_normalize_inplace(zero, {5, 10});
             TEST_BOOL(tMath::approximately(zero, {5, 10}));
         }
+        {
+            // safe divide
+            Vector2f v = {10, 10};
+            float zero = 0;
+            TEST_BOOL(tMath::approximately(tMath::safe_divide(v, zero, {100, 100}), {100, 100}));
+        }
+        {
+            Vector2f v = {10, 10};
+            float zero = 0;
+            tMath::safe_divide_inplace(v, zero, {100, 100});
+            TEST_BOOL(tMath::approximately(v, {100, 100}));
+        }
     }
 
     TEST_END("test vector2");
@@ -461,7 +473,65 @@ void test_vector3()
         TEST_BOOL(tMath::approximately(tMath::normalized<Vector3f>(vi), { 0.577350f, 0.577350f, 0.577350f }));
     }
     {
-        // distance TODO
+        // distance
+        {
+            // f32
+            Vector3f v1 = { 5, 10, 5 };
+            Vector3f v2 = { 2, -5, 5 };
+            auto dis = tMath::distance(v1, v2);
+            TEST_BOOL(tMath::approximately(dis, 15.297058f));
+        }
+        {
+            // i32
+            Vector3i32 v1 = { 5, 10, 9 };
+            Vector3i32 v2 = { 2, -5, 9 };
+            auto dis = tMath::distance(v1, v2); // int32 返回的是 double
+            TEST_BOOL(tMath::approximately(dis, 15.29705854077835449));
+        }
+        {
+            // i16
+            Vector3i16 v1 = { 5, 10, 90 };
+            Vector3i16 v2 = { 2, -5, 90 };
+            auto dis = tMath::distance(v1, v2); // int16 返回的是 float
+            TEST_BOOL(tMath::approximately(dis, 15.297058f));
+        }
+    }
+    {
+        // lerp
+        Vector3f a = { -10, 10, -10 };
+        Vector3f b = { 10, 30, 10 };
+        TEST_BOOL(tMath::approximately(tMath::lerp(a, b, 0.6f), { 2.0f, 22.0f, 2.0f }));
+    }
+
+    {
+        // zero divide
+        {
+            Vector3f zero = {0, 0};
+            Vector3f n = tMath::safe_normalized(zero, {5, 5, 1});
+            TEST_BOOL(tMath::approximately(n, {5, 5, 1}));
+        }
+        {
+            Vector3i32 zero = {0, 0, 0};
+            Vector3f n = tMath::safe_normalized<Vector3f>(zero, {10, 5, 6});
+            TEST_BOOL(tMath::approximately(n, {10, 5, 6}));
+        }
+        {
+            Vector3f zero = {0, 0, 0};
+            tMath::safe_normalize_inplace(zero, {5, 10, -5});
+            TEST_BOOL(tMath::approximately(zero, {5, 10, -5}));
+        }
+        {
+            // safe divide
+            Vector3f v = {10, 10, 10};
+            float zero = 0;
+            TEST_BOOL(tMath::approximately(tMath::safe_divide(v, zero, {100, 100, 100}), {100, 100, 100}));
+        }
+        {
+            Vector3f v = {10, 10, 10};
+            float zero = 0;
+            tMath::safe_divide_inplace(v, zero, {100, 100, 98});
+            TEST_BOOL(tMath::approximately(v, {100, 100, 98}));
+        }
     }
 
     TEST_END("test vector3");
