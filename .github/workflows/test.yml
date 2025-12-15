@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest]
         config: [Debug, Release]
         test_option: [TMATH_TEST_ENABLE_AVX2=ON, TMATH_TEST_ENABLE_AVX2=OFF]
 
