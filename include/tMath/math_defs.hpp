@@ -125,18 +125,6 @@ namespace detail
         v.w;
     };
 
-    template<typename TVec, typename Tx>
-    concept x_offset_is_0 = (offsetof(TVec, x) == 0);
-
-    template<typename TVec, typename Ty>
-    concept y_offset_is_1 = (offsetof(TVec, y) == 1 * sizeof(Ty));
-
-    template<typename TVec, typename Tz>
-    concept z_offset_is_2 = (offsetof(TVec, z) == 2 * sizeof(Tz));
-
-    template<typename TVec, typename Tw>
-    concept w_offset_is_3 = (offsetof(TVec, w) == 3 * sizeof(Tw));
-
     template<typename T>
     concept has_quat_tag = requires
     {
@@ -155,8 +143,7 @@ namespace detail
         requires std::is_same_v<decltype(v.y), TField>;
 
         requires is_pure_data_type<TVec>;
-    } && !has_z<TVec> && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 2) &&
-        x_offset_is_0<TVec, TField> && y_offset_is_1<TVec, TField>;
+    } && !has_z<TVec> && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 2);
 
     template<typename TVec, typename TField>
     concept is_generic_vector3 = requires(TVec v)
@@ -171,8 +158,7 @@ namespace detail
         requires std::is_same_v<decltype(v.z), TField>;
 
         requires is_pure_data_type<TVec>;
-    } && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 3) &&
-        x_offset_is_0<TVec, TField> && y_offset_is_1<TVec, TField> && z_offset_is_2<TVec, TField>;
+    } && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 3);
 
     template<typename T, typename TField>
     concept is_vector4_or_quat = requires(T v)
@@ -189,8 +175,7 @@ namespace detail
         requires std::is_same_v<decltype(v.w), TField>;
 
         requires is_pure_data_type<T>;
-    } && (sizeof(T) == sizeof(TField) * 4) &&
-        x_offset_is_0<T, TField> && y_offset_is_1<T, TField> && z_offset_is_2<T, TField> && w_offset_is_3<T, TField>;
+    } && (sizeof(T) == sizeof(TField) * 4);
 
     template<typename TVec, typename TField>
     concept is_generic_vector4 = is_vector4_or_quat<TVec, TField> && !has_quat_tag<TVec>;

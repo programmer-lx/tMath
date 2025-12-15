@@ -69,11 +69,7 @@ requires(V v)
     requires std::is_standard_layout_v<V>;
     requires std::is_trivially_copyable_v<V>;
 
-} && (alignof(V) == alignof(__m128)) && (sizeof(V) == sizeof(__m128)) &&
-    TMATH_NAMESPACE_NAME::detail::x_offset_is_0<V, float> &&
-    TMATH_NAMESPACE_NAME::detail::y_offset_is_1<V, float> &&
-    TMATH_NAMESPACE_NAME::detail::z_offset_is_2<V, float> &&
-    TMATH_NAMESPACE_NAME::detail::w_offset_is_3<V, float>;
+} && (alignof(V) == alignof(__m128)) && (sizeof(V) == sizeof(__m128));
 
 
 
