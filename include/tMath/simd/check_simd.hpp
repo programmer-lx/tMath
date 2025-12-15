@@ -2,8 +2,14 @@
 
 #include "math_defs_simd.hpp"
 
-// only support x64 os
-static_assert(sizeof(void*) == 8, "This math library only support x64 system");
+// only support x86_64 os
+static_assert(sizeof(void*) == 8, "only support x86_64 system");
+
+#if !defined(__x86_64__) && !defined(_M_X64)
+#error "only support x86_64 system"
+#endif
+
+
 
 // SIMD support
 #define TMATH_SIMD_USE_SSE2 0

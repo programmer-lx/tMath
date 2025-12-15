@@ -1,4 +1,5 @@
 #include <tMath/vector4.hpp>
+#include <tMath/quat.hpp>
 
 #include "test.hpp"
 
