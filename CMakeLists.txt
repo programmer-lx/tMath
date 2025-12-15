@@ -16,10 +16,20 @@ if(MSVC)
     target_compile_options(tMath INTERFACE /utf-8)
 endif()
 
-# options
+
+# options of test
 option(TMATH_BUILD_TESTS "Build tests?" OFF)
+option(TMATH_TEST_ENABLE_AVX2 "enable avx2 (test only)" OFF)
 
 if(TMATH_BUILD_TESTS)
+    if(TMATH_TEST_ENABLE_AVX2)
+        if(MSVC)
+            add_compile_options(/arch:AVX2)
+        else()
+            add_compile_options(-mavx2)
+        endif()
+    endif()
+
     enable_testing()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()

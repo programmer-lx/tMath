@@ -4,9 +4,8 @@
 
 struct Vector2f
 {
-    float x = 0, y = 0;
+    TMATH_VECTOR2(Vector2f, float)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector2f)
 
 static_assert(tMath::is_vector2_float<Vector2f>);
 

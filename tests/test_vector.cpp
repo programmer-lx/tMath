@@ -6,75 +6,63 @@
 
 struct Vector2f
 {
-    float x = 0, y = 0;
+    TMATH_VECTOR2(Vector2f, float)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector2f)
 
 struct Vector2d
 {
-    double x = 0, y = 0;
+    TMATH_VECTOR2(Vector2d, double)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector2d)
 
 struct Vector2i16
 {
-    int16_t x = 0, y = 0;
+    TMATH_VECTOR2(Vector2i16, int16_t)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector2i16)
 
 struct Vector2i32
 {
-    int32_t x = 0, y = 0;
+    TMATH_VECTOR2(Vector2i32, int32_t)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector2i32)
 
 struct Vector3f
 {
-    float x = 0, y = 0, z = 0;
+    TMATH_VECTOR3(Vector3f, float)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector3f)
 
 struct Vector3d
 {
-    double x = 0, y = 0, z = 0;
+    TMATH_VECTOR3(Vector3d, double)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector3d)
 
 struct Vector3i32
 {
-    int32_t x = 0, y = 0, z = 0;
+    TMATH_VECTOR3(Vector3i32, int32_t)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector3i32)
 
 struct Vector3i16
 {
-    int16_t x = 0, y = 0, z = 0;
+    TMATH_VECTOR3(Vector3i16, int16_t)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector3i16)
 
 struct Vector4f
 {
-    float x = 0, y = 0, z = 0, w = 0;
+    TMATH_VECTOR4(Vector4f, float)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector4f)
 
 struct Vector4d
 {
-    double x = 0, y = 0, z = 0, w = 0;
+    TMATH_VECTOR4(Vector4d, double)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector4d)
 
 struct Vector4i16
 {
-    int16_t x = 0, y = 0, z = 0, w = 0;
+    TMATH_VECTOR4(Vector4i16, int16_t)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector4i16)
 
 struct Vector4i32
 {
-    int32_t x = 0, y = 0, z = 0, w = 0;
+    TMATH_VECTOR4(Vector4i32, int32_t)
 };
-TMATH_REGISTER_VECTOR_TYPE(Vector4i32)
 
 
 void test_vector2()
@@ -82,10 +70,17 @@ void test_vector2()
     TEST_TITLE("test vector2");
 
     {
-        // copy function
-        Vector2f v1 = {1, 1};
-        Vector2f v2;
-        v2 = v1;
+        {
+            Vector2f v{1, 2};
+            TEST_BOOL(v[0] == 1);
+            TEST_BOOL(v[1] == 2);
+            TEST_BOOL(v.x == 1);
+            TEST_BOOL(v.y == 2);
+            TEST_BOOL(v.r == 1);
+            TEST_BOOL(v.g == 2);
+            TEST_BOOL(v.data[0] == 1);
+            TEST_BOOL(v.data[1] == 2);
+        }
     }
     {
         // operators
@@ -335,7 +330,21 @@ void test_vector2()
 void test_vector3()
 {
     TEST_TITLE("test vector3");
-
+    {
+        Vector3f v{1, 2, 3};
+        TEST_BOOL(v[0] == 1);
+        TEST_BOOL(v[1] == 2);
+        TEST_BOOL(v[2] == 3);
+        TEST_BOOL(v.x == 1);
+        TEST_BOOL(v.y == 2);
+        TEST_BOOL(v.z == 3);
+        TEST_BOOL(v.r == 1);
+        TEST_BOOL(v.g == 2);
+        TEST_BOOL(v.b == 3);
+        TEST_BOOL(v.data[0] == 1);
+        TEST_BOOL(v.data[1] == 2);
+        TEST_BOOL(v.data[2] == 3);
+    }
     {
         // operators
         {
@@ -557,6 +566,25 @@ void test_vector4()
     TEST_TITLE("test vector4");
 
     {
+        Vector4f v{1, 2, 3, 4};
+        TEST_BOOL(v[0] == 1);
+        TEST_BOOL(v[1] == 2);
+        TEST_BOOL(v[2] == 3);
+        TEST_BOOL(v[3] == 4);
+        TEST_BOOL(v.x == 1);
+        TEST_BOOL(v.y == 2);
+        TEST_BOOL(v.z == 3);
+        TEST_BOOL(v.w == 4);
+        TEST_BOOL(v.r == 1);
+        TEST_BOOL(v.g == 2);
+        TEST_BOOL(v.b == 3);
+        TEST_BOOL(v.a == 4);
+        TEST_BOOL(v.data[0] == 1);
+        TEST_BOOL(v.data[1] == 2);
+        TEST_BOOL(v.data[2] == 3);
+        TEST_BOOL(v.data[3] == 4);
+    }
+    {
         // quat tag
         TEST_BOOL(tMath::is_vector4_float<Vector4f>);
         TEST_BOOL(!tMath::is_quat<Vector4f>);
@@ -588,30 +616,32 @@ void test_vector4()
         {
             // +=
             Vector4f v1 = { 1.5, 2, 5.5, 1 };
-            constexpr Vector4f v2 = { 3.5, 2.5, 5.5, 5.678 };
-            v1 += v2;
-            TEST_BOOL(tMath::approximately(v1, { 5, 4.5, 11.0, 6.678 }));
+            Vector4f v2 = { 3.5, 2.5, 5.5, 5.678 };
+            Vector4f v3 = { 1, 2, 3, 4 };
+            v1 += v2 += v3;
+            TEST_BOOL(tMath::approximately(v1, { 6, 6.5, 14.0, 10.678 }));
         }
         {
             // -=
             Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
-            constexpr Vector4f v2 = { 3.5, 2.5, 15.2, 15.2 };
-            v1 -= v2;
-            TEST_BOOL(tMath::approximately(v1, { -2, -0.5, -9.7, -9.7 }));
+            Vector4f v2 = { 3.5, 2.5, 15.2, 15.2 };
+            Vector4f v3 = { 1, 2, 3, 4 };
+            v1 -= v2 -= v3;
+            TEST_BOOL(tMath::approximately(v1, { -1, 1.5, -6.7, -5.7 }));
         }
         {
             // *=
             Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
-            const float f = 3;
-            v1 *= f;
-            TEST_BOOL(tMath::approximately(v1, { 4.5, 6, 16.5, 16.5 }));
+            float f = 3;
+            v1 *= f *= 3;
+            TEST_BOOL(tMath::approximately(v1, { 13.5, 18, 49.5, 49.5 }));
         }
         {
             // /=
             Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
-            const float f = 3;
-            v1 /= f;
-            TEST_BOOL(tMath::approximately(v1, { 0.5, 2.0/3.0, 5.5/3.0, 5.5/3.0 }));
+            float f = 3;
+            v1 /= f /= 2;
+            TEST_BOOL(tMath::approximately(v1, { 1, 2.0/1.5, 5.5/1.5, 5.5/1.5 }));
         }
         {
             // +

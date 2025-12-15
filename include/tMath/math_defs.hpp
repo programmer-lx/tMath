@@ -22,46 +22,71 @@
 #define TMATH_NODISCARD [[nodiscard]]
 
 
-#define TMATH_REGISTER_VECTOR_TYPE(vector_type_name) \
-    TMATH_FORCE_INLINE bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) \
-    { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
-    TMATH_FORCE_INLINE bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) \
-    { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) \
-    { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) \
-    { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name& operator*=(vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
-    { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name& operator/=(vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
-    { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) \
-    { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) \
-    { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name operator*(const vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
-    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
-    TMATH_FORCE_INLINE vector_type_name operator/(const vector_type_name& lhs, const TMATH_NAMESPACE_NAME::vector_field_t<vector_type_name> rhs) \
-    { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
-
-
-
 TMATH_NAMESPACE_BEGIN
 
 namespace detail
 {
     struct quat_tag {};
 }
-/**
- * 由于没办法通过字段区分vector4和quat
- * 所以需要通过标记的方式进行区分，示例:
- * struct Quat
- * {
- *     float x = 0, y = 0, z = 0, w = 1;
- *     TMATH_MARK_AS_QUAT
- * }
- */
 #define TMATH_MARK_AS_QUAT using is_quat = TMATH_NAMESPACE_NAME::detail::quat_tag;
+
+#define TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name) \
+    TMATH_FORCE_INLINE friend bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name& operator*=(vector_type_name& lhs, const field_type_name rhs) \
+    { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name& operator/=(vector_type_name& lhs, const field_type_name rhs) \
+    { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) \
+    { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name operator*(const vector_type_name& lhs, const field_type_name rhs) \
+    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
+    TMATH_FORCE_INLINE friend vector_type_name operator/(const vector_type_name& lhs, const field_type_name rhs) \
+    { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
+
+#define TMATH_VECTOR_INDEX(field_type_name, data_var_name) \
+    field_type_name& operator[](int i) { return data_var_name[i]; } \
+    const field_type_name& operator[](int i) const { return data_var_name[i]; }
+
+#define TMATH_VECTOR2(vector_type_name, field_type_name) \
+    union \
+    { \
+        struct { field_type_name x, y; }; \
+        struct { field_type_name r, g; }; \
+        field_type_name data[2]; \
+    }; \
+    TMATH_VECTOR_INDEX(field_type_name, data) \
+    TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
+
+#define TMATH_VECTOR3(vector_type_name, field_type_name) \
+    union \
+    { \
+        struct { field_type_name x, y, z; }; \
+        struct { field_type_name r, g, b; }; \
+        field_type_name data[3]; \
+    }; \
+    TMATH_VECTOR_INDEX(field_type_name, data) \
+    TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
+
+#define TMATH_VECTOR4(vector_type_name, field_type_name) \
+    union \
+    { \
+        struct { field_type_name x, y, z, w; }; \
+        struct { field_type_name r, g, b, a; }; \
+        field_type_name data[4]; \
+    }; \
+    TMATH_VECTOR_INDEX(field_type_name, data) \
+    TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
+
+
 
 template<typename T>
 concept is_signed_int = std::is_integral_v<T> && std::is_signed_v<T>;
@@ -100,6 +125,18 @@ namespace detail
         v.w;
     };
 
+    template<typename TVec, typename Tx>
+    concept x_offset_is_0 = (offsetof(TVec, x) == 0);
+
+    template<typename TVec, typename Ty>
+    concept y_offset_is_1 = (offsetof(TVec, y) == 1 * sizeof(Ty));
+
+    template<typename TVec, typename Tz>
+    concept z_offset_is_2 = (offsetof(TVec, z) == 2 * sizeof(Tz));
+
+    template<typename TVec, typename Tw>
+    concept w_offset_is_3 = (offsetof(TVec, w) == 3 * sizeof(Tw));
+
     template<typename T>
     concept has_quat_tag = requires
     {
@@ -110,41 +147,50 @@ namespace detail
     template<typename TVec, typename TField>
     concept is_generic_vector2 = requires(TVec v)
     {
+        v.data;
         v.x;
         v.y;
+        requires std::is_same_v<std::decay_t<decltype(v.data[0])>, TField>;
         requires std::is_same_v<decltype(v.x), TField>;
         requires std::is_same_v<decltype(v.y), TField>;
 
         requires is_pure_data_type<TVec>;
-    } && !has_z<TVec> && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 2);
+    } && !has_z<TVec> && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 2) &&
+        x_offset_is_0<TVec, TField> && y_offset_is_1<TVec, TField>;
 
     template<typename TVec, typename TField>
     concept is_generic_vector3 = requires(TVec v)
     {
+        v.data;
         v.x;
         v.y;
         v.z;
+        requires std::is_same_v<std::decay_t<decltype(v.data[0])>, TField>;
         requires std::is_same_v<decltype(v.x), TField>;
         requires std::is_same_v<decltype(v.y), TField>;
         requires std::is_same_v<decltype(v.z), TField>;
 
         requires is_pure_data_type<TVec>;
-    } && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 3);
+    } && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 3) &&
+        x_offset_is_0<TVec, TField> && y_offset_is_1<TVec, TField> && z_offset_is_2<TVec, TField>;
 
     template<typename T, typename TField>
     concept is_vector4_or_quat = requires(T v)
     {
+        v.data;
         v.x;
         v.y;
         v.z;
         v.w;
+        requires std::is_same_v<std::decay_t<decltype(v.data[0])>, TField>;
         requires std::is_same_v<decltype(v.x), TField>;
         requires std::is_same_v<decltype(v.y), TField>;
         requires std::is_same_v<decltype(v.z), TField>;
         requires std::is_same_v<decltype(v.w), TField>;
 
         requires is_pure_data_type<T>;
-    } && (sizeof(T) == sizeof(TField) * 4);
+    } && (sizeof(T) == sizeof(TField) * 4) &&
+        x_offset_is_0<T, TField> && y_offset_is_1<T, TField> && z_offset_is_2<T, TField> && w_offset_is_3<T, TField>;
 
     template<typename TVec, typename TField>
     concept is_generic_vector4 = is_vector4_or_quat<TVec, TField> && !has_quat_tag<TVec>;
