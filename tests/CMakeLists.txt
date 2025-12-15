@@ -6,6 +6,11 @@ function(add_o3_optimization TARGET_NAME)
     endif()
 endfunction()
 
+if(MSVC)
+    add_compile_options(/utf-8)
+    add_compile_definitions(UNICODE _UNICODE)
+endif()
+
 # float
 add_executable(test_float test_float.cpp)
 target_link_libraries(test_float PRIVATE tMath)
