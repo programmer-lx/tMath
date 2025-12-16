@@ -1,17 +1,19 @@
 #pragma once
 
-#include "math_defs_simd.hpp"
-#include "platform.hpp"
+#include "types.hpp"
 
 
 TMATH_SIMD_NAMESPACE_BEGIN
 
-using float4 = __m128;
+// fn: permute
+#if defined(TMATH_HAS_AVX)
+    #define tmath_permute_ps(v, imm8) _mm_permute_ps((v), (imm8))
+#elif defined(TMATH_HAS_SSE2)
+    #define tmath_permute_ps(v, imm8) _mm_shuffle_ps((v), (v), (imm8))
+#else
+#error "Error"
+#endif
 
-inline float4 load(const float* ptr)
-{
-    return _mm_loadu_ps(ptr);
-}
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4>
 inline float4 load(const TVec4& vec)
@@ -19,9 +21,28 @@ inline float4 load(const TVec4& vec)
     return _mm_loadu_ps(vec.data);
 }
 
-inline void store(float* ptr, float4 v)
+template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
+inline float4 load_point(const TVec3& vec)
 {
-    return _mm_storeu_ps(ptr, v);
+    return _mm_set_ps(1.0f, vec.z, vec.y, vec.x);
+}
+
+template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
+inline float4 load_point(const TVec2& vec)
+{
+    return _mm_set_ps(1.0f, 0.0f, vec.y, vec.x);
+}
+
+template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
+inline float4 load_vector(const TVec3& vec)
+{
+    return _mm_set_ps(0.0f, vec.z, vec.y, vec.x);
+}
+
+template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
+inline float4 load_vector(const TVec2& vec)
+{
+    return _mm_set_ps(0.0f, 0.0f, vec.y, vec.x);
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4>
@@ -29,6 +50,46 @@ inline void store(TVec4& vec, float4 v)
 {
     _mm_storeu_ps(vec.data, v);
 }
+
+template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
+inline void store(TVec3& vec, float4 v)
+{
+    alignas(16) float tmp[4];
+    _mm_store_ps(tmp, v);
+    vec.x = tmp[0];
+    vec.y = tmp[1];
+    vec.z = tmp[2];
+}
+
+template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
+inline void store(TVec2& vec, float4 v)
+{
+    alignas(16) float tmp[4];
+    _mm_store_ps(tmp, v);
+    vec.x = tmp[0];
+    vec.y = tmp[1];
+}
+
+inline float get_x(float4 v)
+{
+    return _mm_cvtss_f32(v);
+}
+
+inline float get_y(float4 v)
+{
+    return _mm_cvtss_f32(tmath_permute_ps(v, _MM_SHUFFLE(1, 1, 1, 1)));
+}
+
+inline float get_z(float4 v)
+{
+    return _mm_cvtss_f32(tmath_permute_ps(v, _MM_SHUFFLE(2, 2, 2, 2)));
+}
+
+inline float get_w(float4 v)
+{
+    return _mm_cvtss_f32(tmath_permute_ps(v, _MM_SHUFFLE(3, 3, 3, 3)));
+}
+
 
 inline float4 set(float scalar)
 {
@@ -106,14 +167,46 @@ inline float4 sqrt(float4 v)
     return _mm_sqrt_ps(v);
 }
 
-inline float dot4(float4 lhs, float4 rhs)
+inline float4 dot3(float4 lhs, float4 rhs)
 {
-    float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [w1w2, z1z2, y1y2, x1x2]
-    float4 shuffle = _mm_shuffle_ps(mul, mul, _MM_SHUFFLE(1, 0, 3, 2));     // shuffle  = [y1y2, x1x2, w1w2, z1z2]
-    mul = _mm_add_ps(mul, shuffle);                                         // mul      = [w1w2+y1y2, z1z2+x1x2, y1y2+w1w2, x1x2+z1z2]
-    shuffle = _mm_shuffle_ps(mul, mul, _MM_SHUFFLE(3, 3, 3, 3));            // shuffle  = [N, N, N, w1w2+y1y2]
-    mul = _mm_add_ps(shuffle, mul);                                         // mul      = [N, N, N, z1z2+x1x2 + w1w2+y1y2]
-    return _mm_cvtss_f32(mul);                                              // pick mul[lane(0)]
+#if defined(TMATH_NO_SIMD)
+#error "TODO"
+#elif defined(TMATH_HAS_SSE4_1)
+    return _mm_dp_ps(lhs, rhs, 0x7f);       // imm8: 7-4: compute, 3-0: store
+#elif defined(TMATH_HAS_SSE3)
+    float4 temp = _mm_mul_ps(lhs, rhs);     // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, Mask::Lane012); // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_hadd_ps(temp, temp);         // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
+    return _mm_hadd_ps(temp, temp);         // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
+#elif defined(TMATH_HAS_SSE2)
+    float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
+    mul = _mm_and_ps(mul, Mask::Lane012);                                   // mul      = [        0,      z1z2, y1y2,                  x1x2]
+    float4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));        // shuffle  = [     y1y2,      x1x2,    0,                  z1z2]
+    mul = _mm_add_ps(mul, shuffle);                                         // mul      = [w1w2+y1y2, z1z2+x1x2, y1y2,             x1x2+z1z2]
+    shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,             w1w2+y1y2]
+    mul = _mm_add_ps(shuffle, mul);                                         // mul      = [        N,         N,    N, z1z2+x1x2 + w1w2+y1y2]
+    return tmath_permute_ps(mul, _MM_SHUFFLE(0, 0, 0, 0));                  // splat mul[lane(0)]
+#endif
+}
+
+inline float4 dot4(float4 lhs, float4 rhs)
+{
+#if defined(TMATH_NO_SIMD)
+#error "TODO"
+#elif defined(TMATH_HAS_SSE4_1)
+    return _mm_dp_ps(lhs, rhs, 0xff);
+#elif defined(TMATH_HAS_SSE3)
+    float4 temp = _mm_mul_ps(lhs, rhs);     // temp = [                 w1w2,                  z1z2,                  y1y2,                  x1x2]
+    temp = _mm_hadd_ps(temp, temp);         // temp = [            z1z2+w1w2,             x1x2+y1y2,             z1z2+w1w2,             x1x2+y1y2]
+    return _mm_hadd_ps(temp, temp);         // temp = [x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2]
+#elif defined(TMATH_HAS_SSE2)
+    float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [      w1w2,       z1z2,      y1y2,                  x1x2]
+    float4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));        // shuffle  = [      y1y2,       x1x2,      w1w2,                  z1z2]
+    mul = _mm_add_ps(mul, shuffle);                                         // mul      = [ w1w2+y1y2,  z1z2+x1x2, y1y2+w1w2,             x1x2+z1z2]
+    shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [         N,          N,         N,             w1w2+y1y2]
+    mul = _mm_add_ps(shuffle, mul);                                         // mul      = [         N,          N,         N, z1z2+x1x2 + w1w2+y1y2]
+    return tmath_permute_ps(mul, _MM_SHUFFLE(0, 0, 0, 0));                  // splat mul[lane(0)]
+#endif
 }
 
 TMATH_SIMD_NAMESPACE_END

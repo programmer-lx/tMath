@@ -11,6 +11,54 @@
 #endif
 
 
+// for testing
+#ifdef TMATH_IS_TESTING
+
+#if defined(TMATH_TEST_SSE2)
+    #define TMATH_HAS_SSE2
+#else
+    #undef __SSE2__
+#endif
+
+#if defined(TMATH_TEST_SSE3)
+    #define TMATH_HAS_SSE3
+#else
+    #undef __SSE3__
+#endif
+
+#if defined(TMATH_TEST_SSE4_1)
+    #define TMATH_HAS_SSE4_1
+#else
+    #undef __SSE4_1__
+#endif
+
+#if defined(TMATH_TEST_AVX)
+    #define TMATH_HAS_AVX
+#else
+    #undef __AVX__
+#endif
+
+#if defined(TMATH_TEST_AVX2)
+    #define TMATH_HAS_AVX2
+#else // 测试除了AVX2之外的其他指令集时，需要取消 __AVX2__ 宏定义，防止定义 TMATH_HAS_AVX2
+    #undef __AVX2__
+#endif
+
+#if defined(TMATH_TEST_FMA3)
+    #define TMATH_HAS_FMA3
+#else
+    #undef __FMA__
+#endif
+
+#if defined(TMATH_TEST_F16C)
+    #define TMATH_HAS_F16C
+#else
+    #undef __F16C__
+#endif
+
+#endif
+
+
 // SIMD support
 // __AVX2__ macro -> AVX2 -> FMA3 -> AVX -> SSE4.1(不一定有SSE4.2) -> SSE3 -> SSE2
 //                        -> F16C -> AVX
@@ -51,7 +99,7 @@
     #define TMATH_HAS_SSE4_1
 #endif
 
-#if defined(TMATH_HAS_SSE4_1) && !defined(TMATH_HAS_SSE3) && !defined(TMATH_NO_SIMD)
+#if defined(TMATH_HAS_SSE4_1) && ( !defined(TMATH_HAS_SSE3) || defined(__SSE3__) ) && !defined(TMATH_NO_SIMD)
     #define TMATH_HAS_SSE3
 #endif
 
@@ -73,44 +121,6 @@
 // Intel SVML 数学运算指令集
 #if defined(TMATH_HAS_SSE2) && defined(_MSC_VER) && (_MSC_VER >= 1920) && !defined(__clang__) && !defined(TMATH_HAS_SVML) && !defined(TMATH_DISABLE_SVML)
     #define TMATH_HAS_SVML
-#endif
-
-
-
-
-// for testing
-#ifdef TMATH_IS_TESTING
-
-#undef TMATH_HAS_SSE2
-#undef TMATH_HAS_SSE3
-#undef TMATH_HAS_SSE4_1
-#undef TMATH_HAS_AVX
-#undef TMATH_HAS_AVX2
-#undef TMATH_HAS_FMA3
-#undef TMATH_HAS_F16C
-
-#if defined(TMATH_TEST_SSE2)
-    #define TMATH_HAS_SSE2
-#endif
-#if defined(TMATH_TEST_SSE3)
-    #define TMATH_HAS_SSE3
-#endif
-#if defined(TMATH_TEST_SSE4_1)
-    #define TMATH_HAS_SSE4_1
-#endif
-#if defined(TMATH_TEST_AVX)
-    #define TMATH_HAS_AVX
-#endif
-#if defined(TMATH_TEST_AVX2)
-    #define TMATH_HAS_AVX2
-#endif
-#if defined(TMATH_TEST_FMA3)
-    #define TMATH_HAS_FMA3
-#endif
-#if defined(TMATH_TEST_F16C)
-    #define TMATH_HAS_F16C
-#endif
-
 #endif
 
 
