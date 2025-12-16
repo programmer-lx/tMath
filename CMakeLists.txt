@@ -13,44 +13,35 @@ target_include_directories(tMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
 # options of test
-option(TMATH_BUILD_TESTS "Build tests?" OFF)
-option(TMATH_TEST_ENABLE_AVX2 "enable avx2 (test only)" OFF)
+option(TMATH_BUILD_TESTS "Build tests?"                 OFF)
+option(TMATH_TEST_SSE2   "Enable SSE2 for testing"      OFF)
+option(TMATH_TEST_SSE3   "Enable SSE3 for testing"      OFF)
+option(TMATH_TEST_SSE4_1 "Enable SSE4.1 for testing"    OFF)
+option(TMATH_TEST_AVX    "Enable AVX for testing"       OFF)
+option(TMATH_TEST_AVX2   "Enable AVX2 for testing"      OFF)
+option(TMATH_TEST_FMA3   "Enable FMA3 for testing"      OFF)
+option(TMATH_TEST_F16C   "Enable F16C for testing"      OFF)
+#option(TMATH_TEST_NEON   "Enable NEON for testing"      OFF)
 
-
-include(CheckCXXCompilerFlag)
-function(tmath_try_enable_avx2 out_var)
-    # 只考虑 x86 架构
-    if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|i.86")
-        set(${out_var} OFF PARENT_SCOPE)
-        return()
-    endif()
-
-    if(MSVC)
-        check_cxx_compiler_flag("/arch:AVX2" HAS_AVX2_FLAG)
-    else()
-        check_cxx_compiler_flag("-mavx2" HAS_AVX2_FLAG)
-    endif()
-
-    set(${out_var} ${HAS_AVX2_FLAG} PARENT_SCOPE)
-endfunction()
 
 if(TMATH_BUILD_TESTS)
-    set(TMATH_USE_AVX2 OFF)
 
-    if(TMATH_TEST_ENABLE_AVX2)
-        tmath_try_enable_avx2(TMATH_USE_AVX2)
-    endif()
+    add_compile_definitions(TMATH_IS_TESTING)
+    add_compile_definitions(
+            $<$<BOOL:${TMATH_TEST_SSE2}>:TMATH_TEST_SSE2>
+            $<$<BOOL:${TMATH_TEST_SSE3}>:TMATH_TEST_SSE3>
+            $<$<BOOL:${TMATH_TEST_SSE4_1}>:TMATH_TEST_SSE4_1>
+            $<$<BOOL:${TMATH_TEST_AVX}>:TMATH_TEST_AVX>
+            $<$<BOOL:${TMATH_TEST_AVX2}>:TMATH_TEST_AVX2>
+            $<$<BOOL:${TMATH_TEST_FMA3}>:TMATH_TEST_FMA3>
+            $<$<BOOL:${TMATH_TEST_F16C}>:TMATH_TEST_F16C>
+#            $<$<BOOL:${TMATH_TEST_NEON}>:TMATH_TEST_ARM_NEON>
+    )
 
-    if(TMATH_USE_AVX2)
-        message(STATUS "TMATH tests: AVX2 enabled")
-        if(MSVC)
-            add_compile_options(/arch:AVX2)
-        else()
-            add_compile_options(-mavx2)
-        endif()
-        add_compile_definitions(TMATH_ENABLE_AVX2)
+    if(MSVC)
+        add_compile_options(/arch:AVX2)
     else()
-        message(STATUS "TMATH tests: AVX2 disabled")
+        add_compile_options(-mavx2 -mfma -mf16c -msse4.1 -msse3 -msse2)
     endif()
 
     enable_testing()

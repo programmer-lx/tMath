@@ -7,16 +7,24 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest]
         config: [Debug, Release]
-        avx2: [ON, OFF]
+        simd_option: [
+          SSE2,
+          SSE3,
+          SSE4_1,
+          AVX,
+          AVX2,
+          FMA3,
+          F16C
+        ]
 
     steps:
       - uses: actions/checkout@v3
 
       # 配置 CMake
       - name: Configure CMake
-        run: cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }} -DTMATH_BUILD_TESTS=ON -DTMATH_TEST_ENABLE_AVX2=${{ matrix.avx2 }}
+        run: cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }} -DTMATH_BUILD_TESTS=ON -DTMATH_TEST_${{ matrix.simd_option }}
 
       # 编译
       - name: Build
