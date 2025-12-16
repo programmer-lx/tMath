@@ -20,16 +20,16 @@ namespace detail
     {
         union
         {
-            uint32_t u[4];
+            T data[4];
             float4 v;
         };
 
-        explicit TVector4(uint32_t x, uint32_t y, uint32_t z, uint32_t w)
+        explicit TVector4(T x, T y, T z, T w)
         {
-            u[0] = x;
-            u[1] = y;
-            u[2] = z;
-            u[3] = w;
+            data[0] = x;
+            data[1] = y;
+            data[2] = z;
+            data[3] = w;
         }
     };
 }
@@ -40,6 +40,7 @@ namespace Mask
     static const float4 Lane1 = detail::TVector4<uint32_t>(0x0, 0xffffffff, 0x0, 0x0).v;
     static const float4 Lane2 = detail::TVector4<uint32_t>(0x0, 0x0, 0xffffffff, 0x0).v;
     static const float4 Lane3 = detail::TVector4<uint32_t>(0x0, 0x0, 0x0, 0xffffffff).v;
+    static const float4 Lane01 = detail::TVector4<uint32_t>(0xffffffff, 0xffffffff, 0x0, 0x0).v;
     static const float4 Lane012 = detail::TVector4<uint32_t>(0xffffffff, 0xffffffff, 0xffffffff, 0x0).v;
 }
 

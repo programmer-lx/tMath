@@ -152,6 +152,35 @@ void test()
             TEST_BOOL(tMath::approximately(v4f, { 5, 10, 17, 26 }));
         }
         {
+            // dot2
+            for (int i = 0; i < 500; ++i)
+            {
+                float x1 = random_f(-10.0f, 10.0f);
+                float y1 = random_f(-10.0f, 10.0f);
+                float z1 = random_f(-10.0f, 10.0f);
+                float w1 = random_f(-10.0f, 10.0f);
+
+                float x2 = random_f(-10.0f, 10.0f);
+                float y2 = random_f(-10.0f, 10.0f);
+                float z2 = random_f(-10.0f, 10.0f);
+                float w2 = random_f(-10.0f, 10.0f);
+
+                float4 a = tSimd::set(x1, y1, z1, w1);
+                float4 b = tSimd::set(x2, y2, z2, w2);
+                double test =
+                    double(x1)*x2 +
+                    double(y1)*y2;
+
+                float4 result = tSimd::dot2(a, b);
+                Vector4f r{};
+                tSimd::store(r, result);
+                TEST_BOOL(tMath::approximately(r.x, float(test), 1e-4f));
+                TEST_BOOL(tMath::approximately(r.y, float(test), 1e-4f));
+                TEST_BOOL(tMath::approximately(r.z, float(test), 1e-4f));
+                TEST_BOOL(tMath::approximately(r.w, float(test), 1e-4f));
+            }
+        }
+        {
             // dot3
             for (int i = 0; i < 500; ++i)
             {

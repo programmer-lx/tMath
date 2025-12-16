@@ -167,6 +167,28 @@ inline float4 sqrt(float4 v)
     return _mm_sqrt_ps(v);
 }
 
+inline float4 dot2(float4 lhs, float4 rhs)
+{
+#if defined(TMATH_NO_SIMD)
+#error "TODO"
+#elif defined(TMATH_HAS_SSE4_1)
+    return _mm_dp_ps(lhs, rhs, 0x3f);       // imm8: 7-4: compute, 3-0: store
+#elif defined(TMATH_HAS_SSE3)
+    float4 temp = _mm_mul_ps(lhs, rhs);     // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, Mask::Lane01);  // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_hadd_ps(temp, temp);         // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
+    return _mm_hadd_ps(temp, temp);         // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
+#elif defined(TMATH_HAS_SSE2)
+    float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
+    mul = _mm_and_ps(mul, Mask::Lane01);                                    // mul      = [        0,         0, y1y2,                  x1x2]
+    float4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));        // shuffle  = [     y1y2,      x1x2,    0,                     0]
+    mul = _mm_add_ps(mul, shuffle);                                         // mul      = [     y1y2,      x1x2, y1y2,                  x1x2]
+    shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,                  y1y2]
+    mul = _mm_add_ps(shuffle, mul);                                         // mul      = [        N,         N,    N,           x1x2 + y1y2]
+    return tmath_permute_ps(mul, _MM_SHUFFLE(0, 0, 0, 0));                  // splat mul[lane(0)]
+#endif
+}
+
 inline float4 dot3(float4 lhs, float4 rhs)
 {
 #if defined(TMATH_NO_SIMD)
@@ -182,9 +204,9 @@ inline float4 dot3(float4 lhs, float4 rhs)
     float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
     mul = _mm_and_ps(mul, Mask::Lane012);                                   // mul      = [        0,      z1z2, y1y2,                  x1x2]
     float4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));        // shuffle  = [     y1y2,      x1x2,    0,                  z1z2]
-    mul = _mm_add_ps(mul, shuffle);                                         // mul      = [w1w2+y1y2, z1z2+x1x2, y1y2,             x1x2+z1z2]
-    shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,             w1w2+y1y2]
-    mul = _mm_add_ps(shuffle, mul);                                         // mul      = [        N,         N,    N, z1z2+x1x2 + w1w2+y1y2]
+    mul = _mm_add_ps(mul, shuffle);                                         // mul      = [     y1y2, z1z2+x1x2, y1y2,             x1x2+z1z2]
+    shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,                  y1y2]
+    mul = _mm_add_ps(shuffle, mul);                                         // mul      = [        N,         N,    N,      z1z2+x1x2 + y1y2]
     return tmath_permute_ps(mul, _MM_SHUFFLE(0, 0, 0, 0));                  // splat mul[lane(0)]
 #endif
 }
