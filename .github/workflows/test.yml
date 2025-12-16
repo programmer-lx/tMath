@@ -24,17 +24,17 @@ jobs:
 
       # 配置 CMake
       - name: Configure CMake
-        run: cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }} -DTMATH_BUILD_TESTS=ON -DTMATH_TEST_${{ matrix.simd_option }}
+        run: cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.simd_option }} -DTMATH_BUILD_TESTS=ON -DTMATH_TEST_${{ matrix.simd_option }}=ON
 
       # 编译
       - name: Build
-        run: cmake --build build-${{ matrix.os }}-${{ matrix.config }} --config ${{ matrix.config }}
+        run: cmake --build build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.simd_option }} --config ${{ matrix.config }}
 
       # 运行测试
       - name: Run CTest (Windows)
         if: runner.os == 'Windows'
-        run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} -C ${{ matrix.config }} --output-on-failure
+        run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.simd_option }} -C ${{ matrix.config }} --output-on-failure
 
       - name: Run CTest (Linux/macOS)
         if: runner.os != 'Windows'
-        run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }} --output-on-failure
+        run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.simd_option }} --output-on-failure
