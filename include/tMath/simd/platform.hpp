@@ -1,9 +1,9 @@
 #pragma once
 
-// TODO
-#ifndef _WIN64
-#error "TODO: The library only support win64 system"
-#endif
+
+// #ifndef _WIN64
+// #error "The library only support win64 system"
+// #endif
 
 // C++ check
 #ifndef __cplusplus
