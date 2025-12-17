@@ -210,6 +210,25 @@ void test_vector2()
                 Vector2f v2 = { 1, 1 };
                 TEST_BOOL(tMath::cross(v1, v2) == 0);
             }
+
+            {
+                // v1 -> v2 是顺时针
+                Vector2f v1 = { -1, 1 };
+                Vector2f v2 = { 1, 1 };
+                TEST_BOOL(tMath::cross(v1.x, v1.y, v2.x, v2.y) < 0);
+            }
+            {
+                // v1 -> v2 是逆时针
+                Vector2f v1 = { -1, 1 };
+                Vector2f v2 = { 1, 1 };
+                TEST_BOOL(tMath::cross(v2.x, v2.y, v1.x, v1.y) > 0);
+            }
+            {
+                // v1, v2平行
+                Vector2f v1 = { -1, -1 };
+                Vector2f v2 = { 1, 1 };
+                TEST_BOOL(tMath::cross(v1.x, v1.y, v2.x, v2.y) == 0);
+            }
         }
         {
             // casts

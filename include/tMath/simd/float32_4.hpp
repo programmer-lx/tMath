@@ -64,7 +64,7 @@ inline float32_4 load_vector(const TVec2& vec)
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4>
-inline void store(TVec4& vec, float32_4 v)
+inline void store(TVec4& vec, float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     vec.x = v.x;
@@ -77,7 +77,7 @@ inline void store(TVec4& vec, float32_4 v)
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
-inline void store(TVec3& vec, float32_4 v)
+inline void store(TVec3& vec, float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     vec.x = v.x;
@@ -93,7 +93,7 @@ inline void store(TVec3& vec, float32_4 v)
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
-inline void store(TVec2& vec, float32_4 v)
+inline void store(TVec2& vec, float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     vec.x = v.x;
@@ -106,7 +106,7 @@ inline void store(TVec2& vec, float32_4 v)
 #endif
 }
 
-inline float get_x(float32_4 v)
+inline float get_x(float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     return v.x;
@@ -115,7 +115,7 @@ inline float get_x(float32_4 v)
 #endif
 }
 
-inline float get_y(float32_4 v)
+inline float get_y(float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     return v.y;
@@ -124,7 +124,7 @@ inline float get_y(float32_4 v)
 #endif
 }
 
-inline float get_z(float32_4 v)
+inline float get_z(float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     return v.z;
@@ -133,7 +133,7 @@ inline float get_z(float32_4 v)
 #endif
 }
 
-inline float get_w(float32_4 v)
+inline float get_w(float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     return v.w;
@@ -161,7 +161,7 @@ inline float32_4 set(float x, float y, float z, float w)
 #endif
 }
 
-inline float32_4 add(float32_4 lhs, float32_4 rhs)
+inline float32_4 add(float32_4_arg_in lhs, float32_4_arg_in rhs)
 {
 #if defined(TMATH_NO_SIMD)
     return lhs + rhs;
@@ -170,7 +170,7 @@ inline float32_4 add(float32_4 lhs, float32_4 rhs)
 #endif
 }
 
-inline float32_4 sub(float32_4 lhs, float32_4 rhs)
+inline float32_4 sub(float32_4_arg_in lhs, float32_4_arg_in rhs)
 {
 #if defined(TMATH_NO_SIMD)
     return lhs - rhs;
@@ -179,7 +179,7 @@ inline float32_4 sub(float32_4 lhs, float32_4 rhs)
 #endif
 }
 
-inline float32_4 mul(float32_4 lhs, float32_4 rhs)
+inline float32_4 mul(float32_4_arg_in lhs, float32_4_arg_in rhs)
 {
 #if defined(TMATH_NO_SIMD)
     return {
@@ -193,7 +193,7 @@ inline float32_4 mul(float32_4 lhs, float32_4 rhs)
 #endif
 }
 
-inline float32_4 mul(float32_4 lhs, float scalar)
+inline float32_4 mul(float32_4_arg_in lhs, float scalar)
 {
 #if defined(TMATH_NO_SIMD)
     return lhs * scalar;
@@ -202,7 +202,7 @@ inline float32_4 mul(float32_4 lhs, float scalar)
 #endif
 }
 
-inline float32_4 div(float32_4 lhs, float32_4 rhs)
+inline float32_4 div(float32_4_arg_in lhs, float32_4_arg_in rhs)
 {
 #if defined(TMATH_NO_SIMD)
     return {
@@ -216,7 +216,7 @@ inline float32_4 div(float32_4 lhs, float32_4 rhs)
 #endif
 }
 
-inline float32_4 div(float32_4 lhs, float scalar)
+inline float32_4 div(float32_4_arg_in lhs, float scalar)
 {
 #if defined(TMATH_NO_SIMD)
     return lhs / scalar;
@@ -225,7 +225,7 @@ inline float32_4 div(float32_4 lhs, float scalar)
 #endif
 }
 
-inline float32_4 mul_add(float32_4 a, float32_4 b, float32_4 c)
+inline float32_4 mul_add(float32_4_arg_in a, float32_4_arg_in b, float32_4_arg_in c)
 {
 #if defined(TMATH_NO_SIMD)
     float32_4 mul = {
@@ -261,7 +261,7 @@ namespace detail
 #endif
 }
 
-inline float32_4 abs(float32_4 v)
+inline float32_4 abs(float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     return TMATH_NAMESPACE_NAME::abs(v);
@@ -270,7 +270,7 @@ inline float32_4 abs(float32_4 v)
 #endif
 }
 
-inline float32_4 sqrt(float32_4 v)
+inline float32_4 sqrt(float32_4_arg_in v)
 {
 #if defined(TMATH_NO_SIMD)
     return {
@@ -284,7 +284,7 @@ inline float32_4 sqrt(float32_4 v)
 #endif
 }
 
-inline float32_4 dot2(float32_4 lhs, float32_4 rhs)
+inline float32_4 dot2(float32_4_arg_in lhs, float32_4_arg_in rhs)
 {
 #if defined(TMATH_NO_SIMD)
     float value = TMATH_NAMESPACE_NAME::dot(lhs.x, lhs.y, rhs.x, rhs.y);
@@ -307,7 +307,7 @@ inline float32_4 dot2(float32_4 lhs, float32_4 rhs)
 #endif
 }
 
-inline float32_4 dot3(float32_4 lhs, float32_4 rhs)
+inline float32_4 dot3(float32_4_arg_in lhs, float32_4_arg_in rhs)
 {
 #if defined(TMATH_NO_SIMD)
     float value = TMATH_NAMESPACE_NAME::dot(lhs.x, lhs.y, lhs.z, rhs.x, rhs.y, rhs.z);
@@ -330,7 +330,7 @@ inline float32_4 dot3(float32_4 lhs, float32_4 rhs)
 #endif
 }
 
-inline float32_4 dot4(float32_4 lhs, float32_4 rhs)
+inline float32_4 dot4(float32_4_arg_in lhs, float32_4_arg_in rhs)
 {
 #if defined(TMATH_NO_SIMD)
     float value = TMATH_NAMESPACE_NAME::dot(lhs, rhs);
@@ -348,6 +348,23 @@ inline float32_4 dot4(float32_4 lhs, float32_4 rhs)
     shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [         N,          N,         N,             w1w2+y1y2]
     mul = _mm_add_ps(shuffle, mul);                                         // mul      = [         N,          N,         N, z1z2+x1x2 + w1w2+y1y2]
     return tmath_permute_ps(mul, _MM_SHUFFLE(0, 0, 0, 0));                  // splat mul[lane(0)]
+#endif
+}
+
+/**
+ * @return (x1y2 - x2y1, same...)
+ */
+inline float32_4 cross2(float32_4_arg_in lhs, float32_4_arg_in rhs)
+{
+#if defined(TMATH_NO_SIMD)
+    float value = TMATH_NAMESPACE_NAME::cross(lhs.x, lhs.y, rhs.x, rhs.y);
+    return { value, value, value, value };
+#elif defined(TMATH_USE_SSE2)
+    float32_4 t2 = tmath_permute_ps(rhs, _MM_SHUFFLE(0, 1, 0, 1));      // t2 = [N, N,   x2,          y2]
+    float32_4 t1 = _mm_mul_ps(lhs, t2);                                 // t1 = [N, N, x2y1,        x1y2]
+    t2 = tmath_permute_ps(t1, _MM_SHUFFLE(1, 1, 1, 1));                 // t2 = [N, N, x2y1,        x2y1]
+    t1 = _mm_sub_ps(t1, t2);                                            // t1 = [N, N,    N,   x1y2-x2y1]
+    return tmath_permute_ps(t1, _MM_SHUFFLE(0, 0, 0, 0));               // re = [x1y2-x2y1, x1y2-x2y1, x1y2-x2y1, x1y2-x2y1]
 #endif
 }
 

@@ -61,6 +61,15 @@ vector_field_t<TVec2> dot(const TVec2& lhs, const TVec2& rhs)
     return lhs.x * rhs.x + lhs.y * rhs.y;
 }
 
+template<is_floating_point F>
+F cross(
+    const F x1, const F y1,
+    const F x2, const F y2
+)
+{
+    return x1 * y2 - x2 * y1;
+}
+
 template<is_vector2 TVec2>
 vector_field_t<TVec2> cross(const TVec2& lhs, const TVec2& rhs)
 {

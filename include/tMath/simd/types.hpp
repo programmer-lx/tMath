@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+// #define TMATH_USE_SSE2 // test
 // #define TMATH_USE_SSE3 // test
 // #define TMATH_NO_SIMD // test
 #if defined(TMATH_NO_SIMD)
@@ -18,35 +19,27 @@ TMATH_SIMD_NAMESPACE_BEGIN
 
 // 128 bits
 #if defined(TMATH_NO_SIMD)
+
     struct float32_4
     {
         TMATH_VECTOR4(float32_4, float)
     };
+    using float32_4_arg_in = const float32_4&;
+
     struct int32_4
     {
         TMATH_VECTOR4(int32_4, int32_t)
     };
-#elif defined(TMATH_USE_SSE2)
-    using float32_4 = __m128;
-    using int32_4 = __m128i;
-#endif
+    using int32_4_arg_in = const int32_4&;
 
-// 256 bits
-#if defined(TMATH_NO_SIMD)
-    struct float64_4
-    {
-        TMATH_VECTOR4(float64_4, double)
-    };
-    struct int64_4
-    {
-        TMATH_VECTOR4(int64_4, int64_t)
-    };
-#elif defined(TMATH_USE_AVX)
-    using float64_4 = __m256;
-    using int64_4 = __m256i;
-#else
-    using float64_4 = __m128[2];
-    using int64_4 = __m128i[2];
+#elif defined(TMATH_USE_SSE2)
+
+    using float32_4 = __m128;
+    using float32_4_arg_in = float32_4;
+
+    using int32_4 = __m128i;
+    using int32_4_arg_in = int32_4;
+
 #endif
 
 
@@ -65,24 +58,6 @@ struct alignas(alignof(float32_4)) _128bits_mem_block
         u32_data[1] = lane1;
         u32_data[2] = lane2;
         u32_data[3] = lane3;
-    }
-};
-
-struct alignas(alignof(float64_4)) _256bits_mem_block
-{
-    union
-    {
-        uint64_t u64_data[4];
-        float64_4 f64_4;
-        int64_4 i64_4;
-    };
-
-    explicit constexpr _256bits_mem_block(uint64_t lane0, uint64_t lane1, uint64_t lane2, uint64_t lane3)
-    {
-        u64_data[0] = lane0;
-        u64_data[1] = lane1;
-        u64_data[2] = lane2;
-        u64_data[3] = lane3;
     }
 };
 
