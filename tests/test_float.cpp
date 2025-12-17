@@ -7,6 +7,10 @@ int main()
     try
     {
         {
+            TEST_BOOL(tMath::approximately(1.0000005, 1.000001f, 0.000001f));
+            TEST_BOOL(tMath::approximately(1.0000005, 1.000001, 0.000001));
+        }
+        {
             TEST_BOOL(tMath::approximately(tMath::to_radians(180.0f), tMath::PI<float>));
         }
         {

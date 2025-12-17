@@ -10,6 +10,15 @@
     #error tMath requires C++
 #endif
 
+// 建议在windows下使用MSVC (测试除外)
+#ifndef TMATH_IS_TESTING
+    #if defined(_WIN64) || defined(_WIN32)
+        #ifndef _MSC_VER
+            #warning "It is recommended to use the MSVC compiler on the Windows platform."
+        #endif
+    #endif
+#endif
+
 
 // for testing
 #ifdef TMATH_IS_TESTING

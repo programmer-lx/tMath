@@ -86,11 +86,19 @@ F lerp(const F a, const F b, const T t)
     return std::lerp(a, b, t);
 }
 
+// 类型不同的浮点的比较
 template<is_floating_point F1, is_floating_point F2>
+    requires (!std::is_same_v<F1, F2>)
 bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = MinTolerance<min_floating_point_t<F1, F2>>)
 {
-    using F = max_floating_point_t<F1, F2>;
-    return TMATH_NAMESPACE_NAME::abs(static_cast<F>(a) - static_cast<F>(b)) < tolerance;
+    using max_float_t = max_floating_point_t<F1, F2>;
+    return TMATH_NAMESPACE_NAME::abs(static_cast<max_float_t>(a) - static_cast<max_float_t>(b)) < static_cast<max_float_t>(tolerance);
+}
+
+template<is_floating_point F>
+bool approximately(const F a, const F b, const F tolerance = MinTolerance<F>)
+{
+    return TMATH_NAMESPACE_NAME::abs(a - b) < tolerance;
 }
 
 template<is_floating_point N>

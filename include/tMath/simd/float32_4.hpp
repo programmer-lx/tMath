@@ -12,6 +12,13 @@ TMATH_SIMD_NAMESPACE_BEGIN
     #define tmath_permute_ps(v, imm8) _mm_shuffle_ps((v), (v), (imm8))
 #endif
 
+// fn: fmadd
+#if defined(TMATH_USE_FMA3)
+    #define tmath_fmadd_ps(a, b, c) _mm_fmadd_ps((a), (b), (c))
+#elif defined(TMATH_USE_SSE2)
+    #define tmath_fmadd_ps(a, b, c) _mm_add_ps(_mm_mul_ps((a), (b)), (c))
+#endif
+
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4>
 inline float32_4 TMATH_SIMD_CALL_CONV load(const TVec4& vec) noexcept
@@ -235,29 +242,8 @@ inline float32_4 TMATH_SIMD_CALL_CONV mul_add(float32_4_arg_in a, float32_4_arg_
         a.w * b.w
     };
     return mul + c;
-#elif defined(TMATH_USE_FMA3)
-    return _mm_fmadd_ps(a, b, c);
 #else
-    return _mm_add_ps(_mm_mul_ps(a, b), c);
-#endif
-}
-
-namespace detail
-{
-#if !defined(TMATH_NO_SIMD)
-    inline float32_4 TMATH_SIMD_CALL_CONV get_abs_mask_impl() noexcept
-    {
-        const float32_4 ones = _mm_cmpeq_ps(_mm_setzero_ps(), _mm_setzero_ps()); // 全 1
-        const float32_4 sign_bit = _mm_set1_ps(-0.0f); // 符号位为 1，其余为 0
-        return _mm_andnot_ps(sign_bit, ones); // (!(sign_bit)) & ones
-    }
-
-    // 四个分量的符号位都为0，其余位为1
-    inline float32_4 TMATH_SIMD_CALL_CONV get_abs_mask() noexcept
-    {
-        static float32_4 mask = get_abs_mask_impl();
-        return mask;
-    }
+    return tmath_fmadd_ps(a, b, c);
 #endif
 }
 
@@ -266,7 +252,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV abs(float32_4_arg_in v) noexcept
 #if defined(TMATH_NO_SIMD)
     return TMATH_NAMESPACE_NAME::abs(v);
 #else
-    return _mm_and_ps(v, detail::get_abs_mask());
+    return _mm_and_ps(v, Mask128::Abs4.f32_4);
 #endif
 }
 
@@ -279,6 +265,8 @@ inline float32_4 TMATH_SIMD_CALL_CONV sqrt(float32_4_arg_in v) noexcept
         TMATH_NAMESPACE_NAME::sqrt(v.z),
         TMATH_NAMESPACE_NAME::sqrt(v.w)
     };
+#elif defined(TMATH_USE_SVML)
+    return _mm_svml_sqrt_ps(v);
 #else
     return _mm_sqrt_ps(v);
 #endif
@@ -288,8 +276,10 @@ inline float32_4 TMATH_SIMD_CALL_CONV sin(float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return TMATH_NAMESPACE_NAME::sin(v);
-#else
+#elif defined(TMATH_USE_SVML)
     return _mm_sin_ps(v);
+#else
+    // TODO sin
 #endif
 }
 
@@ -297,8 +287,10 @@ inline float32_4 TMATH_SIMD_CALL_CONV cos(float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return TMATH_NAMESPACE_NAME::cos(v);
-#else
+#elif defined(TMATH_USE_SVML)
     return _mm_cos_ps(v);
+#else
+    // TODO cos
 #endif
 }
 

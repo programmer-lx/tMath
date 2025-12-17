@@ -5,6 +5,7 @@
 // #define TMATH_USE_SSE2 // test
 // #define TMATH_USE_SSE3 // test
 // #define TMATH_NO_SIMD // test
+// #define TMATH_USE_FMA3 // test
 #if defined(TMATH_NO_SIMD)
     #include "../vector1.hpp"
     #include "../vector2.hpp"
@@ -65,6 +66,9 @@ struct alignas(16) _128bits_mem_block
 
 namespace Mask128
 {
+    // 四个数，符号位是0，其余位是1
+    static constexpr _128bits_mem_block Abs4 = _128bits_mem_block(0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff);
+
     static constexpr _128bits_mem_block Lane0 = _128bits_mem_block(0xffffffff, 0x0, 0x0, 0x0);
     static constexpr _128bits_mem_block Lane1 = _128bits_mem_block(0x0, 0xffffffff, 0x0, 0x0);
     static constexpr _128bits_mem_block Lane2 = _128bits_mem_block(0x0, 0x0, 0xffffffff, 0x0);
