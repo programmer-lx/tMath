@@ -392,7 +392,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV cross3(float32_4_arg_in lhs, float32_4_arg
     float value = TMATH_NAMESPACE_NAME::cross(lhs.x, lhs.y, rhs.x, rhs.y);
     return { value, value, value, value };
 #elif defined(TMATH_USE_SSE2)
-    return {}; // TODO cross3
+    return _mm_set1_ps(0.0f); // TODO cross3
 #endif
 }
 

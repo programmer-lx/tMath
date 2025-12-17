@@ -57,7 +57,7 @@ inline void test_float4()
         TEST_BOOL(r.x == 2);
         TEST_BOOL(r.y == 3);
         TEST_BOOL(r.z == 4);
-        TEST_BOOL(r.z == 1);
+        TEST_BOOL(r.w == 1);
     }
     {
         float32_4 v = tSimd::set(1, 2, 3, 4);
