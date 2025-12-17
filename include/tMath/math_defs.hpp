@@ -333,4 +333,19 @@ template<is_signed_int I>
 using sint_to_floating_point_t = sint_to_floating_point<I>::type;
 
 
+// 提取两个输入的浮点类型的size最大的类型
+template<is_floating_point F1, is_floating_point F2>
+using max_floating_point_t = std::conditional_t<(sizeof(F1) >= sizeof(F2)), F1, F2>;
+
+// 提取两个输入的浮点类型的size最小的类型
+template<is_floating_point F1, is_floating_point F2>
+using min_floating_point_t = std::conditional_t<(sizeof(F1) <= sizeof(F2)), F1, F2>;
+
+template<is_vector_n V1, is_vector_n V2>
+using max_field_floating_point_t = std::conditional_t<(sizeof(vector_field_t<V1>) >= sizeof(vector_field_t<V2>)), vector_field_t<V1>, vector_field_t<V2>>;
+
+template<is_vector_n V1, is_vector_n V2>
+using min_field_floating_point_t = std::conditional_t<(sizeof(vector_field_t<V1>) <= sizeof(vector_field_t<V2>)), vector_field_t<V1>, vector_field_t<V2>>;
+
+
 TMATH_NAMESPACE_END

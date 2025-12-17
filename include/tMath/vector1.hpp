@@ -86,10 +86,11 @@ F lerp(const F a, const F b, const T t)
     return std::lerp(a, b, t);
 }
 
-template<is_floating_point F>
-bool approximately(const F a, const F b, const F tolerance = MinTolerance<F>)
+template<is_floating_point F1, is_floating_point F2>
+bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = MinTolerance<min_floating_point_t<F1, F2>>)
 {
-    return TMATH_NAMESPACE_NAME::abs(a - b) < tolerance;
+    using F = max_floating_point_t<F1, F2>;
+    return TMATH_NAMESPACE_NAME::abs(static_cast<F>(a) - static_cast<F>(b)) < tolerance;
 }
 
 template<is_floating_point N>

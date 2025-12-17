@@ -34,12 +34,30 @@ inline void test_float4()
         TEST_BOOL(r.y == 3);
     }
     {
+        float32_4 v = tSimd::load_point(Vector2f{2, 3});
+        Vector4f r{};
+        tSimd::store(r, v);
+        TEST_BOOL(r.x == 2);
+        TEST_BOOL(r.y == 3);
+        TEST_BOOL(r.z == 0);
+        TEST_BOOL(r.w == 1);
+    }
+    {
         float32_4 v = tSimd::load_point(Vector3f{2, 3, 4});
         Vector3f r{};
         tSimd::store(r, v);
         TEST_BOOL(r.x == 2);
         TEST_BOOL(r.y == 3);
         TEST_BOOL(r.z == 4);
+    }
+    {
+        float32_4 v = tSimd::load_point(Vector3f{2, 3, 4});
+        Vector4f r{};
+        tSimd::store(r, v);
+        TEST_BOOL(r.x == 2);
+        TEST_BOOL(r.y == 3);
+        TEST_BOOL(r.z == 4);
+        TEST_BOOL(r.z == 1);
     }
     {
         float32_4 v = tSimd::set(1, 2, 3, 4);
