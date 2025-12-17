@@ -49,24 +49,28 @@ jobs:
           # =========================
           - os: ubuntu-latest
             compiler: gcc
+            generator: "Unix Makefiles"
             cc: gcc
             cxx: g++
             config: Debug
 
           - os: ubuntu-latest
             compiler: gcc
+            generator: "Unix Makefiles"
             cc: gcc
             cxx: g++
             config: Release
 
           - os: ubuntu-latest
             compiler: clang
+            generator: "Unix Makefiles"
             cc: clang
             cxx: clang++
             config: Debug
 
           - os: ubuntu-latest
             compiler: clang
+            generator: "Unix Makefiles"
             cc: clang
             cxx: clang++
             config: Release
