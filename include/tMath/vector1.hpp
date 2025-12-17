@@ -27,6 +27,48 @@ N abs(const N n)
 }
 
 template<is_floating_point F>
+F sin(const F f)
+{
+    return std::sin(f);
+}
+
+template<is_floating_point F>
+F asin(const F f)
+{
+    return std::asin(f);
+}
+
+template<is_floating_point F>
+F cos(const F f)
+{
+    return std::cos(f);
+}
+
+template<is_floating_point F>
+F acos(const F f)
+{
+    return std::acos(f);
+}
+
+template<is_floating_point F>
+F tan(const F f)
+{
+    return std::tan(f);
+}
+
+template<is_floating_point F>
+F atan(const F f)
+{
+    return std::atan(f);
+}
+
+template<is_floating_point F>
+F atan2(const F y, const F x)
+{
+    return std::atan2(y, x);
+}
+
+template<is_floating_point F>
 F sqrt(const F f)
 {
     return std::sqrt(f);

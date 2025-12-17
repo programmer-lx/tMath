@@ -762,6 +762,15 @@ void test_vector4()
         TEST_BOOL(tMath::approximately(tMath::abs(negative), { 180, 3, 150.123f, 256.12 }));
     }
     {
+        // triangle functions
+        {
+            Vector4f v = { -180, -3, -150.123f, -256.12 };
+            TEST_BOOL(tMath::approximately(tMath::sin(v), { sin(-180.0f), sin(-3.0f), sin(-150.123f), sin(-256.12f) }));
+            TEST_BOOL(tMath::approximately(tMath::cos(v), { cos(-180.0f), cos(-3.0f), cos(-150.123f), cos(-256.12f) }));
+            TEST_BOOL(tMath::approximately(tMath::tan(v), { tan(-180.0f), tan(-3.0f), tan(-150.123f), tan(-256.12f) }));
+        }
+    }
+    {
         {
             Vector4f vec = { -1, 1, -1, 2 };
             auto f = tMath::magnitude(vec);

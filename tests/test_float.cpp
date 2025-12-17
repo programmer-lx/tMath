@@ -20,11 +20,22 @@ int main()
         }
         {
             float a = 10;
-            constexpr float e = tMath::Epsilon<float>;
             TEST_BOOL(tMath::clamp(a, 0.0f, tMath::Epsilon<float>) == tMath::Epsilon<float>);
         }
         {
             TEST_BOOL(tMath::approximately(tMath::lerp(-10.0f, 10.0f, 0.6), 2.0f));
+        }
+        {
+            // triangle functions
+            float x = -0.1896513f;
+            float y = 0.456987f;
+            TEST_BOOL(tMath::approximately(tMath::sin(x), sin(x)));
+            TEST_BOOL(tMath::approximately(tMath::asin(x), asin(x)));
+            TEST_BOOL(tMath::approximately(tMath::cos(x), cos(x)));
+            TEST_BOOL(tMath::approximately(tMath::acos(x), acos(x)));
+            TEST_BOOL(tMath::approximately(tMath::tan(x), tan(x)));
+            TEST_BOOL(tMath::approximately(tMath::atan(x), atan(x)));
+            TEST_BOOL(tMath::approximately(tMath::atan2(y, x), atan2(y, x)));
         }
         {
             // zero divide

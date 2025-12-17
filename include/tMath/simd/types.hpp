@@ -10,6 +10,8 @@
     #include "../vector2.hpp"
     #include "../vector3.hpp"
     #include "../vector4.hpp"
+    #include "../matrix3x3.hpp"
+    #include "../matrix4x4.hpp"
 #endif
 
 #include "math_defs_simd.hpp"
@@ -43,7 +45,7 @@ TMATH_SIMD_NAMESPACE_BEGIN
 #endif
 
 
-struct alignas(alignof(float32_4)) _128bits_mem_block
+struct alignas(16) _128bits_mem_block
 {
     union
     {
@@ -52,7 +54,7 @@ struct alignas(alignof(float32_4)) _128bits_mem_block
         int32_4 i32_4;
     };
 
-    explicit constexpr _128bits_mem_block(uint32_t lane0, uint32_t lane1, uint32_t lane2, uint32_t lane3)
+    explicit constexpr _128bits_mem_block(uint32_t lane0, uint32_t lane1, uint32_t lane2, uint32_t lane3) noexcept
     {
         u32_data[0] = lane0;
         u32_data[1] = lane1;

@@ -14,43 +14,57 @@
 // for testing
 #ifdef TMATH_IS_TESTING
 
-#undef __SSE2__
-#undef __SSE3__
-#undef __SSE4_1__
-#undef __AVX__
-#undef __AVX2__
-#undef __FMA__
-#undef __F16C__
+    #undef __SSE2__
+    #undef __SSE3__
+    #undef __SSE4_1__
+    #undef __AVX__
+    #undef __AVX2__
+    #undef __FMA__
+    #undef __F16C__
 
-#if defined(TMATH_TEST_SSE2)
-    #define TMATH_USE_SSE2
+    #if defined(TMATH_TEST_SSE2)
+        #define TMATH_USE_SSE2
+    #endif
+
+    #if defined(TMATH_TEST_SSE3)
+        #define TMATH_USE_SSE3
+    #endif
+
+    #if defined(TMATH_TEST_SSE4_1)
+        #define TMATH_USE_SSE4_1
+    #endif
+
+    #if defined(TMATH_TEST_AVX)
+        #define TMATH_USE_AVX
+    #endif
+
+    #if defined(TMATH_TEST_AVX2)
+        #define TMATH_USE_AVX2
+    #endif
+
+    #if defined(TMATH_TEST_FMA3)
+        #define TMATH_USE_FMA3
+    #endif
+
+    #if defined(TMATH_TEST_F16C)
+        #define TMATH_USE_F16C
+    #endif
+
+#endif // !TMATH_IS_TESTING
+
+
+
+// call conv
+#if defined(_MSC_VER) && !defined(_M_ARM) && !defined(_M_ARM64) && !defined(_M_HYBRID_X86_ARM64) && !defined(_M_ARM64EC) && (!_MANAGED) && (!_M_CEE) && (!defined(_M_IX86_FP) || (_M_IX86_FP > 1)) && !defined(TMATH_NO_SIMD) && !defined(TMATH_VECTORCALL_ENABLED)
+    #define TMATH_VECTORCALL_ENABLED
 #endif
 
-#if defined(TMATH_TEST_SSE3)
-    #define TMATH_USE_SSE3
+#if defined(TMATH_VECTORCALL_ENABLED)
+    #define TMATH_SIMD_CALL_CONV __vectorcall
+#else
+    #define TMATH_SIMD_CALL_CONV
 #endif
 
-#if defined(TMATH_TEST_SSE4_1)
-    #define TMATH_USE_SSE4_1
-#endif
-
-#if defined(TMATH_TEST_AVX)
-    #define TMATH_USE_AVX
-#endif
-
-#if defined(TMATH_TEST_AVX2)
-    #define TMATH_USE_AVX2
-#endif
-
-#if defined(TMATH_TEST_FMA3)
-    #define TMATH_USE_FMA3
-#endif
-
-#if defined(TMATH_TEST_F16C)
-    #define TMATH_USE_F16C
-#endif
-
-#endif
 
 
 // SIMD support

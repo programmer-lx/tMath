@@ -46,36 +46,6 @@ TVec2& operator/=(TVec2& lhs, const vector_field_t<TVec2> rhs)
     return lhs;
 }
 
-template<is_floating_point F>
-F dot(
-    const F x1, const F y1,
-    const F x2, const F y2
-)
-{
-    return x1 * x2 + y1 * y2;
-}
-
-template<is_vector2 TVec2>
-vector_field_t<TVec2> dot(const TVec2& lhs, const TVec2& rhs)
-{
-    return lhs.x * rhs.x + lhs.y * rhs.y;
-}
-
-template<is_floating_point F>
-F cross(
-    const F x1, const F y1,
-    const F x2, const F y2
-)
-{
-    return x1 * y2 - x2 * y1;
-}
-
-template<is_vector2 TVec2>
-vector_field_t<TVec2> cross(const TVec2& lhs, const TVec2& rhs)
-{
-    return lhs.x * rhs.y - lhs.y * rhs.x;
-}
-
 
 TMATH_NAMESPACE_END
 #include "impl/vector_operators.inl"
@@ -111,6 +81,36 @@ template<is_vector2 TVec2>
 TVec2 abs(const TVec2& v)
 {
     return { TMATH_NAMESPACE_NAME::abs(v.x), TMATH_NAMESPACE_NAME::abs(v.y) };
+}
+
+template<is_floating_point F>
+F dot(
+    const F x1, const F y1,
+    const F x2, const F y2
+)
+{
+    return x1 * x2 + y1 * y2;
+}
+
+template<is_vector2 TVec2>
+vector_field_t<TVec2> dot(const TVec2& lhs, const TVec2& rhs)
+{
+    return lhs.x * rhs.x + lhs.y * rhs.y;
+}
+
+template<is_floating_point F>
+F cross(
+    const F x1, const F y1,
+    const F x2, const F y2
+)
+{
+    return x1 * y2 - x2 * y1;
+}
+
+template<is_vector2 TVec2>
+vector_field_t<TVec2> cross(const TVec2& lhs, const TVec2& rhs)
+{
+    return lhs.x * rhs.y - lhs.y * rhs.x;
 }
 
 template<is_vector2_floating_point TVec2>

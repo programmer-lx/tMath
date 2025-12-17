@@ -31,25 +31,25 @@ namespace detail
 #define TMATH_MARK_AS_QUAT using is_quat = TMATH_NAMESPACE_NAME::detail::quat_tag;
 
 #define TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name) \
-    TMATH_FORCE_INLINE friend bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) \
+    TMATH_FORCE_INLINE friend bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) \
+    TMATH_FORCE_INLINE friend bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator*=(vector_type_name& lhs, const field_type_name rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name& operator*=(vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator/=(vector_type_name& lhs, const field_type_name rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name& operator/=(vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator*(const vector_type_name& lhs, const field_type_name rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name operator*(const vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator/(const vector_type_name& lhs, const field_type_name rhs) \
+    TMATH_FORCE_INLINE friend vector_type_name operator/(const vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
 
 #define TMATH_VECTOR_INDEX(field_type_name, data_var_name) \
