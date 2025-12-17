@@ -16,43 +16,43 @@ TMATH_SIMD_NAMESPACE_BEGIN
 
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4>
-inline float4 load(const TVec4& vec)
+inline float32_4 load(const TVec4& vec)
 {
     return _mm_loadu_ps(vec.data);
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
-inline float4 load_point(const TVec3& vec)
+inline float32_4 load_point(const TVec3& vec)
 {
     return _mm_set_ps(1.0f, vec.z, vec.y, vec.x);
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
-inline float4 load_point(const TVec2& vec)
+inline float32_4 load_point(const TVec2& vec)
 {
     return _mm_set_ps(1.0f, 0.0f, vec.y, vec.x);
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
-inline float4 load_vector(const TVec3& vec)
+inline float32_4 load_vector(const TVec3& vec)
 {
     return _mm_set_ps(0.0f, vec.z, vec.y, vec.x);
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
-inline float4 load_vector(const TVec2& vec)
+inline float32_4 load_vector(const TVec2& vec)
 {
     return _mm_set_ps(0.0f, 0.0f, vec.y, vec.x);
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4>
-inline void store(TVec4& vec, float4 v)
+inline void store(TVec4& vec, float32_4 v)
 {
     _mm_storeu_ps(vec.data, v);
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
-inline void store(TVec3& vec, float4 v)
+inline void store(TVec3& vec, float32_4 v)
 {
     alignas(16) float tmp[4];
     _mm_store_ps(tmp, v);
@@ -62,7 +62,7 @@ inline void store(TVec3& vec, float4 v)
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
-inline void store(TVec2& vec, float4 v)
+inline void store(TVec2& vec, float32_4 v)
 {
     alignas(16) float tmp[4];
     _mm_store_ps(tmp, v);
@@ -70,68 +70,68 @@ inline void store(TVec2& vec, float4 v)
     vec.y = tmp[1];
 }
 
-inline float get_x(float4 v)
+inline float get_x(float32_4 v)
 {
     return _mm_cvtss_f32(v);
 }
 
-inline float get_y(float4 v)
+inline float get_y(float32_4 v)
 {
     return _mm_cvtss_f32(tmath_permute_ps(v, _MM_SHUFFLE(1, 1, 1, 1)));
 }
 
-inline float get_z(float4 v)
+inline float get_z(float32_4 v)
 {
     return _mm_cvtss_f32(tmath_permute_ps(v, _MM_SHUFFLE(2, 2, 2, 2)));
 }
 
-inline float get_w(float4 v)
+inline float get_w(float32_4 v)
 {
     return _mm_cvtss_f32(tmath_permute_ps(v, _MM_SHUFFLE(3, 3, 3, 3)));
 }
 
 
-inline float4 set(float scalar)
+inline float32_4 set(float scalar)
 {
     return _mm_set1_ps(scalar);
 }
 
-inline float4 set(float x, float y, float z, float w)
+inline float32_4 set(float x, float y, float z, float w)
 {
     return _mm_set_ps(w, z, y, x);
 }
 
-inline float4 add(float4 lhs, float4 rhs)
+inline float32_4 add(float32_4 lhs, float32_4 rhs)
 {
     return _mm_add_ps(lhs, rhs);
 }
 
-inline float4 sub(float4 lhs, float4 rhs)
+inline float32_4 sub(float32_4 lhs, float32_4 rhs)
 {
     return _mm_sub_ps(lhs, rhs);
 }
 
-inline float4 mul(float4 lhs, float4 rhs)
+inline float32_4 mul(float32_4 lhs, float32_4 rhs)
 {
     return _mm_mul_ps(lhs, rhs);
 }
 
-inline float4 mul(float4 lhs, float scalar)
+inline float32_4 mul(float32_4 lhs, float scalar)
 {
     return _mm_mul_ps(lhs, _mm_set1_ps(scalar));
 }
 
-inline float4 div(float4 lhs, float4 rhs)
+inline float32_4 div(float32_4 lhs, float32_4 rhs)
 {
     return _mm_div_ps(lhs, rhs);
 }
 
-inline float4 div(float4 lhs, float scalar)
+inline float32_4 div(float32_4 lhs, float scalar)
 {
     return _mm_div_ps(lhs, _mm_set1_ps(scalar));
 }
 
-inline float4 mul_add(float4 a, float4 b, float4 c)
+inline float32_4 mul_add(float32_4 a, float32_4 b, float32_4 c)
 {
 #if defined(TMATH_USE_FMA3)
     return _mm_fmadd_ps(a, b, c);
@@ -142,46 +142,46 @@ inline float4 mul_add(float4 a, float4 b, float4 c)
 
 namespace detail
 {
-    inline float4 get_abs_mask_impl()
+    inline float32_4 get_abs_mask_impl()
     {
-        const float4 ones = _mm_cmpeq_ps(_mm_setzero_ps(), _mm_setzero_ps()); // 全 1
-        const float4 sign_bit = _mm_set1_ps(-0.0f); // 符号位为 1，其余为 0
+        const float32_4 ones = _mm_cmpeq_ps(_mm_setzero_ps(), _mm_setzero_ps()); // 全 1
+        const float32_4 sign_bit = _mm_set1_ps(-0.0f); // 符号位为 1，其余为 0
         return _mm_andnot_ps(sign_bit, ones); // (!(sign_bit)) & ones
     }
 
     // 四个分量的符号位都为0，其余位为1
-    inline float4 get_abs_mask()
+    inline float32_4 get_abs_mask()
     {
-        static float4 mask = get_abs_mask_impl();
+        static float32_4 mask = get_abs_mask_impl();
         return mask;
     }
 }
 
-inline float4 abs(float4 v)
+inline float32_4 abs(float32_4 v)
 {
     return _mm_and_ps(v, detail::get_abs_mask());
 }
 
-inline float4 sqrt(float4 v)
+inline float32_4 sqrt(float32_4 v)
 {
     return _mm_sqrt_ps(v);
 }
 
-inline float4 dot2(float4 lhs, float4 rhs)
+inline float32_4 dot2(float32_4 lhs, float32_4 rhs)
 {
 #if defined(TMATH_NO_SIMD)
 #error "TODO"
 #elif defined(TMATH_USE_SSE4_1)
-    return _mm_dp_ps(lhs, rhs, 0x3f);       // imm8: 7-4: compute, 3-0: store
+    return _mm_dp_ps(lhs, rhs, 0x3f);           // imm8: 7-4: compute, 3-0: store
 #elif defined(TMATH_USE_SSE3)
-    float4 temp = _mm_mul_ps(lhs, rhs);     // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
-    temp = _mm_and_ps(temp, Mask::Lane01);  // temp = [                0,             z1z2,             y1y2,             x1x2]
-    temp = _mm_hadd_ps(temp, temp);         // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
-    return _mm_hadd_ps(temp, temp);         // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
+    float32_4 temp = _mm_mul_ps(lhs, rhs);      // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, Mask128::Lane01);   // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_hadd_ps(temp, temp);             // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
+    return _mm_hadd_ps(temp, temp);             // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
 #elif defined(TMATH_USE_SSE2)
-    float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
-    mul = _mm_and_ps(mul, Mask::Lane01);                                    // mul      = [        0,         0, y1y2,                  x1x2]
-    float4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));        // shuffle  = [     y1y2,      x1x2,    0,                     0]
+    float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
+    mul = _mm_and_ps(mul, Mask128::Lane01.f32_4);                           // mul      = [        0,         0, y1y2,                  x1x2]
+    float32_4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));     // shuffle  = [     y1y2,      x1x2,    0,                     0]
     mul = _mm_add_ps(mul, shuffle);                                         // mul      = [     y1y2,      x1x2, y1y2,                  x1x2]
     shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,                  y1y2]
     mul = _mm_add_ps(shuffle, mul);                                         // mul      = [        N,         N,    N,           x1x2 + y1y2]
@@ -189,21 +189,21 @@ inline float4 dot2(float4 lhs, float4 rhs)
 #endif
 }
 
-inline float4 dot3(float4 lhs, float4 rhs)
+inline float32_4 dot3(float32_4 lhs, float32_4 rhs)
 {
 #if defined(TMATH_NO_SIMD)
 #error "TODO"
 #elif defined(TMATH_USE_SSE4_1)
-    return _mm_dp_ps(lhs, rhs, 0x7f);       // imm8: 7-4: compute, 3-0: store
+    return _mm_dp_ps(lhs, rhs, 0x7f);           // imm8: 7-4: compute, 3-0: store
 #elif defined(TMATH_USE_SSE3)
-    float4 temp = _mm_mul_ps(lhs, rhs);     // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
-    temp = _mm_and_ps(temp, Mask::Lane012); // temp = [                0,             z1z2,             y1y2,             x1x2]
-    temp = _mm_hadd_ps(temp, temp);         // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
-    return _mm_hadd_ps(temp, temp);         // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
+    float32_4 temp = _mm_mul_ps(lhs, rhs);      // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, Mask128::Lane012);  // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_hadd_ps(temp, temp);             // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
+    return _mm_hadd_ps(temp, temp);             // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
 #elif defined(TMATH_USE_SSE2)
-    float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
-    mul = _mm_and_ps(mul, Mask::Lane012);                                   // mul      = [        0,      z1z2, y1y2,                  x1x2]
-    float4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));        // shuffle  = [     y1y2,      x1x2,    0,                  z1z2]
+    float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
+    mul = _mm_and_ps(mul, Mask128::Lane012.f32_4);                          // mul      = [        0,      z1z2, y1y2,                  x1x2]
+    float32_4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));     // shuffle  = [     y1y2,      x1x2,    0,                  z1z2]
     mul = _mm_add_ps(mul, shuffle);                                         // mul      = [     y1y2, z1z2+x1x2, y1y2,             x1x2+z1z2]
     shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,                  y1y2]
     mul = _mm_add_ps(shuffle, mul);                                         // mul      = [        N,         N,    N,      z1z2+x1x2 + y1y2]
@@ -211,19 +211,19 @@ inline float4 dot3(float4 lhs, float4 rhs)
 #endif
 }
 
-inline float4 dot4(float4 lhs, float4 rhs)
+inline float32_4 dot4(float32_4 lhs, float32_4 rhs)
 {
 #if defined(TMATH_NO_SIMD)
 #error "TODO"
 #elif defined(TMATH_USE_SSE4_1)
     return _mm_dp_ps(lhs, rhs, 0xff);
 #elif defined(TMATH_USE_SSE3)
-    float4 temp = _mm_mul_ps(lhs, rhs);     // temp = [                 w1w2,                  z1z2,                  y1y2,                  x1x2]
+    float32_4 temp = _mm_mul_ps(lhs, rhs);  // temp = [                 w1w2,                  z1z2,                  y1y2,                  x1x2]
     temp = _mm_hadd_ps(temp, temp);         // temp = [            z1z2+w1w2,             x1x2+y1y2,             z1z2+w1w2,             x1x2+y1y2]
     return _mm_hadd_ps(temp, temp);         // temp = [x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2]
 #elif defined(TMATH_USE_SSE2)
-    float4 mul = _mm_mul_ps(lhs, rhs);                                      // mul      = [      w1w2,       z1z2,      y1y2,                  x1x2]
-    float4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));        // shuffle  = [      y1y2,       x1x2,      w1w2,                  z1z2]
+    float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [      w1w2,       z1z2,      y1y2,                  x1x2]
+    float32_4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));     // shuffle  = [      y1y2,       x1x2,      w1w2,                  z1z2]
     mul = _mm_add_ps(mul, shuffle);                                         // mul      = [ w1w2+y1y2,  z1z2+x1x2, y1y2+w1w2,             x1x2+z1z2]
     shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [         N,          N,         N,             w1w2+y1y2]
     mul = _mm_add_ps(shuffle, mul);                                         // mul      = [         N,          N,         N, z1z2+x1x2 + w1w2+y1y2]
