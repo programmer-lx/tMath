@@ -31,15 +31,56 @@ add_executable(test_operators_override test_operator_override.cpp)
 target_link_libraries(test_operators_override PRIVATE tMath)
 add_o3_optimization(test_operators_override)
 
-# SIMD vec4 float32
-add_executable(test_simd_vector4_float32 simd/test_simd_vector4_float32.cpp)
-target_link_libraries(test_simd_vector4_float32 PRIVATE tMath)
-add_o3_optimization(test_simd_vector4_float32)
+
+
+# SIMD float4
+# SSE2
+add_executable(test_simd_SSE2 simd/SSE2.cpp)
+target_link_libraries(test_simd_SSE2 PRIVATE tMath)
+add_o3_optimization(test_simd_SSE2)
+
+# SSE3
+add_executable(test_simd_SSE3 simd/SSE3.cpp)
+target_link_libraries(test_simd_SSE3 PRIVATE tMath)
+add_o3_optimization(test_simd_SSE3)
+
+# SSE4.1
+add_executable(test_simd_SSE4_1 simd/SSE4_1.cpp)
+target_link_libraries(test_simd_SSE4_1 PRIVATE tMath)
+add_o3_optimization(test_simd_SSE4_1)
+
+# AVX
+add_executable(test_simd_AVX simd/AVX.cpp)
+target_link_libraries(test_simd_AVX PRIVATE tMath)
+add_o3_optimization(test_simd_AVX)
+
+# FMA3
+add_executable(test_simd_FMA3 simd/FMA3.cpp)
+target_link_libraries(test_simd_FMA3 PRIVATE tMath)
+add_o3_optimization(test_simd_FMA3)
+
+# F16C
+add_executable(test_simd_F16C simd/F16C.cpp)
+target_link_libraries(test_simd_F16C PRIVATE tMath)
+add_o3_optimization(test_simd_F16C)
+
+# AVX2
+add_executable(test_simd_AVX2 simd/AVX2.cpp)
+target_link_libraries(test_simd_AVX2 PRIVATE tMath)
+add_o3_optimization(test_simd_AVX2)
 
 
 # 添加测试
-add_test(NAME TestFloat COMMAND $<TARGET_FILE:test_float>)
-add_test(NAME TestVector COMMAND $<TARGET_FILE:test_vector>)
-add_test(NAME TestQuat COMMAND $<TARGET_FILE:test_quat>)
-add_test(NAME TestOperatorOverride COMMAND $<TARGET_FILE:test_operators_override>)
-add_test(NAME TestSimdVector4_float32 COMMAND $<TARGET_FILE:test_simd_vector4_float32>)
+add_test(NAME Test_Float COMMAND $<TARGET_FILE:test_float>)
+add_test(NAME Test_Vector COMMAND $<TARGET_FILE:test_vector>)
+add_test(NAME Test_Quat COMMAND $<TARGET_FILE:test_quat>)
+add_test(NAME Test_OperatorOverride COMMAND $<TARGET_FILE:test_operators_override>)
+
+# SIMDs
+add_test(NAME Test_simd_SSE2 COMMAND $<TARGET_FILE:test_simd_SSE2>)
+add_test(NAME Test_simd_SSE3 COMMAND $<TARGET_FILE:test_simd_SSE3>)
+add_test(NAME Test_simd_SSE4_1 COMMAND $<TARGET_FILE:test_simd_SSE4_1>)
+add_test(NAME Test_simd_AVX COMMAND $<TARGET_FILE:test_simd_AVX>)
+add_test(NAME Test_simd_FMA3 COMMAND $<TARGET_FILE:test_simd_FMA3>)
+add_test(NAME Test_simd_F16C COMMAND $<TARGET_FILE:test_simd_F16C>)
+add_test(NAME Test_simd_AVX2 COMMAND $<TARGET_FILE:test_simd_AVX2>)

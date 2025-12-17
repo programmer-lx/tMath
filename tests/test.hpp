@@ -20,6 +20,8 @@
             std::cerr << "  File:      " << __FILE__ << std::endl; \
             std::cerr << "  Line:      " << __LINE__ << std::endl; \
             throw std::runtime_error(""); \
+        } else { \
+            std::cout << "Testing: " << #condition << '\n'; \
         } \
     } while (0)
 

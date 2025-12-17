@@ -7,8 +7,10 @@
 
 TMATH_SIMD_NAMESPACE_BEGIN
 
-#if defined(TMATH_HAS_SSE2) && !defined(TMATH_NO_SIMD)
+#if defined(TMATH_USE_SSE2) && !defined(TMATH_NO_SIMD)
 using float4 = __m128;
+#else
+#error "Error"
 #endif
 
 

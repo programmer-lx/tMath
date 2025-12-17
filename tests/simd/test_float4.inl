@@ -1,13 +1,11 @@
+#pragma once
+
 #include <tMath/simd/float4.hpp>
 #include <tMath/vector4.hpp>
 #include <tMath/vector3.hpp>
 #include <tMath/vector2.hpp>
 
 #include "../test.hpp"
-
-void check_simd_support()
-{
-}
 
 struct Vector4f
 {
@@ -24,7 +22,7 @@ struct Vector2f
     TMATH_VECTOR2(Vector2f, float)
 };
 
-void test()
+inline void test_float4()
 {
     using tSimd::float4;
 
@@ -259,19 +257,4 @@ void test()
         tSimd::store(test, result);
         TEST_BOOL(tMath::approximately(test, {1, std::sqrt(2.0f), std::sqrt(3.0f), std::sqrt(4.0f)}));
     }
-}
-
-int main()
-{
-    try
-    {
-        check_simd_support();
-        test();
-    }
-    catch (...)
-    {
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
 }
