@@ -1,6 +1,6 @@
 #define TMATH_NO_SIMD
 
-#include "test_all.inl"
+#include "test_all.hpp"
 
 using namespace tSimd;
 

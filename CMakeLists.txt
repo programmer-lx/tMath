@@ -12,11 +12,16 @@ add_library(tMath INTERFACE)
 target_include_directories(tMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
-# options of test
-option(TMATH_BUILD_TESTS "Build tests?" OFF)
+# options
+option(TMATH_BUILD_EXAMPLES "" OFF)
+option(TMATH_BUILD_TESTS "" OFF)
+option(TMATH_BUILD_BENCHMARKS "" OFF)
+
+if(TMATH_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 if(TMATH_BUILD_TESTS)
-
     add_compile_definitions(TMATH_IS_TESTING)
 
     if(MSVC)
@@ -27,4 +32,11 @@ if(TMATH_BUILD_TESTS)
 
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(TMATH_BUILD_BENCHMARKS)
+    set(BENCHMARK_ENABLE_TESTING OFF)
+    set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON)
+    add_subdirectory(3rdparty/benchmark)
+    add_subdirectory(benchmark)
 endif()

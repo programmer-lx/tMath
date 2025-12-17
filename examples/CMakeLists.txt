@@ -1,0 +1,16 @@
+function(example_add_o3_optimization TARGET_NAME)
+    if(MSVC)
+        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:/Ox /GL>)
+    else()
+        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O3>)
+    endif()
+endfunction()
+
+if(MSVC)
+    add_compile_options(/utf-8)
+    add_compile_definitions(UNICODE _UNICODE)
+endif()
+
+add_executable(example_simd_performance simd_performance.cpp)
+target_link_libraries(example_simd_performance PRIVATE tMath winmm.lib)
+example_add_o3_optimization(example_simd_performance)

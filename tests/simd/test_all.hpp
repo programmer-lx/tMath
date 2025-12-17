@@ -6,7 +6,7 @@
 #error "testing header MUST be included after tSimd library"
 #endif
 
-#include "test_float4.inl"
+#include "test_float4.hpp"
 
 inline void test_all()
 {

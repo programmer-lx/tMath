@@ -1,6 +1,6 @@
 #define TMATH_TEST_SSE2
 
-#include "test_all.hpp"
+#include "benchmark_all.hpp"
 
 using namespace tSimd;
 
@@ -10,7 +10,7 @@ int main()
 {
     try
     {
-        test_all();
+        benchmark_all();
     }
     catch (...)
     {

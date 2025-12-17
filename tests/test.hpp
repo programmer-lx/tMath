@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <random>
+#include <chrono>
 
 
 #define TEST_TITLE(title) \
@@ -38,3 +39,24 @@ F random_f(F min, F max)
     std::uniform_real_distribution<F> dist(min, max);
     return dist(rng);
 }
+
+class ScopeTimer
+{
+public:
+    using Clock = std::chrono::high_resolution_clock;
+
+    ScopeTimer()
+        : m_start(Clock::now())
+    {
+    }
+
+    double time_millis() const
+    {
+        auto end = Clock::now();
+        std::chrono::duration<double, std::milli> elapsed = end - m_start;
+        return elapsed.count();
+    }
+
+private:
+    Clock::time_point m_start;
+};
