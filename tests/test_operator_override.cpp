@@ -17,5 +17,7 @@ int main()
     Vector2f c = a + b;
     TEST_BOOL(tMath::approximately(c, {3, 3}));
 
+    std::cout << "SUCCEED (test_operator_override)" << std::endl;
+
     return 0;
 }

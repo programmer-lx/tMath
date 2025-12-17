@@ -177,10 +177,18 @@ void test_vector2()
         }
         {
             // dot
-            Vector2f v1 = { 1, 2 };
-            Vector2f v2 = { 2, 3 };
-            float f = tMath::dot(v1, v2);
-            TEST_BOOL(tMath::approximately(f, 8.0f));
+            {
+                Vector2f v1 = { 1, 2 };
+                Vector2f v2 = { 2, 3 };
+                float f = tMath::dot(v1.x, v1.y, v2.x, v2.y);
+                TEST_BOOL(tMath::approximately(f, 8.0f));
+            }
+            {
+                Vector2f v1 = { 1, 2 };
+                Vector2f v2 = { 2, 3 };
+                float f = tMath::dot(v1, v2);
+                TEST_BOOL(tMath::approximately(f, 8.0f));
+            }
         }
         {
             // fake cross
@@ -422,10 +430,18 @@ void test_vector3()
         }
         {
             // dot
-            Vector3f v1 = { 1, 2, 3 };
-            Vector3f v2 = { 2, 3, 4 };
-            float f = tMath::dot(v1, v2);
-            TEST_BOOL(tMath::approximately(f, 20.0f));
+            {
+                Vector3f v1 = { 1, 2, 3 };
+                Vector3f v2 = { 2, 3, 4 };
+                float f = tMath::dot(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+                TEST_BOOL(tMath::approximately(f, 20.0f));
+            }
+            {
+                Vector3f v1 = { 1, 2, 3 };
+                Vector3f v2 = { 2, 3, 4 };
+                float f = tMath::dot(v1, v2);
+                TEST_BOOL(tMath::approximately(f, 20.0f));
+            }
         }
         {
             // cross
@@ -669,10 +685,18 @@ void test_vector4()
         }
         {
             // dot
-            Vector4f v1 = { 1, 2, 3, 3 };
-            Vector4f v2 = { 2, 3, 4, 4 };
-            float f = tMath::dot(v1, v2);
-            TEST_BOOL(tMath::approximately(f, 32.0f));
+            {
+                Vector4f v1 = { 1, 2, 3, 3 };
+                Vector4f v2 = { 2, 3, 4, 4 };
+                float f = tMath::dot(v1.x, v1.y, v1.z, v1.w, v2.x, v2.y, v2.z, v2.w);
+                TEST_BOOL(tMath::approximately(f, 32.0f));
+            }
+            {
+                Vector4f v1 = { 1, 2, 3, 3 };
+                Vector4f v2 = { 2, 3, 4, 4 };
+                float f = tMath::dot(v1, v2);
+                TEST_BOOL(tMath::approximately(f, 32.0f));
+            }
         }
         {
             // cross
@@ -821,6 +845,8 @@ int main()
     {
         return EXIT_FAILURE;
     }
+
+    std::cout << "SUCCEED (test_vector)" << std::endl;
 
     return EXIT_SUCCESS;
 }

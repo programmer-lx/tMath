@@ -56,5 +56,7 @@ int main()
         return EXIT_FAILURE;
     }
 
+    std::cout << "SUCCEED (test_float)" << std::endl;
+
     return EXIT_SUCCESS;
 }

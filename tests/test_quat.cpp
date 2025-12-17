@@ -31,5 +31,7 @@ int main()
         return EXIT_FAILURE;
     }
 
+    std::cout << "SUCCEED (test_quat)" << std::endl;
+
     return EXIT_SUCCESS;
 }

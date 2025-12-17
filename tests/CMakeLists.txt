@@ -69,6 +69,11 @@ add_executable(test_simd_AVX2 simd/AVX2.cpp)
 target_link_libraries(test_simd_AVX2 PRIVATE tMath)
 add_o3_optimization(test_simd_AVX2)
 
+# no SIMD
+add_executable(test_no_SIMD simd/no_simd.cpp)
+target_link_libraries(test_no_SIMD PRIVATE tMath)
+add_o3_optimization(test_no_SIMD)
+
 
 # 添加测试
 add_test(NAME Test_Float COMMAND $<TARGET_FILE:test_float>)
@@ -84,3 +89,4 @@ add_test(NAME Test_simd_AVX COMMAND $<TARGET_FILE:test_simd_AVX>)
 add_test(NAME Test_simd_FMA3 COMMAND $<TARGET_FILE:test_simd_FMA3>)
 add_test(NAME Test_simd_F16C COMMAND $<TARGET_FILE:test_simd_F16C>)
 add_test(NAME Test_simd_AVX2 COMMAND $<TARGET_FILE:test_simd_AVX2>)
+add_test(NAME Test_no_SIMD COMMAND $<TARGET_FILE:test_no_SIMD>)

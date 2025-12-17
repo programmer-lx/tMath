@@ -57,6 +57,18 @@ TVec4& operator/=(TVec4& lhs, const vector_field_t<TVec4> rhs)
     return lhs;
 }
 
+template<is_floating_point F>
+F dot(
+    const F x1, const F y1, const F z1, const F w1,
+    const F x2, const F y2, const F z2, const F w2
+)
+{
+    return  x1 * x2 +
+            y1 * y2 +
+            z1 * z2 +
+            w1 * w2;
+}
+
 template<is_vector4 TVec4>
 vector_field_t<TVec4> dot(const TVec4& lhs, const TVec4& rhs)
 {
