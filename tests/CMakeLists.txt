@@ -2,7 +2,7 @@ function(add_o2_optimization TARGET_NAME)
     if(MSVC)
         target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:/O2>)
     else()
-        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O3>)
+        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O2>)
     endif()
 endfunction()
 

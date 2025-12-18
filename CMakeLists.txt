@@ -35,8 +35,16 @@ if(TMATH_BUILD_TESTS)
 endif()
 
 if(TMATH_BUILD_BENCHMARKS)
+
+    set(TMATH_JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/json/single_include)
+    set(TMATH_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
+
+    add_compile_definitions(TMATH_IS_TESTING)
+
     set(BENCHMARK_ENABLE_TESTING OFF)
     set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON)
     add_subdirectory(3rdparty/benchmark)
+
+    enable_testing()
     add_subdirectory(benchmark)
 endif()
