@@ -72,6 +72,23 @@ target_include_directories(minimize_bm_json PRIVATE ${TMATH_JSON_INCLUDE_DIR})
 target_sources(minimize_bm_json PRIVATE ${TMATH_JSON_INCLUDE_DIR}/nlohmann/json.hpp)
 
 
+# YYYY-MM-DD
+string(TIMESTAMP TMATH_BENCHMARK_DATE "%Y-%m-%d")
+
+# system name
+if(WIN32)
+    set(TMATH_BENCHMARK_OS windows)
+elseif(APPLE)
+    set(TMATH_BENCHMARK_OS macos)
+elseif(UNIX)
+    set(TMATH_BENCHMARK_OS linux)
+else()
+    message(FATAL_ERROR "Unsupported OS for benchmark")
+endif()
+
+set(TMATH_BM_JSON_OUTPUT_DIR ${TMATH_WEBSITE_DIR}/${TMATH_BENCHMARK_DATE}/${TMATH_BENCHMARK_OS})
+file(MAKE_DIRECTORY ${TMATH_BM_JSON_OUTPUT_DIR})
+
 function(add_simd_benchmark_test simd_name target)
     add_test(
             NAME Benchmark_${simd_name}
@@ -79,7 +96,7 @@ function(add_simd_benchmark_test simd_name target)
             python
             ${TMATH_SCRIPTS_DIR}/run_benchmark_and_minimize.py
             $<TARGET_FILE:${target}>
-            ${TMATH_BENCHMARK_JSON_DIR}/${simd_name}.json
+            ${TMATH_BM_JSON_OUTPUT_DIR}/${simd_name}.json
             $<TARGET_FILE:minimize_bm_json>
     )
 endfunction()

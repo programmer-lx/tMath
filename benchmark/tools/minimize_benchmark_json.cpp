@@ -198,7 +198,10 @@ static void from_json(const Json& json, GoogleOneBenchmark& obj)
     CHECK(g_repetitions == obj.repetitions, "invalid repetitions");
 
     CHECK(obj.time_unit == "ns", "time_unit must be \"ns\"");
-    CHECK(obj.cpu_time > 0, "cpu_time must > 0");
+    if (obj.aggregate_name != "cv") // cv可能等于0
+    {
+        CHECK(obj.cpu_time > 0, "cpu_time must > 0");
+    }
     CHECK(obj.repetitions > 0, "repetitions must > 0");
 }
 

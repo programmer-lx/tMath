@@ -38,6 +38,7 @@ if(TMATH_BUILD_BENCHMARKS)
 
     set(TMATH_JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/json/single_include)
     set(TMATH_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
+    set(TMATH_WEBSITE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/website)
 
     add_compile_definitions(TMATH_IS_TESTING)
 

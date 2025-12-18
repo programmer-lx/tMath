@@ -1,0 +1,27 @@
+{
+    "function_groups": [
+        {
+            "fn_signature": "float32_4 dot4(float32_4 lhs, float32_4 rhs)",
+            "functions": [
+                {
+                    "cpu_time_median": 5.440848214285714,
+                    "cv": 0.018130943107349435,
+                    "intrinsic": "TODO",
+                    "lib_name": "tMath"
+                }
+            ]
+        },
+        {
+            "fn_signature": "float32_4 test_name(float32_4 lhs, float32_4 rhs)",
+            "functions": [
+                {
+                    "cpu_time_median": 5.580357142857143,
+                    "cv": 0.011236522499985848,
+                    "intrinsic": "TODO",
+                    "lib_name": "tMath"
+                }
+            ]
+        }
+    ],
+    "repetitions": 5
+}

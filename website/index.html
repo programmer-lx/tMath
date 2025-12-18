@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>tSimd Benchmark 性能表</title>
+  <link rel="stylesheet" href="./3rdparty/materialize/css/materialize.min.css">
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+      background-color: #f0f2f5;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .container-flex {
+      display: flex;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    .date-list {
+      width: 200px;
+      margin-right: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      max-height: 600px;
+      padding: 10px;
+    }
+    .date-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    .date-item.active {
+      background-color: #26a69a;
+      color: white;
+      font-weight: bold;
+    }
+    .card {
+      flex: 1;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      background-color: #fff;
+    }
+    table {
+      width: 100%;
+    }
+    thead th {
+      background-color: #26a69a;
+      color: white;
+      text-align: center;
+    }
+    tbody td {
+      text-align: center;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    tbody tr:hover {
+      background-color: #b2dfdb;
+    }
+    #search-box {
+      margin-bottom: 15px;
+    }
+    .sort-arrow {
+      font-size: 0.8em;
+    }
+  </style>
+</head>
+<body>
+<h1>tSimd Benchmark 性能表</h1>
+<div class="container-flex">
+  <div class="date-list" id="date-list">
+    <!-- 日期列表 -->
+  </div>
+  <div class="card">
+    <div class="input-field">
+      <input id="search-box" type="text" placeholder="搜索函数名...">
+      <label for="search-box">函数名搜索</label>
+    </div>
+    <table class="striped" id="benchmark-table">
+      <thead>
+      <tr>
+        <th>函数签名</th>
+        <th>指令集</th>
+        <th>库</th>
+        <th>CPU Time (ns)</th>
+        <th>吞吐量 (ops/ns)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- 数据由 JS 填充 -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="./3rdparty/jquery.min.js"></script>
+<script src="./3rdparty/materialize/js/materialize.min.js"></script>
+<script>
+  $(document).ready(function() {
+    const simds = ['SSE2','SSE3','SSE4_1','AVX','FMA3','F16C','AVX2'];
+    const $tbody = $('#benchmark-table tbody');
+    let cachedDates = [];
+    let currentDate = null;
+
+    // 加载日期列表
+    $.getJSON('./benchmark_data/dates.json', function(dates) {
+      cachedDates = dates.sort((a,b)=> b.localeCompare(a)); // 最近日期在上
+      const $dateList = $('#date-list');
+      $dateList.empty();
+      cachedDates.forEach(date => {
+        $dateList.append(`<div class="date-item" data-date="${date}">${date}</div>`);
+      });
+      // 默认选中第一条
+      currentDate = cachedDates[0];
+      $(`#date-list .date-item[data-date="${currentDate}"]`).addClass('active');
+      loadBenchmarkData(currentDate);
+    });
+
+    // 日期点击事件
+    $('#date-list').on('click', '.date-item', function() {
+      const date = $(this).data('date');
+      if(date === currentDate) return;
+      currentDate = date;
+      $('#date-list .date-item').removeClass('active');
+      $(this).addClass('active');
+      loadBenchmarkData(currentDate, $('#search-box').val()); // 传入当前搜索关键词
+    });
+
+    function loadBenchmarkData(date) {
+      $tbody.empty();
+      simds.forEach(simd => {
+        $.getJSON(`./benchmark_data/${date}/windows/${simd}.json`, function(data) {
+          data.function_groups.forEach(group => {
+            const fnName = group.fn_signature;
+            group.functions.forEach(fn => {
+              const cpu = fn.cpu_time_median;
+              if (!cpu || cpu <= 0) return;
+              const throughput = (1.0 / cpu).toFixed(4);
+              const row = `
+                <tr>
+                  <td class="fn-name">${fnName}</td>
+                  <td>${simd}</td>
+                  <td>${fn.lib_name}</td>
+                  <td class="cpu-time">${cpu.toFixed(3)}</td>
+                  <td class="throughput">${throughput}</td>
+                </tr>
+              `;
+              $tbody.append(row);
+            });
+          });
+          attachSorting();
+          // 如果搜索框有值，则立即过滤
+          if(keyword) {
+            $('#benchmark-table tbody tr').each(function() {
+              const fnText = $(this).find('.fn-name').text().toLowerCase();
+              $(this).toggle(fnText.includes(keyword.toLowerCase()));
+            });
+          }
+        }).fail(function() {
+          console.warn(`加载 ${simd}.json 失败`);
+        });
+      });
+    }
+
+    // 搜索功能
+    $('#search-box').on('input', function() {
+      const keyword = $(this).val().toLowerCase();
+      $('#benchmark-table tbody tr').each(function() {
+        const fnText = $(this).find('.fn-name').text().toLowerCase();
+        $(this).toggle(fnText.includes(keyword));
+      });
+    });
+
+    // 排序功能
+    function attachSorting() {
+      $('#benchmark-table thead th').each(function(index) {
+        const $th = $(this);
+        const colName = $th.text();
+        if (colName === 'CPU Time (ns)' || colName === '吞吐量 (ops/ns)') {
+          let asc = true;
+          $th.css('cursor', 'pointer');
+          if ($th.find('.sort-arrow').length === 0) {
+            $th.append(' <span class="sort-arrow">▲</span>');
+          }
+          $th.off('click').on('click', function() {
+            const rows = $tbody.find('tr').toArray();
+            rows.sort((a, b) => {
+              const aVal = parseFloat($(a).children('td').eq(index).text());
+              const bVal = parseFloat($(b).children('td').eq(index).text());
+              return asc ? aVal - bVal : bVal - aVal;
+            });
+            $tbody.append(rows);
+            asc = !asc;
+            $('#benchmark-table thead th .sort-arrow').text('');
+            $(this).find('.sort-arrow').text(asc ? '▲' : '▼');
+          });
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>
