@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#define TMATH_USE_SSE2 // test
+// #define TMATH_USE_SSE2 // test
 // #define TMATH_USE_SSE3 // test
 // #define TMATH_NO_SIMD // test
 // #define TMATH_USE_FMA3 // test

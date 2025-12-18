@@ -86,7 +86,7 @@ else()
     message(FATAL_ERROR "Unsupported OS for benchmark")
 endif()
 
-set(TMATH_BM_JSON_OUTPUT_DIR ${TMATH_WEBSITE_DIR}/${TMATH_BENCHMARK_DATE}/${TMATH_BENCHMARK_OS})
+set(TMATH_BM_JSON_OUTPUT_DIR ${TMATH_WEBSITE_DIR}/benchmark_data/${TMATH_BENCHMARK_DATE}/${TMATH_BENCHMARK_OS})
 file(MAKE_DIRECTORY ${TMATH_BM_JSON_OUTPUT_DIR})
 
 function(add_simd_benchmark_test simd_name target)

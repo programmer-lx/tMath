@@ -4,19 +4,8 @@
             "fn_signature": "float32_4 dot4(float32_4 lhs, float32_4 rhs)",
             "functions": [
                 {
-                    "cpu_time_median": 5.580357142857143,
-                    "cv": 0.04714554917076157,
-                    "intrinsic": "TODO",
-                    "lib_name": "tMath"
-                }
-            ]
-        },
-        {
-            "fn_signature": "float32_4 test_name(float32_4 lhs, float32_4 rhs)",
-            "functions": [
-                {
-                    "cpu_time_median": 5.625,
-                    "cv": 0.012491999874294819,
+                    "cpu_time_median": 1.4787946428571428,
+                    "cv": 0.02167633888021137,
                     "intrinsic": "TODO",
                     "lib_name": "tMath"
                 }

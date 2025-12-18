@@ -15,23 +15,9 @@ struct Vector4f32
     TMATH_VECTOR4(Vector4f32, float)
 };
 
-int main()
+TEST(quat, tag)
 {
-    try
-    {
-        {
-            // quat tag
-            TEST_BOOL(tMath::is_vector4_float<Vector4f32> == true);
-            // TEST_BOOL(tMath::is_vector4_float<Quat> == false);
-            // TEST_BOOL(tMath::is_quat<Quat> == true);
-        }
-    }
-    catch (...)
-    {
-        return EXIT_FAILURE;
-    }
-
-    std::cout << "SUCCEED (test_quat)" << std::endl;
-
-    return EXIT_SUCCESS;
+    EXPECT_TRUE(tMath::is_vector4_float<Vector4f32> == true);
 }
+
+TMATH_TEST_MAIN()

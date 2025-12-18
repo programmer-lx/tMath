@@ -24,6 +24,8 @@ endif()
 if(TMATH_BUILD_TESTS)
     add_compile_definitions(TMATH_IS_TESTING)
 
+    add_subdirectory(3rdparty/googletest)
+
     if(MSVC)
         add_compile_options(/arch:AVX2)
     else()

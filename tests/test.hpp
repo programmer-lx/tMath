@@ -7,30 +7,15 @@
 #include <random>
 #include <chrono>
 
+#include <gtest/gtest.h>
 
-#define TEST_TITLE(title) \
-    do { \
-        std::cout << "--- " << title << " ---" << std::endl; \
-    } while (0)
 
-#define TEST_BOOL(condition) \
-    do { \
-        if (!(condition)) { \
-            std::cerr << "--- TEST FAILED ---" << std::endl; \
-            std::cerr << "  Condition: " << #condition << std::endl; \
-            std::cerr << "  File:      " << __FILE__ << std::endl; \
-            std::cerr << "  Line:      " << __LINE__ << std::endl; \
-            throw std::runtime_error(""); \
-        } else { \
-            std::cout << "Testing: " << #condition << '\n'; \
-        } \
-    } while (0)
-
-#define TEST_BOOL_N(count, exp) \
-    do { for (int __i = 0; __i < count; ++__i) { exp } } while (0)
-
-#define TEST_END(title) \
-    do { std::cout << "--- " << title << "(end)" << " ---\n" << std::endl; } while (0)
+#define TMATH_TEST_MAIN() \
+    GTEST_API_ int main(int argc, char **argv) { \
+      printf("Running main() from %s\n", __FILE__); \
+      testing::InitGoogleTest(&argc, argv); \
+      return RUN_ALL_TESTS(); \
+    }
 
 template<std::floating_point F>
 F random_f(F min, F max)

@@ -9,15 +9,12 @@ struct Vector2f
 
 static_assert(tMath::is_vector2_float<Vector2f>);
 
-int main()
+TEST(tMath, operator_override)
 {
     Vector2f a = {1, 1};
     Vector2f b = { 2, 2 };
-
     Vector2f c = a + b;
-    TEST_BOOL(tMath::approximately(c, {3, 3}));
-
-    std::cout << "SUCCEED (test_operator_override)" << std::endl;
-
-    return 0;
+    EXPECT_TRUE(tMath::approximately(c, {3, 3}));
 }
+
+TMATH_TEST_MAIN()
