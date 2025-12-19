@@ -8,7 +8,7 @@ function(action_for_test_target TARGET_NAME)
     # for github CI
     if(UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         message(STATUS "Linux + Clang detected: enabling -Wc++11-narrowing")
-        target_compile_options(my_app PRIVATE -Wc++11-narrowing)
+        target_compile_options(${TARGET_NAME} PRIVATE -Wc++11-narrowing)
     endif()
 
     target_compile_definitions(${TARGET_NAME} PRIVATE TMATH_IS_TESTING)

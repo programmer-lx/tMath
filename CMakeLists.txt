@@ -31,6 +31,7 @@ if(TMATH_BUILD_BENCHMARKS)
 endif()
 
 if(TMATH_BUILD_TESTS)
+    set(BUILD_GMOCK OFF)
     add_subdirectory(3rdparty/googletest)
 
     enable_testing()
