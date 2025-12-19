@@ -102,6 +102,7 @@ TEST(vector2, no_equal)
     {
         Vector2f v1 = {1.5, 2.5};
         Vector2f v2 = { 1.5, 2.51 };
+        EXPECT_FALSE(tMath::approximately(v1, v2));
     }
 }
 

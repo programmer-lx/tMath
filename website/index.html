@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>tSimd Benchmark 性能表</title>
+  <title>tSimd Benchmark</title>
   <link rel="stylesheet" href="./3rdparty/materialize/css/materialize.min.css">
   <style>
     body {
@@ -71,10 +71,17 @@
     .sort-arrow {
       font-size: 0.8em;
     }
+    #benchmark-table th:nth-child(3),
+    #benchmark-table td:nth-child(3) {
+      max-width: 300px;
+      white-space: normal;       /* 不换行 */
+      overflow: hidden;          /* 超出隐藏 */
+      text-overflow: ellipsis;   /* 超出显示省略号 */
+    }
   </style>
 </head>
 <body>
-<h1>tSimd Benchmark 性能表</h1>
+<h1>tSimd Benchmark</h1>
 <div class="container-flex">
   <div class="date-list" id="date-list">
     <!-- 日期列表 -->
@@ -87,11 +94,13 @@
     <table class="striped" id="benchmark-table">
       <thead>
       <tr>
-        <th>函数签名</th>
-        <th>指令集</th>
-        <th>库</th>
-        <th>CPU Time (ns)</th>
-        <th>吞吐量 (ops/ns)</th>
+        <th>函数签名 Signature</th>
+        <th>指令集 Intrinsic</th>
+        <th>单次操作 CPU Time (ns)</th>
+        <th>变异系数 CV (%)</th>
+        <th>操作次数 OP Count</th>
+        <th>测试次数 Repetitions</th>
+        <th>备注</th>
       </tr>
       </thead>
       <tbody>
@@ -105,7 +114,7 @@
 <script src="./3rdparty/materialize/js/materialize.min.js"></script>
 <script>
   $(document).ready(function() {
-    const simds = ['SSE2','SSE3','SSE4_1','AVX','FMA3','F16C','AVX2'];
+    const simds = ['NO_SIMD', 'SSE2','SSE3','SSE4_1','AVX','FMA3','F16C','AVX2', 'SVML'];
     const $tbody = $('#benchmark-table tbody');
     let cachedDates = [];
     let currentDate = null;
@@ -141,16 +150,17 @@
           data.function_groups.forEach(group => {
             const fnName = group.fn_signature;
             group.functions.forEach(fn => {
-              const cpu = fn.cpu_time_median;
-              if (!cpu || cpu <= 0) return;
-              const throughput = (1.0 / cpu).toFixed(4);
+              const cpuTime = fn.cpu_time_median;
+              if (!cpuTime || cpuTime <= 0) return;
               const row = `
                 <tr>
                   <td class="fn-name">${fnName}</td>
                   <td>${simd}</td>
-                  <td>${fn.lib_name}</td>
-                  <td class="cpu-time">${cpu.toFixed(3)}</td>
-                  <td class="throughput">${throughput}</td>
+                  <td class="cpu-time">${cpuTime.toFixed(3) / fn.op_count}</td>
+                  <td class="cv">${fn.cv.toFixed(2) * 100.0}</td>
+                  <td class="op-count">${fn.op_count}</td>
+                  <td class="repetitions">${data.repetitions}</td>
+                  <td>${fn.comment}</td>
                 </tr>
               `;
               $tbody.append(row);
@@ -165,7 +175,7 @@
             });
           }
         }).fail(function() {
-          console.warn(`加载 ${simd}.json 失败`);
+          // console.warn(`加载 ${simd}.json 失败`); // 可能只是没有这个文件而已，不一定代表失败
         });
       });
     }
@@ -184,7 +194,7 @@
       $('#benchmark-table thead th').each(function(index) {
         const $th = $(this);
         const colName = $th.text();
-        if (colName === 'CPU Time (ns)' || colName === '吞吐量 (ops/ns)') {
+        if (colName === '单次操作 CPU Time (ns)') {
           let asc = true;
           $th.css('cursor', 'pointer');
           if ($th.find('.sort-arrow').length === 0) {

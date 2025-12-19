@@ -1,0 +1,60 @@
+{
+    "function_groups": [
+        {
+            "fn_signature": "float4 cos(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 8593.750000000002,
+                    "cv": 0.029447449328233743,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 dot4(float4 lhs, float4 rhs)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 1093.75,
+                    "cv": 0.1749635530559415,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 mul_add(float4 a, float4 b, float4 c)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 1406.2500000000002,
+                    "cv": 0.0,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 sin(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 8750.0,
+                    "cv": 0.02336631686452281,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 tan(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 9843.75,
+                    "cv": 0.026730352285432423,
+                    "op_count": 512
+                }
+            ]
+        }
+    ],
+    "repetitions": 5
+}

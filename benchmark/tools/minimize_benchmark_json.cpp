@@ -41,7 +41,6 @@ using Path = std::filesystem::path;
       "real_time": 1.0000007932831068e+02,
       "cpu_time": 0.0000000000000000e+00,
       "time_unit": "ns",
-      "lib_name": 1.0000000000000000e+00 // 自己传入的参数，表示使用什么库 (tMath, DXMath, glm, ...)
     },
     {
       "name": "float32_4 test_name(float32_4 lhs, float32_4 rhs)/iterations:8/repeats:8_stddev",
@@ -57,7 +56,6 @@ using Path = std::filesystem::path;
       "real_time": 2.1346937621170738e+02,
       "cpu_time": 0.0000000000000000e+00,
       "time_unit": "ns",
-      "lib_name": 0.0000000000000000e+00
     },
     {
       "name": "float32_4 test_name(float32_4 lhs, float32_4 rhs)/iterations:8/repeats:8_cv",
@@ -72,8 +70,7 @@ using Path = std::filesystem::path;
       "iterations": 8,
       "real_time": 1.2420036337130129e+00,
       "cpu_time": 0.0000000000000000e+00,
-      "time_unit": "ns",
-      "lib_name": 0.0000000000000000e+00
+      "time_unit": "ns"
     }
   ]
 }
@@ -113,9 +110,14 @@ std::string get_cpp_fn_sig(const std::string& fn_sig)
     return split(fn_sig, '/').at(0);
 }
 
-std::string get_lib_name(const std::string& fn_sig)
+std::string get_comment(const std::string& fn_sig)
 {
     return split(fn_sig, '/').at(1);
+}
+
+int get_op_count(const std::string& fn_sig)
+{
+    return std::stoi(split(fn_sig, '/').at(2));
 }
 
 
@@ -198,7 +200,7 @@ static void from_json(const Json& json, GoogleOneBenchmark& obj)
     CHECK(g_repetitions == obj.repetitions, "invalid repetitions");
 
     CHECK(obj.time_unit == "ns", "time_unit must be \"ns\"");
-    if (obj.aggregate_name != "cv") // cv可能等于0
+    if (obj.aggregate_name != "cv" && obj.aggregate_name != "stddev") // cv可能等于0，不记录stddev
     {
         CHECK(obj.cpu_time > 0, "cpu_time must > 0");
     }
@@ -268,16 +270,16 @@ static void from_json(const Json& json, GoogleBenchmarkResult& obj)
 // =========================== tMath benchmark info ===========================
 struct OneFunction
 {
-    std::string lib_name;
-    std::string intrinsic;
+    std::string comment;
+    int op_count = -1;
     double cpu_time_median = 0;
     double cv = 0;
 };
 
 static void to_json(Json& json, const OneFunction& obj)
 {
-    TO_JSON(lib_name);
-    TO_JSON(intrinsic);
+    TO_JSON(comment);
+    TO_JSON(op_count);
     TO_JSON(cpu_time_median);
     TO_JSON(cv);
 }
@@ -326,8 +328,8 @@ BenchmarkResult make_tmath_bm_result(const GoogleBenchmarkResult& google_bm_resu
         group.fn_signature = fn_sig;
 
         OneFunction fn;
-        fn.lib_name = get_lib_name(bm.run_name);
-        fn.intrinsic = "TODO"; // TODO file_name postfix is intrinsic
+        fn.comment = get_comment(bm.run_name);
+        fn.op_count = get_op_count(bm.run_name);
         fn.cpu_time_median = bm.internal_cpu_time_median;
         fn.cv = bm.internal_cv;
         group.functions.push_back(std::move(fn));
@@ -384,8 +386,8 @@ int main(int argc, char** argv)
     //              "fn_signature": "float32_4 dot4(float32_4 lhs, float32_4 rhs)", (完整的函数签名) (可视化的时候，把所有函数名相同的测试结果聚合在一起就行，然后按照lib的名称进行排序，但是tMath放在最前面)
     //              "functions": [
     //                  {
-    //                      "lib_name": tMath, (库名)
-    //                      "intrinsic": AVX2, (指令集名)
+    //                      "comment": "备注"
+    //                      "op_count": 一个函数的操作次数，次数越高，信噪比越高
     //                      "cpu_time_median": 1024.12 (ns)
     //                      "cv": 0.01, (变异系数) (不是百分比，而是比例)
     //                  }

@@ -1,7 +1,5 @@
 #include <tMath/vector1.hpp>
 
-#include <gtest/gtest.h>
-
 #include "test.hpp"
 
 TEST(vector1, approximately)

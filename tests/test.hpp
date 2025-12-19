@@ -9,6 +9,9 @@
 
 #include <gtest/gtest.h>
 
+#if !defined(TMATH_IS_TESTING)
+#error "please define TMATH_IS_TESTING macro to enable testing."
+#endif
 
 #define TMATH_TEST_MAIN() \
     GTEST_API_ int main(int argc, char **argv) { \

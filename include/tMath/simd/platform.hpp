@@ -21,7 +21,8 @@
 
 
 // for testing
-#ifdef TMATH_IS_TESTING
+// BUT if is doing benchmark, don't enable this
+#if defined(TMATH_IS_TESTING) && !defined(TMATH_IS_DOING_BENCHMARK)
 
     #undef __SSE2__
     #undef __SSE3__
@@ -131,7 +132,7 @@
     #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || defined(_M_ARM64EC) || __arm__ || __aarch64__
         #define TMATH_USE_ARM_NEON
     #elif !defined(TMATH_NO_SIMD)
-        #error tMath does not support this target
+        #error "tMath does not support this target"
     #endif
 #endif // !TMATH_USE_ARM_NEON && !TMATH_USE_SSE2 && !TMATH_NO_SIMD
 
@@ -221,6 +222,12 @@ TMATH_SIMD_NAMESPACE_BEGIN
     TMATH_DEFINE_SIMD_CONSTEXPR(use_F16C, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_F16C, false);
+#endif
+
+#if defined(TMATH_USE_SVML)
+    TMATH_DEFINE_SIMD_CONSTEXPR(use_SVML, true);
+#else
+    TMATH_DEFINE_SIMD_CONSTEXPR(use_SVML, false);
 #endif
 
 TMATH_SIMD_NAMESPACE_END
