@@ -55,28 +55,28 @@ jobs:
           # =========================
           - os: ubuntu-latest
             compiler: gcc
-            generator: "Unix Makefiles"
+            generator: "Ninja Multi-Config"
             cc: gcc
             cxx: g++
             config: Debug
 
           - os: ubuntu-latest
             compiler: gcc
-            generator: "Unix Makefiles"
+            generator: "Ninja Multi-Config"
             cc: gcc
             cxx: g++
             config: Release
 
           - os: ubuntu-latest
             compiler: clang
-            generator: "Unix Makefiles"
+            generator: "Ninja Multi-Config"
             cc: clang
             cxx: clang++
             config: Debug
 
           - os: ubuntu-latest
             compiler: clang
-            generator: "Unix Makefiles"
+            generator: "Ninja Multi-Config"
             cc: clang
             cxx: clang++
             config: Release
@@ -84,11 +84,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
 
-      - name: Setup MinGW (Windows)
-        if: matrix.compiler == 'mingw'
-        uses: egor-tensin/setup-mingw@v2
+#      - name: Setup MinGW (Windows)
+#        if: matrix.compiler == 'mingw'
+#        uses: egor-tensin/setup-mingw@v2
 
 
       - name: Install compilers (Linux)
@@ -98,7 +98,8 @@ jobs:
           sudo apt-get install -y gcc g++ clang
 
 
-      - name: Configure CMake
+      - name: Configure CMake (Multi-Config generator)
+        if: matrix.compiler != 'mingw'
         run: >
           cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }}
           -G "${{ matrix.generator }}"
@@ -108,11 +109,28 @@ jobs:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
 
+      - name: Configure CMake (Single-Config generator)
+        if: matrix.compiler == 'mingw'
+        run: >
+          cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }}
+          -G "${{ matrix.generator }}"
+          ${{ matrix.toolset && format('-T {0}', matrix.toolset || '') }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+          -DTMATH_BUILD_TESTS=ON
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
 
-      - name: Build
+
+      - name: Build (Multi-Config)
+        if: matrix.compiler != 'mingw'
         run: cmake --build build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }} --config ${{ matrix.config }}
 
+      - name: Build (Single-Config)
+        if: matrix.compiler == 'mingw'
+        run: cmake --build build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }}
 
-      - name: Run CTest
-        if: runner.os == 'Windows'
+
+      - name: Run CTest (TODO only windows msvc now)
+        if: runner.os == 'Windows' && matrix.compiler != 'mingw'
         run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }} -C ${{ matrix.config }} --output-on-failure
