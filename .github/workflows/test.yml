@@ -81,7 +81,10 @@ jobs:
             cxx: clang++
             config: Release
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup MinGW (Windows)
         if: matrix.compiler == 'mingw'
