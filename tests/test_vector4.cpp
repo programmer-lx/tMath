@@ -260,9 +260,9 @@ TEST(vector4, abs)
 TEST(vector4, triangle_functions)
 {
     Vector4f v = { -180, -3, -150.123f, -256.12 };
-    EXPECT_TRUE(tMath::approximately(tMath::sin(v), { sin(-180.0f), sin(-3.0f), sin(-150.123f), sin(-256.12f) }));
-    EXPECT_TRUE(tMath::approximately(tMath::cos(v), { cos(-180.0f), cos(-3.0f), cos(-150.123f), cos(-256.12f) }));
-    EXPECT_TRUE(tMath::approximately(tMath::tan(v), { tan(-180.0f), tan(-3.0f), tan(-150.123f), tan(-256.12f) }));
+    EXPECT_TRUE(tMath::approximately(tMath::sin(v), { std::sin(-180.0f), std::sin(-3.0f), std::sin(-150.123f), std::sin(-256.12f) }));
+    EXPECT_TRUE(tMath::approximately(tMath::cos(v), { std::cos(-180.0f), std::cos(-3.0f), std::cos(-150.123f), std::cos(-256.12f) }));
+    EXPECT_TRUE(tMath::approximately(tMath::tan(v), { std::tan(-180.0f), std::tan(-3.0f), std::tan(-150.123f), std::tan(-256.12f) }));
 }
 
 TEST(vector4, magnitude)

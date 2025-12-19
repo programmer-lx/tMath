@@ -5,12 +5,6 @@ function(action_for_test_target TARGET_NAME)
         target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O2> -mavx2 -mfma -mf16c -msse4.1 -msse3 -msse2)
     endif()
 
-    # for github CI
-    if(UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        message(STATUS "Linux + Clang detected: enabling -Wc++11-narrowing")
-        target_compile_options(${TARGET_NAME} PRIVATE -Wc++11-narrowing)
-    endif()
-
     target_compile_definitions(${TARGET_NAME} PRIVATE TMATH_IS_TESTING)
     target_link_libraries(${TARGET_NAME} PRIVATE gtest)
 endfunction()
