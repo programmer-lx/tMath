@@ -25,6 +25,8 @@ if(MSVC)
 else()
     target_compile_options(benchmark_simd_SSE2 PRIVATE -msse2)
 endif()
+get_target_property(OPTIONS_simd_SSE2 benchmark_simd_SSE2 COMPILE_OPTIONS)
+message(STATUS "benchmark_simd_SSE2 compile options: ${OPTIONS_simd_SSE2}")
 
 # SSE3
 add_executable(benchmark_simd_SSE3 SSE3.cpp)

@@ -5,8 +5,8 @@
             "functions": [
                 {
                     "comment": "",
-                    "cpu_time_median": 3281.250000000001,
-                    "cv": 0.02109498091980349,
+                    "cpu_time_median": 4687.5,
+                    "cv": 0.014808397201978627,
                     "op_count": 512
                 }
             ]
@@ -16,8 +16,8 @@
             "functions": [
                 {
                     "comment": "",
-                    "cpu_time_median": 3125.0,
-                    "cv": 0.022139286905932375,
+                    "cpu_time_median": 4687.5,
+                    "cv": 0.1055710956307975,
                     "op_count": 512
                 }
             ]
@@ -27,8 +27,8 @@
             "functions": [
                 {
                     "comment": "",
-                    "cpu_time_median": 3437.5,
-                    "cv": 0.0,
+                    "cpu_time_median": 3906.25,
+                    "cv": 0.15894983652115213,
                     "op_count": 512
                 }
             ]

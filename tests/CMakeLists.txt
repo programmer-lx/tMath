@@ -1,12 +1,15 @@
 function(action_for_test_target TARGET_NAME)
     if(MSVC)
-        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:/O2> /arch:AVX2)
+        target_compile_options(${TARGET_NAME} PRIVATE /arch:AVX2 /arch:AVX) # /arch:SSE4.2 /arch:SSE2 现在对MSVC无效
     else()
-        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O2> -mavx2 -mfma -mf16c -msse4.1 -msse3 -msse2)
+        target_compile_options(${TARGET_NAME} PRIVATE -mavx2 -mfma -mf16c -msse4.1 -msse3 -msse2)
     endif()
 
     target_compile_definitions(${TARGET_NAME} PRIVATE TMATH_IS_TESTING)
-    target_link_libraries(${TARGET_NAME} PRIVATE gtest)
+    target_link_libraries(${TARGET_NAME} PRIVATE gtest gtest_main tMath)
+
+    get_target_property(OPTIONS ${TARGET_NAME} COMPILE_OPTIONS)
+    message(STATUS "${TARGET_NAME} compile options: ${OPTIONS}")
 endfunction()
 
 if(MSVC)
@@ -16,32 +19,26 @@ endif()
 
 # float
 add_executable(test_float test_float.cpp)
-target_link_libraries(test_float PRIVATE tMath)
 action_for_test_target(test_float)
 
 # Vector2
 add_executable(test_vector2 test_vector2.cpp)
-target_link_libraries(test_vector2 PRIVATE tMath)
 action_for_test_target(test_vector2)
 
 # Vector3
 add_executable(test_vector3 test_vector3.cpp)
-target_link_libraries(test_vector3 PRIVATE tMath)
 action_for_test_target(test_vector3)
 
 # Vector4
 add_executable(test_vector4 test_vector4.cpp)
-target_link_libraries(test_vector4 PRIVATE tMath)
 action_for_test_target(test_vector4)
 
 # quat
 add_executable(test_quat test_quat.cpp)
-target_link_libraries(test_quat PRIVATE tMath)
 action_for_test_target(test_quat)
 
 # operators
 add_executable(test_operators_override test_operator_override.cpp)
-target_link_libraries(test_operators_override PRIVATE tMath)
 action_for_test_target(test_operators_override)
 
 
@@ -49,42 +46,34 @@ action_for_test_target(test_operators_override)
 # SIMD float4
 # SSE2
 add_executable(test_simd_SSE2 simd/SSE2.cpp)
-target_link_libraries(test_simd_SSE2 PRIVATE tMath)
 action_for_test_target(test_simd_SSE2)
 
 # SSE3
 add_executable(test_simd_SSE3 simd/SSE3.cpp)
-target_link_libraries(test_simd_SSE3 PRIVATE tMath)
 action_for_test_target(test_simd_SSE3)
 
 # SSE4.1
 add_executable(test_simd_SSE4_1 simd/SSE4_1.cpp)
-target_link_libraries(test_simd_SSE4_1 PRIVATE tMath)
 action_for_test_target(test_simd_SSE4_1)
 
 # AVX
 add_executable(test_simd_AVX simd/AVX.cpp)
-target_link_libraries(test_simd_AVX PRIVATE tMath)
 action_for_test_target(test_simd_AVX)
 
 # FMA3
 add_executable(test_simd_FMA3 simd/FMA3.cpp)
-target_link_libraries(test_simd_FMA3 PRIVATE tMath)
 action_for_test_target(test_simd_FMA3)
 
 # F16C
 add_executable(test_simd_F16C simd/F16C.cpp)
-target_link_libraries(test_simd_F16C PRIVATE tMath)
 action_for_test_target(test_simd_F16C)
 
 # AVX2
 add_executable(test_simd_AVX2 simd/AVX2.cpp)
-target_link_libraries(test_simd_AVX2 PRIVATE tMath)
 action_for_test_target(test_simd_AVX2)
 
 # no SIMD
 add_executable(test_no_SIMD simd/no_simd.cpp)
-target_link_libraries(test_no_SIMD PRIVATE tMath)
 action_for_test_target(test_no_SIMD)
 
 
