@@ -17,6 +17,10 @@ if(MSVC)
     add_compile_definitions(UNICODE _UNICODE)
 endif()
 
+# algorithm test
+add_executable(test_algorithm test_algorithm.cpp)
+action_for_test_target(test_algorithm)
+
 # float
 add_executable(test_float test_float.cpp)
 action_for_test_target(test_float)
