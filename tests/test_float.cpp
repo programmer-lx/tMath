@@ -2,6 +2,30 @@
 
 #include "test.hpp"
 
+TEST(vector1, constexpr_test)
+{
+    constexpr float a = 1;
+    constexpr float b = 2;
+    constexpr float o = 0;
+    {
+        // to degree
+        constexpr float v = tMath::to_degrees(a);
+    }
+    {
+        // to radians
+        constexpr float v = tMath::to_radians(a);
+    }
+    {
+        // clamp
+        constexpr float v = tMath::clamp(a, 0.0f, 1.0f);
+    }
+    {
+        // lerp
+        constexpr float v = tMath::lerp(a, b, o);
+        EXPECT_TRUE(v == a);
+    }
+}
+
 TEST(vector1, approximately)
 {
     EXPECT_TRUE(tMath::approximately(1.0000005, 1.000001f, 0.000001f));
@@ -28,6 +52,8 @@ TEST(vector1, clamp)
 {
     float a = 10;
     EXPECT_TRUE(tMath::clamp(a, 0.0f, tMath::Epsilon<float>) == tMath::Epsilon<float>);
+
+    EXPECT_TRUE(tMath::is_nan(tMath::clamp(tMath::NaN<float>, 1.f, 2.f)));
 }
 
 TEST(vector1, lerp)
@@ -76,4 +102,3 @@ TEST(vector1, zero_divide)
 
 
 
-TMATH_TEST_MAIN()

@@ -8,13 +8,13 @@ TMATH_NAMESPACE_BEGIN
 
 // ============================================= operators =============================================
 template<is_vector3 TVec3>
-bool operator==(const TVec3& lhs, const TVec3& rhs)
+constexpr bool operator==(const TVec3& lhs, const TVec3& rhs) noexcept
 {
     return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z);
 }
 
 template<is_vector3 TVec3>
-TVec3& operator+=(TVec3& lhs, const TVec3& rhs)
+constexpr TVec3& operator+=(TVec3& lhs, const TVec3& rhs) noexcept
 {
     lhs.x += rhs.x;
     lhs.y += rhs.y;
@@ -23,7 +23,7 @@ TVec3& operator+=(TVec3& lhs, const TVec3& rhs)
 }
 
 template<is_vector3 TVec3>
-TVec3& operator-=(TVec3& lhs, const TVec3& rhs)
+constexpr TVec3& operator-=(TVec3& lhs, const TVec3& rhs) noexcept
 {
     lhs.x -= rhs.x;
     lhs.y -= rhs.y;
@@ -32,7 +32,7 @@ TVec3& operator-=(TVec3& lhs, const TVec3& rhs)
 }
 
 template<is_vector3 TVec3>
-TVec3& operator*=(TVec3& lhs, const vector_field_t<TVec3> rhs)
+constexpr TVec3& operator*=(TVec3& lhs, const vector_field_t<TVec3> rhs) noexcept
 {
     lhs.x *= rhs;
     lhs.y *= rhs;
@@ -41,7 +41,7 @@ TVec3& operator*=(TVec3& lhs, const vector_field_t<TVec3> rhs)
 }
 
 template<is_vector3 TVec3>
-TVec3& operator/=(TVec3& lhs, const vector_field_t<TVec3> rhs)
+constexpr TVec3& operator/=(TVec3& lhs, const vector_field_t<TVec3> rhs) noexcept
 {
     lhs.x /= rhs;
     lhs.y /= rhs;
@@ -58,7 +58,7 @@ TMATH_NAMESPACE_BEGIN
 
 // ============================================= casts =============================================
 template<is_vector3 Ret, is_vector3 In>
-Ret vector_cast(const In& v)
+constexpr Ret vector_cast(const In& v) noexcept
 {
     using F = vector_field_t<Ret>;
     return { static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z) };
@@ -68,28 +68,28 @@ Ret vector_cast(const In& v)
 
 // ============================================= functions =============================================
 template<is_vector3_floating_point TVec3>
-TVec3 to_degrees(const TVec3& radians)
+constexpr TVec3 to_degrees(const TVec3& radians) noexcept
 {
     return { to_degrees(radians.x), to_degrees(radians.y), to_degrees(radians.z) };
 }
 
 template<is_vector3_floating_point TVec3>
-TVec3 to_radians(const TVec3& degrees)
+constexpr TVec3 to_radians(const TVec3& degrees) noexcept
 {
     return { to_radians(degrees.x), to_radians(degrees.y), to_radians(degrees.z) };
 }
 
 template<is_vector3 TVec3>
-TVec3 abs(const TVec3& v)
+TVec3 abs(const TVec3& v) noexcept
 {
     return { TMATH_NAMESPACE_NAME::abs(v.x), TMATH_NAMESPACE_NAME::abs(v.y), TMATH_NAMESPACE_NAME::abs(v.z) };
 }
 
 template<is_floating_point F>
-F dot(
+constexpr F dot(
     const F x1, const F y1, const F z1,
     const F x2, const F y2, const F z2
-)
+) noexcept
 {
     return  x1 * x2 +
             y1 * y2 +
@@ -97,7 +97,7 @@ F dot(
 }
 
 template<is_vector3 TVec3>
-vector_field_t<TVec3> dot(const TVec3& lhs, const TVec3& rhs)
+constexpr vector_field_t<TVec3> dot(const TVec3& lhs, const TVec3& rhs) noexcept
 {
     return  lhs.x * rhs.x +
             lhs.y * rhs.y +
@@ -105,7 +105,7 @@ vector_field_t<TVec3> dot(const TVec3& lhs, const TVec3& rhs)
 }
 
 template<is_vector3 TVec3>
-TVec3 cross(const TVec3& lhs, const TVec3& rhs)
+constexpr TVec3 cross(const TVec3& lhs, const TVec3& rhs) noexcept
 {
     return {
         lhs.y * rhs.z - lhs.z * rhs.y,
@@ -115,7 +115,7 @@ TVec3 cross(const TVec3& lhs, const TVec3& rhs)
 }
 
 template<is_vector3_floating_point TVec3>
-bool approximately(const TVec3& a, const TVec3& b, const vector_field_t<TVec3> tolerance = MinTolerance<vector_field_t<TVec3>>)
+bool approximately(const TVec3& a, const TVec3& b, const vector_field_t<TVec3> tolerance = MinTolerance<vector_field_t<TVec3>>) noexcept
 {
     return  approximately(a.x, b.x, tolerance) &&
             approximately(a.y, b.y, tolerance) &&
@@ -123,19 +123,19 @@ bool approximately(const TVec3& a, const TVec3& b, const vector_field_t<TVec3> t
 }
 
 template<is_floating_point F>
-F magnitude(const F x, const F y, const F z)
+F magnitude(const F x, const F y, const F z) noexcept
 {
     return std::hypot(x, y, z);
 }
 
 template<is_vector3_floating_point TVec3>
-vector_field_t<TVec3> magnitude(const TVec3& v)
+vector_field_t<TVec3> magnitude(const TVec3& v) noexcept
 {
     return std::hypot(v.x, v.y, v.z);
 }
 
 template<is_vector3_floating_point TVec3>
-void normalize_inplace(TVec3& v)
+void normalize_inplace(TVec3& v) noexcept
 {
     using F = vector_field_t<TVec3>;
     const F inv_mag = static_cast<F>(1) / magnitude(v);
@@ -145,7 +145,7 @@ void normalize_inplace(TVec3& v)
 }
 
 template<is_vector3_floating_point TVec3>
-void safe_normalize_inplace(TVec3& v, const TVec3& fallback)
+void safe_normalize_inplace(TVec3& v, const TVec3& fallback) noexcept
 {
     using F = vector_field_t<TVec3>;
     const F mag = magnitude(v);
@@ -162,7 +162,7 @@ void safe_normalize_inplace(TVec3& v, const TVec3& fallback)
 }
 
 template<is_vector3_floating_point TVec3>
-TVec3 normalized(const TVec3& v)
+TVec3 normalized(const TVec3& v) noexcept
 {
     TVec3 result = v;
     normalize_inplace(result);
@@ -170,7 +170,7 @@ TVec3 normalized(const TVec3& v)
 }
 
 template<is_vector3_floating_point RetVec3, is_vector3_sint TVec3Int>
-RetVec3 normalized(const TVec3Int& v)
+RetVec3 normalized(const TVec3Int& v) noexcept
 {
     using F = vector_field_t<RetVec3>;
     const F inv_mag = static_cast<F>(1) / magnitude(static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z));
@@ -183,7 +183,7 @@ RetVec3 normalized(const TVec3Int& v)
 }
 
 template<is_vector3_floating_point TVec3>
-TVec3 safe_normalized(const TVec3& v, const TVec3& fallback)
+TVec3 safe_normalized(const TVec3& v, const TVec3& fallback) noexcept
 {
     using F = vector_field_t<TVec3>;
     const F mag = magnitude(v);
@@ -202,7 +202,7 @@ TVec3 safe_normalized(const TVec3& v, const TVec3& fallback)
 }
 
 template<is_vector3_floating_point RetVec3, is_vector3_sint TVec3Int>
-RetVec3 safe_normalized(const TVec3Int& v, const RetVec3& fallback)
+RetVec3 safe_normalized(const TVec3Int& v, const RetVec3& fallback) noexcept
 {
     using F = vector_field_t<RetVec3>;
     const F mag = magnitude(static_cast<F>(v.x), static_cast<F>(v.y), static_cast<F>(v.z));
@@ -221,13 +221,13 @@ RetVec3 safe_normalized(const TVec3Int& v, const RetVec3& fallback)
 }
 
 template<is_vector3_floating_point TVec3>
-vector_field_t<TVec3> distance(const TVec3& a, const TVec3& b)
+vector_field_t<TVec3> distance(const TVec3& a, const TVec3& b) noexcept
 {
     return magnitude(a - b);
 }
 
 template<is_vector3_sint TVec3Int>
-sint_to_floating_point_t<vector_field_t<TVec3Int>> distance(const TVec3Int& a, const TVec3Int& b)
+sint_to_floating_point_t<vector_field_t<TVec3Int>> distance(const TVec3Int& a, const TVec3Int& b) noexcept
 {
     using F = sint_to_floating_point_t<vector_field_t<TVec3Int>>;
     const TVec3Int delta = a - b;
@@ -235,7 +235,7 @@ sint_to_floating_point_t<vector_field_t<TVec3Int>> distance(const TVec3Int& a, c
 }
 
 template<is_vector3_floating_point TVec3, is_floating_point F>
-TVec3 lerp(const TVec3& a, const TVec3& b, const F t)
+constexpr TVec3 lerp(const TVec3& a, const TVec3& b, const F t) noexcept
 {
     return {
         lerp(a.x, b.x, t),

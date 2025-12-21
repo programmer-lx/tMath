@@ -31,25 +31,25 @@ namespace detail
 #define TMATH_MARK_AS_QUAT using is_quat = TMATH_NAMESPACE_NAME::detail::quat_tag;
 
 #define TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name) \
-    TMATH_FORCE_INLINE friend bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator*=(vector_type_name& lhs, const field_type_name rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator*=(vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name& operator/=(vector_type_name& lhs, const field_type_name rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator/=(vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator*(const vector_type_name& lhs, const field_type_name rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name operator*(const vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend vector_type_name operator/(const vector_type_name& lhs, const field_type_name rhs) noexcept \
+    TMATH_FORCE_INLINE friend constexpr vector_type_name operator/(const vector_type_name& lhs, const field_type_name rhs) noexcept \
     { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
 
 #define TMATH_VECTOR_INDEX(field_type_name, data_var_name) \
@@ -61,6 +61,7 @@ namespace detail
     { \
         struct { field_type_name x, y; }; \
         struct { field_type_name r, g; }; \
+        struct { field_type_name u, v; }; \
         field_type_name data[2]; \
     }; \
     TMATH_VECTOR_INDEX(field_type_name, data) \
@@ -85,6 +86,15 @@ namespace detail
     }; \
     TMATH_VECTOR_INDEX(field_type_name, data) \
     TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
+
+#define TMATH_QUAT(quat_type_name, field_type_name) \
+    TMATH_MARK_AS_QUAT \
+    union \
+    { \
+        struct { field_type_name x, y, z, w; }; \
+        field_type_name data[4]; \
+    }; \
+    TMATH_VECTOR_INDEX(field_type_name, data)
 
 
 
@@ -135,10 +145,8 @@ namespace detail
     template<typename TVec, typename TField>
     concept is_generic_vector2 = requires(TVec v)
     {
-        v.data;
         v.x;
         v.y;
-        requires std::is_same_v<std::decay_t<decltype(v.data[0])>, TField>;
         requires std::is_same_v<decltype(v.x), TField>;
         requires std::is_same_v<decltype(v.y), TField>;
 
@@ -148,11 +156,9 @@ namespace detail
     template<typename TVec, typename TField>
     concept is_generic_vector3 = requires(TVec v)
     {
-        v.data;
         v.x;
         v.y;
         v.z;
-        requires std::is_same_v<std::decay_t<decltype(v.data[0])>, TField>;
         requires std::is_same_v<decltype(v.x), TField>;
         requires std::is_same_v<decltype(v.y), TField>;
         requires std::is_same_v<decltype(v.z), TField>;
@@ -163,12 +169,10 @@ namespace detail
     template<typename T, typename TField>
     concept is_vector4_or_quat = requires(T v)
     {
-        v.data;
         v.x;
         v.y;
         v.z;
         v.w;
-        requires std::is_same_v<std::decay_t<decltype(v.data[0])>, TField>;
         requires std::is_same_v<decltype(v.x), TField>;
         requires std::is_same_v<decltype(v.y), TField>;
         requires std::is_same_v<decltype(v.z), TField>;
@@ -346,6 +350,19 @@ using max_field_floating_point_t = std::conditional_t<(sizeof(vector_field_t<V1>
 
 template<is_vector_n V1, is_vector_n V2>
 using min_field_floating_point_t = std::conditional_t<(sizeof(vector_field_t<V1>) <= sizeof(vector_field_t<V2>)), vector_field_t<V1>, vector_field_t<V2>>;
+
+
+
+// initializers
+template<auto... Values>
+struct vector_values
+{
+    template<typename T>
+    constexpr operator T() const noexcept
+    {
+        return T{ Values... };
+    }
+};
 
 
 TMATH_NAMESPACE_END

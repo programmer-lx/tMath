@@ -26,7 +26,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV load(const TVec4& vec) noexcept
 #if defined(TMATH_NO_SIMD)
     return { vec.x, vec.y, vec.z, vec.w };
 #else
-    return _mm_loadu_ps(vec.data);
+    return _mm_loadu_ps(&vec.x);
 #endif
 }
 
@@ -97,7 +97,7 @@ inline void TMATH_SIMD_CALL_CONV store(TVec4& vec, float32_4_arg_in v) noexcept
     vec.z = v.z;
     vec.w = v.w;
 #else
-    _mm_storeu_ps(vec.data, v);
+    _mm_storeu_ps(&vec.x, v);
 #endif
 }
 
@@ -298,13 +298,13 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot2(float32_4_arg_in lhs, float32_4_arg_i
 #if defined(TMATH_NO_SIMD)
     float value = TMATH_NAMESPACE_NAME::dot(lhs.x, lhs.y, rhs.x, rhs.y);
     return { value, value, value, value };
-// #elif defined(TMATH_USE_SSE4_1)
-//     return _mm_dp_ps(lhs, rhs, 0x3f);                   // imm8: 7-4: compute, 3-0: store
-// #elif defined(TMATH_USE_SSE3)
-//     float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
-//     temp = _mm_and_ps(temp, Mask128::Lane01.f32_4);     // temp = [                0,             z1z2,             y1y2,             x1x2]
-//     temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
-//     return _mm_hadd_ps(temp, temp);                     // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
+#elif defined(TMATH_USE_SSE4_1)
+    return _mm_dp_ps(lhs, rhs, 0x3f);                   // imm8: 7-4: compute, 3-0: store
+#elif defined(TMATH_USE_SSE3)
+    float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, Mask128::Lane01.f32_4);     // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
+    return _mm_hadd_ps(temp, temp);                     // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
 #elif defined(TMATH_USE_SSE2)
     float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
     mul = _mm_and_ps(mul, Mask128::Lane01.f32_4);                           // mul      = [        0,         0, y1y2,                  x1x2]
@@ -321,13 +321,13 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot3(float32_4_arg_in lhs, float32_4_arg_i
 #if defined(TMATH_NO_SIMD)
     float value = TMATH_NAMESPACE_NAME::dot(lhs.x, lhs.y, lhs.z, rhs.x, rhs.y, rhs.z);
     return { value, value, value, value };
-// #elif defined(TMATH_USE_SSE4_1)
-//     return _mm_dp_ps(lhs, rhs, 0x7f);                   // imm8: 7-4: compute, 3-0: store
-// #elif defined(TMATH_USE_SSE3)
-//     float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
-//     temp = _mm_and_ps(temp, Mask128::Lane012.f32_4);    // temp = [                0,             z1z2,             y1y2,             x1x2]
-//     temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
-//     return _mm_hadd_ps(temp, temp);                     // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
+#elif defined(TMATH_USE_SSE4_1)
+    return _mm_dp_ps(lhs, rhs, 0x7f);                   // imm8: 7-4: compute, 3-0: store
+#elif defined(TMATH_USE_SSE3)
+    float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, Mask128::Lane012.f32_4);    // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
+    return _mm_hadd_ps(temp, temp);                     // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
 #elif defined(TMATH_USE_SSE2)
     float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
     mul = _mm_and_ps(mul, Mask128::Lane012.f32_4);                          // mul      = [        0,      z1z2, y1y2,                  x1x2]
@@ -344,12 +344,12 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot4(float32_4_arg_in lhs, float32_4_arg_i
 #if defined(TMATH_NO_SIMD)
     float value = TMATH_NAMESPACE_NAME::dot(lhs, rhs);
     return { value, value, value, value };
-// #elif defined(TMATH_USE_SSE4_1)              // bad performance
-//     return _mm_dp_ps(lhs, rhs, 0xff);
-// #elif defined(TMATH_USE_SSE3)                // bad performance
-//     float32_4 t1 = _mm_mul_ps(lhs, rhs);  // t1 = [                 w1w2,                  z1z2,                  y1y2,                  x1x2]
-//     float32_4 t2 = _mm_hadd_ps(t1, t1);   // t2 = [            z1z2+w1w2,             x1x2+y1y2,             z1z2+w1w2,             x1x2+y1y2]
-//     return _mm_hadd_ps(t2, t2);           // re = [x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2]
+#elif defined(TMATH_USE_SSE4_1)
+    return _mm_dp_ps(lhs, rhs, 0xff);
+#elif defined(TMATH_USE_SSE3)
+    float32_4 t1 = _mm_mul_ps(lhs, rhs);  // t1 = [                 w1w2,                  z1z2,                  y1y2,                  x1x2]
+    float32_4 t2 = _mm_hadd_ps(t1, t1);   // t2 = [            z1z2+w1w2,             x1x2+y1y2,             z1z2+w1w2,             x1x2+y1y2]
+    return _mm_hadd_ps(t2, t2);           // re = [x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2]
 #elif defined(TMATH_USE_SSE2)
     // float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [      w1w2,       z1z2,      y1y2,                  x1x2]
     // float32_4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));     // shuffle  = [      y1y2,       x1x2,      w1w2,                  z1z2]

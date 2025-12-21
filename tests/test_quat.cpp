@@ -3,12 +3,10 @@
 
 #include "test.hpp"
 
-// struct Quat
-// {
-//     // TODO
-//     float x, y, z, w;
-//     TMATH_MARK_AS_QUAT
-// };
+struct Quatf
+{
+    TMATH_QUAT(Quatf, float)
+};
 
 struct Vector4f32
 {
@@ -18,6 +16,5 @@ struct Vector4f32
 TEST(quat, tag)
 {
     EXPECT_TRUE(tMath::is_vector4_float<Vector4f32> == true);
+    EXPECT_TRUE(tMath::is_quat<Quatf> == true);
 }
-
-TMATH_TEST_MAIN()

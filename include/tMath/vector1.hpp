@@ -9,79 +9,83 @@
 TMATH_NAMESPACE_BEGIN
 
 template<is_floating_point F>
-F to_degrees(const F radians)
+constexpr F to_degrees(const F radians) noexcept
 {
     return radians * Rad2Deg<F>;
 }
 
 template<is_floating_point F>
-F to_radians(const F degrees)
+constexpr F to_radians(const F degrees) noexcept
 {
     return degrees * Deg2Rad<F>;
 }
 
 template<is_number N>
-N abs(const N n)
+N abs(const N n) noexcept
 {
     return std::abs(n);
 }
 
 template<is_floating_point F>
-F sin(const F f)
+F sin(const F f) noexcept
 {
     return std::sin(f);
 }
 
 template<is_floating_point F>
-F asin(const F f)
+F asin(const F f) noexcept
 {
     return std::asin(f);
 }
 
 template<is_floating_point F>
-F cos(const F f)
+F cos(const F f) noexcept
 {
     return std::cos(f);
 }
 
 template<is_floating_point F>
-F acos(const F f)
+F acos(const F f) noexcept
 {
     return std::acos(f);
 }
 
 template<is_floating_point F>
-F tan(const F f)
+F tan(const F f) noexcept
 {
     return std::tan(f);
 }
 
 template<is_floating_point F>
-F atan(const F f)
+F atan(const F f) noexcept
 {
     return std::atan(f);
 }
 
 template<is_floating_point F>
-F atan2(const F y, const F x)
+F atan2(const F y, const F x) noexcept
 {
     return std::atan2(y, x);
 }
 
 template<is_floating_point F>
-F sqrt(const F f)
+F sqrt(const F f) noexcept
 {
     return std::sqrt(f);
 }
 
+/**
+ * clamp n to [min, max]
+ * if n is NaN, return NaN
+ */
 template<is_number N>
-N clamp(const N n, const N min, const N max)
+constexpr N clamp(const N n, const N min, const N max) noexcept
 {
-    return std::clamp(n, min, max);
+    return (n < min) ? min : (n > max) ? max : n;
 }
 
 template<is_floating_point F, is_floating_point T>
-F lerp(const F a, const F b, const T t)
+constexpr F lerp(const F a, const F b, const T t) noexcept
 {
     return std::lerp(a, b, t);
 }
@@ -89,51 +93,51 @@ F lerp(const F a, const F b, const T t)
 // 类型不同的浮点的比较
 template<is_floating_point F1, is_floating_point F2>
     requires (!std::is_same_v<F1, F2>)
-bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = MinTolerance<min_floating_point_t<F1, F2>>)
+bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = MinTolerance<min_floating_point_t<F1, F2>>) noexcept
 {
     using max_float_t = max_floating_point_t<F1, F2>;
-    return TMATH_NAMESPACE_NAME::abs(static_cast<max_float_t>(a) - static_cast<max_float_t>(b)) < static_cast<max_float_t>(tolerance);
+    return std::abs(static_cast<max_float_t>(a) - static_cast<max_float_t>(b)) < static_cast<max_float_t>(tolerance);
 }
 
 template<is_floating_point F>
-bool approximately(const F a, const F b, const F tolerance = MinTolerance<F>)
+bool approximately(const F a, const F b, const F tolerance = MinTolerance<F>) noexcept
 {
-    return TMATH_NAMESPACE_NAME::abs(a - b) < tolerance;
+    return std::abs(a - b) < tolerance;
 }
 
 template<is_floating_point N>
-static constexpr bool is_infinity(N n)
+static bool is_infinity(N n) noexcept
 {
     return std::isinf(n);
 }
 
 template<is_floating_point N>
-static constexpr bool is_finite(N n)
+static bool is_finite(N n) noexcept
 {
     return std::isfinite(n);
 }
 
 template<is_floating_point N>
-static constexpr bool is_nan(N n)
+static bool is_nan(N n) noexcept
 {
     return std::isnan(n);
 }
 
 // 无效除数
 template<is_floating_point F>
-static constexpr bool is_invalid_divisor(F f)
+static bool is_invalid_divisor(F f) noexcept
 {
     return !is_finite(f) || (abs(f) <= MinTolerance<F>);
 }
 
 template<is_signed_int I>
-static constexpr bool is_invalid_divisor(I i)
+static bool is_invalid_divisor(I i) noexcept
 {
     return i == static_cast<I>(0);
 }
 
 template<is_number N>
-void safe_divide_inplace(N& val, const N divisor, const N fallback)
+void safe_divide_inplace(N& val, const N divisor, const N fallback) noexcept
 {
     if (is_invalid_divisor(divisor))
     {
@@ -145,7 +149,7 @@ void safe_divide_inplace(N& val, const N divisor, const N fallback)
 }
 
 template<is_number N>
-N safe_divide(const N val, const N divisor, const N fallback)
+N safe_divide(const N val, const N divisor, const N fallback) noexcept
 {
     if (is_invalid_divisor(divisor))
     {

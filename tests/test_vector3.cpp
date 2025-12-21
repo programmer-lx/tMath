@@ -64,6 +64,62 @@ struct Vector4i32
     TMATH_VECTOR4(Vector4i32, int32_t)
 };
 
+TEST(vector3, constexpr_test)
+{
+    constexpr Vector3f a = { 1, 1, 1 };
+    constexpr Vector3f b = { 2, 2, 2 };
+    constexpr Vector3f o = { 0 ,0, 0 };
+    {
+        // ==
+        constexpr Vector3f t = {1, 1, 1};
+        constexpr bool result = t == a;
+    }
+    {
+        // !=
+        constexpr bool result = (a != b);
+    }
+    {
+        // +
+        constexpr Vector3f result = a + b;
+    }
+    {
+        // -
+        constexpr Vector3f result = a - b;
+    }
+    {
+        // *
+        constexpr Vector3f result = a * 2;
+    }
+    {
+        // /
+        constexpr Vector3f result = a / 2;
+    }
+    {
+        // cast
+        constexpr Vector3i32 result = tMath::vector_cast<Vector3i32>(a);
+    }
+    {
+        // to degree
+        constexpr Vector3f result = tMath::to_degrees(a);
+    }
+    {
+        // to radians
+        constexpr Vector3f result = tMath::to_radians(a);
+    }
+    {
+        // dot
+        constexpr float result = tMath::dot(a, b);
+        constexpr float result2 = tMath::dot(1.0f, 2.0f, 3.0f, 4.0f, 5.f, 6.f);
+    }
+    {
+        constexpr Vector3f r = tMath::cross(a, b);
+    }
+    {
+        constexpr Vector3f r = tMath::lerp(a, a, 0.5f);
+        EXPECT_TRUE(r == a);
+    }
+}
+
 
 TEST(vector3, fields)
 {
@@ -341,4 +397,3 @@ TEST(vector3, zero_div)
 
 
 
-TMATH_TEST_MAIN()

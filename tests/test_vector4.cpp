@@ -64,6 +64,78 @@ struct Vector4i32
     TMATH_VECTOR4(Vector4i32, int32_t)
 };
 
+TEST(vector4, constexpr_test)
+{
+    constexpr Vector4f a = { 1, 1, 1, 1 };
+    constexpr Vector4f b = { 1, 1, 1, 1 };
+    constexpr Vector4f o = { 0, 0, 0, 0 };
+    {
+        // ==
+        constexpr bool result = (a == b);
+        EXPECT_TRUE(result == true);
+    }
+    {
+        // +
+        constexpr Vector4f t = { 0, 0, 0, 0 };
+        constexpr Vector4f result = t + a;
+        EXPECT_TRUE(result == a);
+    }
+    {
+        // -
+        constexpr Vector4f t = { 0, 0, 0, 0 };
+        constexpr Vector4f result = a - t;
+        EXPECT_TRUE(result == a);
+    }
+    {
+        // *
+        constexpr Vector4f result = a * 1.0f;
+        EXPECT_TRUE(result == a);
+    }
+    {
+        // /
+        constexpr Vector4f result = a / 1.0f;
+        EXPECT_TRUE(result == a);
+    }
+    {
+        // cast
+        constexpr Vector4i32 result = tMath::vector_cast<Vector4i32>(a);
+        constexpr Vector4i32 test = tMath::one();
+        EXPECT_TRUE(result == test);
+    }
+    {
+        // initializers
+        constexpr Vector4f ones = tMath::one();
+        EXPECT_TRUE(ones == a);
+
+        constexpr Vector4f zeros = tMath::zero();
+        EXPECT_TRUE(zeros == o);
+    }
+    {
+        constexpr Vector4f degrees = tMath::to_degrees(Vector4f{ tMath::PI<float>, tMath::PI<float>, tMath::PI<float>, tMath::PI<float> });
+        constexpr Vector4f test = { 180, 180, 180, 180 };
+        EXPECT_TRUE(degrees == test);
+    }
+    {
+        constexpr Vector4f radians = tMath::to_radians(Vector4f{ 180, 180, 180, 180 });
+        constexpr Vector4f test = { tMath::PI<float>, tMath::PI<float>, tMath::PI<float>, tMath::PI<float> };
+        EXPECT_TRUE(radians == test);
+    }
+    {
+        // dot
+        constexpr float result = tMath::dot(a, b);
+        constexpr float result2 = tMath::dot(1.f, 2.f, 3.f, 4.f, 1.f, 2.f, 2.f, 4.f);
+    }
+    {
+        // cross
+        constexpr Vector4f result = tMath::cross(a, b);
+    }
+    {
+        // lerp
+         constexpr Vector4f result = tMath::lerp(a, b, 0.5f);
+        EXPECT_TRUE(result == a);
+    }
+}
+
 TEST(vector4, fields)
 {
     Vector4f v{1, 2, 3, 4};
@@ -83,6 +155,17 @@ TEST(vector4, fields)
     EXPECT_TRUE(v.data[1] == 2);
     EXPECT_TRUE(v.data[2] == 3);
     EXPECT_TRUE(v.data[3] == 4);
+}
+
+TEST(vector4, init)
+{
+    {
+        Vector4f ones = tMath::one();
+        EXPECT_TRUE(ones.x == 1);
+        EXPECT_TRUE(ones.y == 1);
+        EXPECT_TRUE(ones.z == 1);
+        EXPECT_TRUE(ones.w == 1);
+    }
 }
 
 TEST(vector4, quat_tag)
@@ -367,4 +450,3 @@ TEST(vector4, zero_div)
 
 
 
-TMATH_TEST_MAIN()

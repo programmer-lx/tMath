@@ -17,4 +17,3 @@ TEST(tMath, operator_override)
     EXPECT_TRUE(tMath::approximately(c, {3, 3}));
 }
 
-TMATH_TEST_MAIN()

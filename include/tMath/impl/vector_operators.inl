@@ -8,13 +8,13 @@
 TMATH_NAMESPACE_BEGIN
 
 template<is_vector_n TVec>
-bool operator!=(const TVec& lhs, const TVec& rhs)
+constexpr bool operator!=(const TVec& lhs, const TVec& rhs) noexcept
 {
     return !(lhs == rhs);
 }
 
 template<is_vector_n TVec>
-void safe_divide_inplace(TVec& v, const vector_field_t<TVec> divisor, const TVec& fallback)
+void safe_divide_inplace(TVec& v, const vector_field_t<TVec> divisor, const TVec& fallback) noexcept
 {
     if (is_invalid_divisor(divisor))
     {
@@ -26,7 +26,7 @@ void safe_divide_inplace(TVec& v, const vector_field_t<TVec> divisor, const TVec
 }
 
 template<is_vector_n TVec>
-TVec operator+(const TVec& lhs, const TVec& rhs)
+constexpr TVec operator+(const TVec& lhs, const TVec& rhs) noexcept
 {
     TVec v = lhs;
     v += rhs;
@@ -34,7 +34,7 @@ TVec operator+(const TVec& lhs, const TVec& rhs)
 }
 
 template<is_vector_n TVec>
-TVec operator-(const TVec& lhs, const TVec& rhs)
+constexpr TVec operator-(const TVec& lhs, const TVec& rhs) noexcept
 {
     TVec v = lhs;
     v -= rhs;
@@ -42,7 +42,7 @@ TVec operator-(const TVec& lhs, const TVec& rhs)
 }
 
 template<is_vector_n TVec>
-TVec operator*(const TVec& lhs, const vector_field_t<TVec> rhs)
+constexpr TVec operator*(const TVec& lhs, const vector_field_t<TVec> rhs) noexcept
 {
     TVec v = lhs;
     v *= rhs;
@@ -50,7 +50,7 @@ TVec operator*(const TVec& lhs, const vector_field_t<TVec> rhs)
 }
 
 template<is_vector_n TVec>
-TVec operator/(const TVec& lhs, const vector_field_t<TVec> rhs)
+constexpr TVec operator/(const TVec& lhs, const vector_field_t<TVec> rhs) noexcept
 {
     TVec v = lhs;
     v /= rhs;
@@ -58,7 +58,7 @@ TVec operator/(const TVec& lhs, const vector_field_t<TVec> rhs)
 }
 
 template<is_vector_n TVec>
-TVec safe_divide(const TVec& v, const vector_field_t<TVec> divisor, const TVec& fallback)
+TVec safe_divide(const TVec& v, const vector_field_t<TVec> divisor, const TVec& fallback) noexcept
 {
     TVec result = v;
     safe_divide_inplace(result, divisor, fallback);

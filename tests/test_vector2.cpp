@@ -65,6 +65,64 @@ struct Vector4i32
 };
 
 
+TEST(vector2, constexpr_test)
+{
+    constexpr Vector2f a = { 1, 1 };
+    constexpr Vector2f b = { 2, 2 };
+    constexpr Vector2f o = { 0 ,0 };
+    {
+        // ==
+        constexpr Vector2f t = {1, 1};
+        constexpr bool result = t == a;
+    }
+    {
+        // !=
+        constexpr bool result = (a != b);
+    }
+    {
+        // +
+        constexpr Vector2f result = a + b;
+    }
+    {
+        // -
+        constexpr Vector2f result = a - b;
+    }
+    {
+        // *
+        constexpr Vector2f result = a * 2;
+    }
+    {
+        // /
+        constexpr Vector2f result = a / 2;
+    }
+    {
+        // cast
+        constexpr Vector2i32 result = tMath::vector_cast<Vector2i32>(a);
+    }
+    {
+        // to degree
+        constexpr Vector2f result = tMath::to_degrees(a);
+    }
+    {
+        // to radians
+        constexpr Vector2f result = tMath::to_radians(a);
+    }
+    {
+        // dot
+        constexpr float result = tMath::dot(a, b);
+        constexpr float result2 = tMath::dot(1.0f, 2.0f, 3.0f, 4.0f);
+    }
+    {
+        constexpr float r1 = tMath::cross(a, b);
+        constexpr float r2 = tMath::cross(1.f, 2.f, 3.f, 4.f);
+    }
+    {
+        constexpr Vector2f r = tMath::lerp(a, a, 0.5f);
+        EXPECT_TRUE(r == a);
+    }
+}
+
+
 TEST(vector2, fields)
 {
     Vector2f v{1, 2};
@@ -74,6 +132,8 @@ TEST(vector2, fields)
     EXPECT_TRUE(v.y == 2);
     EXPECT_TRUE(v.r == 1);
     EXPECT_TRUE(v.g == 2);
+    EXPECT_TRUE(v.u == 1);
+    EXPECT_TRUE(v.v == 2);
     EXPECT_TRUE(v.data[0] == 1);
     EXPECT_TRUE(v.data[1] == 2);
 }
@@ -388,4 +448,3 @@ TEST(vector2, zero_div)
     }
 }
 
-TMATH_TEST_MAIN()
