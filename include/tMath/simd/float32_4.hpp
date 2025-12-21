@@ -30,6 +30,24 @@ inline float32_4 TMATH_SIMD_CALL_CONV load(const TVec4& vec) noexcept
 #endif
 }
 
+inline float32_4 TMATH_SIMD_CALL_CONV load(float scalar) noexcept
+{
+#if defined(TMATH_NO_SIMD)
+    return { scalar, scalar, scalar, scalar };
+#else
+    return _mm_set1_ps(scalar);
+#endif
+}
+
+inline float32_4 TMATH_SIMD_CALL_CONV load(float x, float y, float z, float w) noexcept
+{
+#if defined(TMATH_NO_SIMD)
+    return { x, y, z, w };
+#else
+    return _mm_set_ps(w, z, y, x);
+#endif
+}
+
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
 inline float32_4 TMATH_SIMD_CALL_CONV load_point(const TVec3& vec) noexcept
 {
@@ -146,25 +164,6 @@ inline float TMATH_SIMD_CALL_CONV get_w(float32_4_arg_in v) noexcept
     return v.w;
 #else
     return _mm_cvtss_f32(tmath_permute_ps(v, _MM_SHUFFLE(3, 3, 3, 3)));
-#endif
-}
-
-
-inline float32_4 TMATH_SIMD_CALL_CONV set(float scalar) noexcept
-{
-#if defined(TMATH_NO_SIMD)
-    return { scalar, scalar, scalar, scalar };
-#else
-    return _mm_set1_ps(scalar);
-#endif
-}
-
-inline float32_4 TMATH_SIMD_CALL_CONV set(float x, float y, float z, float w) noexcept
-{
-#if defined(TMATH_NO_SIMD)
-    return { x, y, z, w };
-#else
-    return _mm_set_ps(w, z, y, x);
 #endif
 }
 
