@@ -156,8 +156,8 @@
                 <tr>
                   <td class="fn-name">${fnName}</td>
                   <td>${simd}</td>
-                  <td class="cpu-time">${cpuTime.toFixed(3) / fn.op_count}</td>
-                  <td class="cv">${fn.cv.toFixed(2) * 100.0}</td>
+                  <td class="cpu-time">${(cpuTime / fn.op_count).toFixed(3)}</td>
+                  <td class="cv">${(fn.cv * 100.0).toFixed(2)}</td>
                   <td class="op-count">${fn.op_count}</td>
                   <td class="repetitions">${data.repetitions}</td>
                   <td>${fn.comment}</td>

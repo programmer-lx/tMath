@@ -5,8 +5,8 @@
             "functions": [
                 {
                     "comment": "",
-                    "cpu_time_median": 2031.2500000000005,
-                    "cv": 0.16423851052029312,
+                    "cpu_time_median": 1093.75,
+                    "cv": 0.07401656182502166,
                     "op_count": 512
                 }
             ]

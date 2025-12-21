@@ -7,6 +7,8 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <ranges>
+#include <algorithm>
 
 #include <nlohmann/json.hpp>
 
@@ -157,7 +159,6 @@ struct File
 struct GoogleBenchmarkContext
 {
     std::string library_build_type;
-    std::string date;
     int32_t num_cpus = -1;
     int32_t mhz_per_cpu = -1;
     std::string library_version;
@@ -166,7 +167,6 @@ struct GoogleBenchmarkContext
 static void from_json(const Json& json, GoogleBenchmarkContext& obj)
 {
     FROM_JSON(library_build_type);
-    FROM_JSON(date);
     FROM_JSON(num_cpus);
     FROM_JSON(mhz_per_cpu);
     FROM_JSON(library_version);
@@ -343,12 +343,128 @@ BenchmarkResult make_tmath_bm_result(const GoogleBenchmarkResult& google_bm_resu
     return result;
 }
 
+struct DateString
+{
+    std::string str;
+    int year = -1;
+    int month = -1;
+    int day = -1;
+
+    static DateString from_str(const std::string& _str)
+    {
+        DateString result{};
+        result.str = _str;
+        CHECK(result.str.size() == 10, "date MUST be \"yyyy-mm-dd\", length is 10");
+
+        result.year = std::stoi(result.str.substr(0, 4));
+        result.month = std::stoi(result.str.substr(5, 2));
+        result.day = std::stoi(result.str.substr(8, 2));
+
+        CHECK(result.year >= 2000, "year must >= 2000");
+        CHECK(result.month >= 1 && result.month <= 12, "montu must in [1, 12]");
+        CHECK(result.day >= 1 && result.day <= 31, "day must in [1, 31]");
+
+        return result;
+    }
+
+    // for sorting
+    bool operator<(const DateString& rhs) const
+    {
+        if (year != rhs.year)
+        {
+            return year < rhs.year;
+        }
+        if (month != rhs.month)
+        {
+            return month < rhs.month;
+        }
+        if (day != rhs.day)
+        {
+            return day < rhs.day;
+        }
+
+        // equal
+        return false;
+    }
+
+    bool operator>(const DateString& rhs) const
+    {
+        if (year != rhs.year)
+        {
+            return year > rhs.year;
+        }
+        if (month != rhs.month)
+        {
+            return month > rhs.month;
+        }
+        if (day != rhs.day)
+        {
+            return day > rhs.day;
+        }
+
+        // equal
+        return false;
+    }
+
+    bool operator==(const DateString& rhs) const
+    {
+        return  year == rhs.year &&
+                month == rhs.month &&
+                day == rhs.day;
+    }
+};
+
+using Dates = std::vector<std::string>;
+
+
+Dates trim_dates(const Dates& dates)
+{
+    Dates result = dates;
+    // 从新到旧排序，然后取前7个
+
+    std::ranges::sort(result, [](const std::string& a, const std::string& b)
+    {
+        DateString da = DateString::from_str(a);
+        DateString db = DateString::from_str(b);
+        return da > db;
+    });
+
+    Dates ret;
+    for (int i = 0; i < std::min(static_cast<size_t>(7), result.size()); ++i)
+    {
+        ret.push_back(result[i]);
+    }
+
+    return ret;
+}
+
+bool is_dir_out_of_date(const Path& dir, const std::vector<Path>& valid_dirs)
+{
+    CHECK(std::filesystem::is_directory(dir), std::format("dir must be a directory, dir: {}", dir.string()));
+
+    auto dir2 = std::filesystem::weakly_canonical(dir);
+    for (const auto& d : valid_dirs)
+    {
+        CHECK(std::filesystem::is_directory(d), std::format("d must be a directory, d: {}", d.string()));
+
+        auto d2 = std::filesystem::weakly_canonical(d);
+        if (d2.compare(dir2) == 0)
+        {
+            return false;
+        }
+    }
+
+    // 全部比较完毕，没有一个匹配到
+    return true;
+}
 
 
 int main(int argc, char** argv)
 {
     // argv[0]: ignore
     // argv[1]: json_file_path (input and output)
+    // argv[2]: dates.json path (按日期从新到旧进行排序，并且只保留最近7次的测试结果，其余的直接删除)
+    // argv[3]: current date (yyyy-mm-dd)
 
     // 步骤:
     // 0. 提取 context 字段中的 library_build_type 字段，入如果不等于release，则表示该测试是不准确的，直接退出程序
@@ -398,7 +514,7 @@ int main(int argc, char** argv)
 
     try
     {
-        CHECK(argc == 2, "argc must be equal to 2, argv[1] is the path of benchmark.json");
+        CHECK(argc == 4, "argc must be equal to 2, argv[1] is the path of benchmark.json, argv[2] is the path of dates.json, argv[3] is date");
 
         std::string google_json_str;
 
@@ -423,6 +539,55 @@ int main(int argc, char** argv)
             Json tmath_bm_json = tmath_bm;
             std::string json_str = tmath_bm_json.dump(4);
             output.write_string(json_str);
+        }
+
+        // 更新 dates.json 文件
+        {
+            Path dates_json_file_path = argv[2];
+            dates_json_file_path = std::filesystem::absolute(dates_json_file_path);
+            std::string json_str;
+
+            {
+                // read file
+                File dates_json_file(dates_json_file_path, std::ios::in);
+                json_str = dates_json_file.get_string();
+            }
+            Json json = Json::parse(json_str);
+
+            Dates dates = json;
+            DateString date = DateString::from_str(argv[3]);
+            Dates dates_result = trim_dates(dates);
+
+            {
+                // 写回去
+                File dates_output(dates_json_file_path, std::ios::out);
+                Json out_dates_json = dates_result;
+                std::string out_dates_str = out_dates_json.dump(4);
+                dates_output.write_string(out_dates_str);
+            }
+
+            // 删除所有过期的文件夹
+            Path dates_dir = dates_json_file_path.parent_path();
+            CHECK(std::filesystem::is_directory(dates_dir), "dates_dir MUST be a directory");
+            std::vector<Path> valid_dirs;
+            for (const auto& dir_str : dates_result)
+            {
+                auto absolute_path = dates_dir / dir_str;
+                absolute_path = std::filesystem::absolute(absolute_path);
+                absolute_path = std::filesystem::weakly_canonical(absolute_path);
+
+                valid_dirs.push_back(absolute_path);
+            }
+            for (auto entry : std::filesystem::directory_iterator(dates_dir))
+            {
+                if (std::filesystem::is_directory(entry.path()))
+                {
+                    if (is_dir_out_of_date(entry.path(), valid_dirs))
+                    {
+                        std::filesystem::remove_all(entry.path());
+                    }
+                }
+            }
         }
     }
     catch (std::exception& e)

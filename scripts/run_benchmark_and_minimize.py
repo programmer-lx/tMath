@@ -3,16 +3,18 @@ import sys
 from pathlib import Path
 
 def main():
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 6:
         print(
             "Usage: run_benchmark_and_minimize.py "
-            "<benchmark_exe> <json_output> <minimize_exe>"
+            "<benchmark_exe> <json_output> <dates.json path> <date(yyyy-mm-dd)> <minimize_exe>"
         )
         sys.exit(1)
 
     benchmark_exe = Path(sys.argv[1])
     json_out      = Path(sys.argv[2])
-    minimize_exe  = Path(sys.argv[3])
+    dates_json    = Path(sys.argv[3])
+    date          = str(sys.argv[4])
+    minimize_exe  = Path(sys.argv[5])
 
     json_out.parent.mkdir(parents=True, exist_ok=True)
 
@@ -27,6 +29,8 @@ def main():
     subprocess.check_call([
         str(minimize_exe),
         str(json_out),
+        str(dates_json),
+        str(date)
     ])
 
 if __name__ == "__main__":

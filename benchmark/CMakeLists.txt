@@ -124,6 +124,8 @@ endif()
 set(TMATH_BM_JSON_OUTPUT_DIR ${TMATH_WEBSITE_DIR}/benchmark_data/${TMATH_BENCHMARK_DATE}/${TMATH_BENCHMARK_OS})
 file(MAKE_DIRECTORY ${TMATH_BM_JSON_OUTPUT_DIR})
 
+set(TMATH_BM_DATES_JSON_PATH ${TMATH_WEBSITE_DIR}/benchmark_data/dates.json)
+
 function(add_simd_benchmark_test simd_name target)
     add_test(
             NAME Benchmark_${simd_name}
@@ -132,6 +134,8 @@ function(add_simd_benchmark_test simd_name target)
             ${TMATH_SCRIPTS_DIR}/run_benchmark_and_minimize.py
             $<TARGET_FILE:${target}>
             ${TMATH_BM_JSON_OUTPUT_DIR}/${simd_name}.json
+            ${TMATH_BM_DATES_JSON_PATH}
+            ${TMATH_BENCHMARK_DATE}
             $<TARGET_FILE:minimize_bm_json>
     )
 endfunction()
