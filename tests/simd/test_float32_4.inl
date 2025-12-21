@@ -123,18 +123,23 @@ TEST(float32_4, mul)
     }
 }
 
-TEST(float32_4, div)
+TEST(float32_4, hadamard_div)
 {
     {
         float32_4 v = tSimd::load(1, 2, 3, 4);
         float32_4 v2 = tSimd::load(2);
-        float32_4 result = tSimd::div(v, v2);
+        float32_4 result = tSimd::hadamard_div(v, v2);
 
         Vector4f test{};
         tSimd::store(test, result);
 
         EXPECT_TRUE(tMath::approximately(test, {0.5, 1, 1.5, 2}));
     }
+}
+
+TEST(float32_4, div)
+{
+
     {
         float32_4 v = tSimd::load(1, 2, 3, 4);
         float32_4 result = tSimd::div(v, 2);

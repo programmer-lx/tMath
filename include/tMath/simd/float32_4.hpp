@@ -185,9 +185,6 @@ inline float32_4 TMATH_SIMD_CALL_CONV sub(float32_4_arg_in lhs, float32_4_arg_in
 #endif
 }
 
-/**
- * 逐分量相乘
- */
 inline float32_4 TMATH_SIMD_CALL_CONV hadamard_mul(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
 {
 #if defined(TMATH_NO_SIMD)
@@ -206,7 +203,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV mul(float32_4_arg_in lhs, float scalar) no
 #endif
 }
 
-inline float32_4 TMATH_SIMD_CALL_CONV div(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
+inline float32_4 TMATH_SIMD_CALL_CONV hadamard_div(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return tMath::hadamard_div(lhs, rhs);
@@ -227,13 +224,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV div(float32_4_arg_in lhs, float scalar) no
 inline float32_4 TMATH_SIMD_CALL_CONV mul_add(float32_4_arg_in a, float32_4_arg_in b, float32_4_arg_in c) noexcept
 {
 #if defined(TMATH_NO_SIMD)
-    float32_4 mul = {
-        a.x * b.x,
-        a.y * b.y,
-        a.z * b.z,
-        a.w * b.w
-    };
-    return mul + c;
+    return tMath::hadamard_mul(a, b) + c;
 #else
     return tmath_fmadd_ps(a, b, c);
 #endif
