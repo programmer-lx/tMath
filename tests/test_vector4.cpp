@@ -99,16 +99,8 @@ TEST(vector4, constexpr_test)
     {
         // cast
         constexpr Vector4i32 result = tMath::vector_cast<Vector4i32>(a);
-        constexpr Vector4i32 test = tMath::one();
+        constexpr Vector4i32 test = { 1, 1, 1, 1 };
         EXPECT_TRUE(result == test);
-    }
-    {
-        // initializers
-        constexpr Vector4f ones = tMath::one();
-        EXPECT_TRUE(ones == a);
-
-        constexpr Vector4f zeros = tMath::zero();
-        EXPECT_TRUE(zeros == o);
     }
     {
         constexpr Vector4f degrees = tMath::to_degrees(Vector4f{ tMath::PI<float>, tMath::PI<float>, tMath::PI<float>, tMath::PI<float> });
@@ -157,16 +149,6 @@ TEST(vector4, fields)
     EXPECT_TRUE(v.data[3] == 4);
 }
 
-TEST(vector4, init)
-{
-    {
-        Vector4f ones = tMath::one();
-        EXPECT_TRUE(ones.x == 1);
-        EXPECT_TRUE(ones.y == 1);
-        EXPECT_TRUE(ones.z == 1);
-        EXPECT_TRUE(ones.w == 1);
-    }
-}
 
 TEST(vector4, quat_tag)
 {
@@ -268,6 +250,24 @@ TEST(vector4, div)
     Vector4f v1 = { 1.5, 2, 5.5, 5.5 };
     const float f = 3;
     EXPECT_TRUE(tMath::approximately(v1 / f, { 0.5, 2.0/3.0, 5.5/3.0, 5.5/3.0 }));
+}
+
+TEST(vector4, hadamard_mul)
+{
+    constexpr Vector4f a = {1, 2, 3, 4};
+    constexpr Vector4f b = {4, 5, 6, 7};
+    constexpr Vector4f test = {4, 10, 18, 28};
+    constexpr Vector4f result = tMath::hadamard_mul(a, b);
+    EXPECT_EQ(test, result);
+}
+
+TEST(vector4, hadamard_div)
+{
+    constexpr Vector4f a = {1, 2, 3, 4};
+    constexpr Vector4f b = {4, 5, 6, 7};
+    constexpr Vector4f test = {1.0/4, 2.0/5, 0.5, 4.0/7};
+    constexpr Vector4f result = tMath::hadamard_div(a, b);
+    EXPECT_TRUE(tMath::approximately(test, result));
 }
 
 TEST(vector4, dot)

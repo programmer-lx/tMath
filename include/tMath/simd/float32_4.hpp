@@ -185,15 +185,13 @@ inline float32_4 TMATH_SIMD_CALL_CONV sub(float32_4_arg_in lhs, float32_4_arg_in
 #endif
 }
 
-inline float32_4 TMATH_SIMD_CALL_CONV mul(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
+/**
+ * 逐分量相乘
+ */
+inline float32_4 TMATH_SIMD_CALL_CONV hadamard_mul(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
 {
 #if defined(TMATH_NO_SIMD)
-    return {
-        lhs.x * rhs.x,
-        lhs.y * rhs.y,
-        lhs.z * rhs.z,
-        lhs.w * rhs.w
-    };
+    return TMATH_NAMESPACE_NAME::hadamard_mul(lhs, rhs);
 #else
     return _mm_mul_ps(lhs, rhs);
 #endif
@@ -211,12 +209,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV mul(float32_4_arg_in lhs, float scalar) no
 inline float32_4 TMATH_SIMD_CALL_CONV div(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
 {
 #if defined(TMATH_NO_SIMD)
-    return {
-        lhs.x / rhs.x,
-        lhs.y / rhs.y,
-        lhs.z / rhs.z,
-        lhs.w / rhs.w
-    };
+    return tMath::hadamard_div(lhs, rhs);
 #else
     return _mm_div_ps(lhs, rhs);
 #endif
@@ -279,6 +272,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV sin(float32_4_arg_in v) noexcept
     return _mm_sin_ps(v);
 #else
     // TODO sin
+    return _mm_set1_ps(0.0f);
 #endif
 }
 
@@ -290,6 +284,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV cos(float32_4_arg_in v) noexcept
     return _mm_cos_ps(v);
 #else
     // TODO cos
+    return _mm_set1_ps(0.0f);
 #endif
 }
 

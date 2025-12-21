@@ -62,25 +62,25 @@ static constexpr F Deg2Rad = PI<F> / static_cast<F>(180);
 template<is_floating_point F>
 static constexpr F MinTolerance = static_cast<F>(10) * std::numeric_limits<F>::epsilon();
 
-template<is_number N>
+template<is_signed_number N>
 static constexpr N Epsilon = std::numeric_limits<N>::epsilon();
 
-template<is_number N>
+template<is_signed_number N>
 static constexpr N Max = std::numeric_limits<N>::max();
 
-template<is_number N>
+template<is_signed_number N>
 static constexpr N Min = std::numeric_limits<N>::min();
 
-template<is_number N>
+template<is_signed_number N>
 static constexpr N Infinity = std::numeric_limits<N>::infinity();
 
-template<is_number N>
+template<is_signed_number N>
 static constexpr N QuietNaN = std::numeric_limits<N>::quiet_NaN();
 
-template<is_number N>
+template<is_signed_number N>
 static constexpr N SignalingNaN = std::numeric_limits<N>::signaling_NaN();
 
-template<is_number N>
+template<is_signed_number N>
 static constexpr N NaN = QuietNaN<N>;
 
 TMATH_NAMESPACE_END

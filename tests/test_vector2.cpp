@@ -264,6 +264,24 @@ TEST(vector2, dot)
     }
 }
 
+TEST(vector2, hadamard_mul)
+{
+    constexpr Vector2f a = { 1, 2 };
+    constexpr Vector2f b = { 3, 4 };
+    constexpr Vector2f result = tMath::hadamard_mul(a, b);
+    constexpr Vector2f test = { 3, 8 };
+    EXPECT_EQ(result, test);
+}
+
+TEST(vector2, hadamard_div)
+{
+    constexpr Vector2f a = { 1, 2 };
+    constexpr Vector2f b = { 3, 4 };
+    constexpr Vector2f result = tMath::hadamard_div(a, b);
+    constexpr Vector2f test = { 1.0/3.0, 0.5 };
+    EXPECT_TRUE(tMath::approximately(result, test));
+}
+
 TEST(vector2, cross)
 {
     {

@@ -24,11 +24,8 @@
 
 TMATH_NAMESPACE_BEGIN
 
-namespace detail
-{
-    struct quat_tag {};
-}
-#define TMATH_MARK_AS_QUAT using is_quat = TMATH_NAMESPACE_NAME::detail::quat_tag;
+struct quat_tag {};
+#define TMATH_MARK_AS_QUAT using is_quat = TMATH_NAMESPACE_NAME::quat_tag;
 
 #define TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name) \
     TMATH_FORCE_INLINE friend constexpr bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
@@ -102,11 +99,20 @@ template<typename T>
 concept is_signed_int = std::is_integral_v<T> && std::is_signed_v<T>;
 
 template<typename T>
+concept is_unsigned_int = std::is_integral_v<T> && !std::is_signed_v<T>;
+
+template<typename T>
+concept is_int = std::is_integral_v<T>;
+
+template<typename T>
 concept is_floating_point = std::is_floating_point_v<T>;
 
 // 数学库只能计算符合这些约束条件的数字
 template<typename T>
-concept is_number = TMATH_NAMESPACE_NAME::is_signed_int<T> || TMATH_NAMESPACE_NAME::is_floating_point<T>;
+concept is_signed_number = TMATH_NAMESPACE_NAME::is_signed_int<T> || TMATH_NAMESPACE_NAME::is_floating_point<T>;
+
+template<typename T>
+concept is_number = std::is_arithmetic_v<T>;
 
 namespace detail
 {
@@ -139,7 +145,7 @@ namespace detail
     concept has_quat_tag = requires
     {
         typename T::is_quat;
-        requires std::is_same_v<typename T::is_quat, TMATH_NAMESPACE_NAME::detail::quat_tag>;
+        requires std::is_same_v<typename T::is_quat, TMATH_NAMESPACE_NAME::quat_tag>;
     };
 
     template<typename TVec, typename TField>
@@ -295,18 +301,21 @@ template<typename T>
 concept is_vector_n = is_vector2<T> || is_vector3<T> || is_vector4<T>;
 
 
+template<typename T>
+concept is_vector_n_or_quat = is_vector_n<T> || is_quat<T>;
+
 
 // ----------------------------------------------------
-// VectorN 字段类型萃取
+// VectorN Quat 字段类型萃取
 // ----------------------------------------------------
-template<is_vector_n V>
-struct vector_traits
+template<is_vector_n_or_quat V>
+struct vector_quat_traits
 {
     using field_type = decltype(std::declval<V>().x);
 };
 
-template<is_vector_n V>
-using vector_field_t = vector_traits<V>::field_type;
+template<is_vector_n_or_quat V>
+using vector_quat_field_t = vector_quat_traits<V>::field_type;
 
 
 
@@ -346,10 +355,10 @@ template<is_floating_point F1, is_floating_point F2>
 using min_floating_point_t = std::conditional_t<(sizeof(F1) <= sizeof(F2)), F1, F2>;
 
 template<is_vector_n V1, is_vector_n V2>
-using max_field_floating_point_t = std::conditional_t<(sizeof(vector_field_t<V1>) >= sizeof(vector_field_t<V2>)), vector_field_t<V1>, vector_field_t<V2>>;
+using max_field_floating_point_t = std::conditional_t<(sizeof(vector_quat_field_t<V1>) >= sizeof(vector_quat_field_t<V2>)), vector_quat_field_t<V1>, vector_quat_field_t<V2>>;
 
 template<is_vector_n V1, is_vector_n V2>
-using min_field_floating_point_t = std::conditional_t<(sizeof(vector_field_t<V1>) <= sizeof(vector_field_t<V2>)), vector_field_t<V1>, vector_field_t<V2>>;
+using min_field_floating_point_t = std::conditional_t<(sizeof(vector_quat_field_t<V1>) <= sizeof(vector_quat_field_t<V2>)), vector_quat_field_t<V1>, vector_quat_field_t<V2>>;
 
 
 

@@ -84,6 +84,10 @@ action_for_test_target(test_no_SIMD)
 add_executable(test_no_SVML simd/no_SVML.cpp)
 action_for_test_target(test_no_SVML)
 
+# compile time vector1
+add_executable(test_compile_time_vector1 compile_time/test_vector1.cpp)
+action_for_test_target(test_compile_time_vector1)
+
 
 # 添加测试
 add_test(NAME Test_Algorithm COMMAND $<TARGET_FILE:test_algorithm>)
@@ -104,3 +108,6 @@ add_test(NAME Test_simd_F16C COMMAND $<TARGET_FILE:test_simd_F16C>)
 add_test(NAME Test_simd_AVX2 COMMAND $<TARGET_FILE:test_simd_AVX2>)
 add_test(NAME Test_no_SIMD COMMAND $<TARGET_FILE:test_no_SIMD>)
 add_test(NAME Test_no_SVML COMMAND $<TARGET_FILE:test_no_SVML>)
+
+# compile time
+add_test(NAME Test_compile_time_Vector1 COMMAND $<TARGET_FILE:test_compile_time_vector1>)

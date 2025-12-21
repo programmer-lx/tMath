@@ -24,6 +24,21 @@ TEST(vector1, constexpr_test)
         constexpr float v = tMath::lerp(a, b, o);
         EXPECT_TRUE(v == a);
     }
+    {
+        // lerp saturated
+        constexpr float v = tMath::lerp_saturated(a, b, 10.0f);
+        EXPECT_TRUE(v == b);
+    }
+    {
+        // min
+        constexpr float result = tMath::min(1, 2);
+        EXPECT_EQ(result, 1);
+    }
+    {
+        // max
+        constexpr float result = tMath::max(2, 3);
+        EXPECT_EQ(result, 3);
+    }
 }
 
 TEST(vector1, approximately)
@@ -37,9 +52,33 @@ TEST(vector1, to_radians)
     EXPECT_TRUE(tMath::approximately(tMath::to_radians(180.0f), tMath::PI<float>));
 }
 
+TEST(vector1, factorial)
+{
+    EXPECT_EQ(tMath::factorial(10), 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1);
+    EXPECT_EQ(tMath::factorial(11), 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1);
+    EXPECT_EQ(tMath::factorial(-1), 1);
+    EXPECT_EQ(tMath::factorial(0), 1);
+}
+
 TEST(vector1, degrees)
 {
     EXPECT_TRUE(tMath::approximately(tMath::to_degrees(tMath::PI<float>), 180.0f));
+}
+
+TEST(vector1, exp)
+{
+    EXPECT_EQ(tMath::exp(5.0), std::exp(5.0));
+    EXPECT_EQ(tMath::exp(5.0f), std::exp(5.0f));
+}
+
+TEST(vector1, min)
+{
+    EXPECT_EQ(tMath::min(1, 2), std::min(1, 2));
+}
+
+TEST(vector1, max)
+{
+    EXPECT_EQ(tMath::max(1, 2), std::max(1, 2));
 }
 
 TEST(vector1, abs)
@@ -59,6 +98,12 @@ TEST(vector1, clamp)
 TEST(vector1, lerp)
 {
     EXPECT_TRUE(tMath::approximately(tMath::lerp(-10.0f, 10.0f, 0.6), 2.0f));
+}
+
+TEST(vector1, lerp_saturated)
+{
+    EXPECT_TRUE(tMath::approximately(tMath::lerp_saturated(-10.0f, 10.0f, 1.2f), 10.0f));
+    EXPECT_TRUE(tMath::approximately(tMath::lerp_saturated(-10.0f, 10.0f, -2.f), -10.0f));
 }
 
 TEST(vector1, triangle_functions)

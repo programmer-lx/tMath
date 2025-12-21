@@ -20,10 +20,43 @@ constexpr F to_radians(const F degrees) noexcept
     return degrees * Deg2Rad<F>;
 }
 
+/**
+ * x阶乘
+ * @return x * (x-1) * (x-2) ... * 2 * 1
+ */
+template<is_int I>
+constexpr I factorial(const I x) noexcept
+{
+    I result = static_cast<I>(1);
+    for (I i = 1; i <= x; ++i)
+    {
+        result *= i;
+    }
+    return result;
+}
+
 template<is_number N>
+constexpr N min(const N a, const N b) noexcept
+{
+    return a < b ? a : b;
+}
+
+template<is_number N>
+constexpr N max(const N a, const N b) noexcept
+{
+    return a > b ? a : b;
+}
+
+template<is_signed_number N>
 N abs(const N n) noexcept
 {
     return std::abs(n);
+}
+
+template<is_floating_point F>
+F exp(const F x) noexcept
+{
+    return std::exp(x);
 }
 
 template<is_floating_point F>
@@ -78,7 +111,7 @@ F sqrt(const F f) noexcept
  * clamp n to [min, max]
  * if n is NaN, return NaN
  */
-template<is_number N>
+template<is_signed_number N>
 constexpr N clamp(const N n, const N min, const N max) noexcept
 {
     return (n < min) ? min : (n > max) ? max : n;
@@ -87,7 +120,16 @@ constexpr N clamp(const N n, const N min, const N max) noexcept
 template<is_floating_point F, is_floating_point T>
 constexpr F lerp(const F a, const F b, const T t) noexcept
 {
-    return std::lerp(a, b, t);
+    return a + (b - a) * static_cast<F>(t);
+}
+
+/**
+ * clamp t to [0, 1] at first
+ */
+template<is_floating_point F, is_floating_point T>
+constexpr F lerp_saturated(const F a, const F b, const T t) noexcept
+{
+    return lerp(a, b, clamp(t, static_cast<T>(0), static_cast<T>(1)));
 }
 
 // 类型不同的浮点的比较
@@ -136,7 +178,7 @@ static bool is_invalid_divisor(I i) noexcept
     return i == static_cast<I>(0);
 }
 
-template<is_number N>
+template<is_signed_number N>
 void safe_divide_inplace(N& val, const N divisor, const N fallback) noexcept
 {
     if (is_invalid_divisor(divisor))
@@ -148,7 +190,7 @@ void safe_divide_inplace(N& val, const N divisor, const N fallback) noexcept
     val /= divisor;
 }
 
-template<is_number N>
+template<is_signed_number N>
 N safe_divide(const N val, const N divisor, const N fallback) noexcept
 {
     if (is_invalid_divisor(divisor))

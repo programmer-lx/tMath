@@ -98,18 +98,20 @@ TEST(float32_4, sub)
     EXPECT_TRUE(tMath::approximately(test, {0, 1, 2, 3}));
 }
 
+TEST(float32_4, hadamard_mul)
+{
+    float32_4 v = tSimd::load(1, 2, 3, 4);
+    float32_4 v2 = tSimd::load(2);
+    float32_4 result = tSimd::hadamard_mul(v, v2);
+
+    Vector4f test{};
+    tSimd::store(test, result);
+
+    EXPECT_TRUE(tMath::approximately(test, {2, 4, 6, 8}));
+}
+
 TEST(float32_4, mul)
 {
-    {
-        float32_4 v = tSimd::load(1, 2, 3, 4);
-        float32_4 v2 = tSimd::load(2);
-        float32_4 result = tSimd::mul(v, v2);
-
-        Vector4f test{};
-        tSimd::store(test, result);
-
-        EXPECT_TRUE(tMath::approximately(test, {2, 4, 6, 8}));
-    }
     {
         float32_4 v = tSimd::load(1, 2, 3, 4);
         float32_4 result = tSimd::mul(v, 2);
