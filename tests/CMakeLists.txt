@@ -80,8 +80,13 @@ action_for_test_target(test_simd_AVX2)
 add_executable(test_no_SIMD simd/no_simd.cpp)
 action_for_test_target(test_no_SIMD)
 
+# no SVML
+add_executable(test_no_SVML simd/no_SVML.cpp)
+action_for_test_target(test_no_SVML)
+
 
 # 添加测试
+add_test(NAME Test_Algorithm COMMAND $<TARGET_FILE:test_algorithm>)
 add_test(NAME Test_Float COMMAND $<TARGET_FILE:test_float>)
 add_test(NAME Test_Vector2 COMMAND $<TARGET_FILE:test_vector2>)
 add_test(NAME Test_Vector3 COMMAND $<TARGET_FILE:test_vector3>)
@@ -98,3 +103,4 @@ add_test(NAME Test_simd_FMA3 COMMAND $<TARGET_FILE:test_simd_FMA3>)
 add_test(NAME Test_simd_F16C COMMAND $<TARGET_FILE:test_simd_F16C>)
 add_test(NAME Test_simd_AVX2 COMMAND $<TARGET_FILE:test_simd_AVX2>)
 add_test(NAME Test_no_SIMD COMMAND $<TARGET_FILE:test_no_SIMD>)
+add_test(NAME Test_no_SVML COMMAND $<TARGET_FILE:test_no_SVML>)

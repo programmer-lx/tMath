@@ -22,7 +22,10 @@ template<is_floating_point F>
 static constexpr F InvTwoPI = static_cast<F>(1) / TwoPI<F>;
 
 template<is_floating_point F>
-static constexpr F HalfPI = static_cast<F>(0.5) * PI<F>;
+static constexpr F HalfPI = PI<F> / static_cast<F>(2);
+
+template<is_floating_point F>
+static constexpr F QuarterPI = PI<F> / static_cast<F>(4);
 
 
 

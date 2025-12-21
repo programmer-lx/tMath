@@ -32,16 +32,6 @@
 // 测试时，应开启全部的SIMD开关，确保电脑支持所有使用到的SIMD指令
 #if defined(TMATH_IS_TESTING) && !defined(TMATH_IS_DOING_BENCHMARK)
 
-    // 如果是MSVC，则判断有无开启AVX2
-    #if defined(TMATH_TEST_FMA3) || ( defined(_MSC_VER) && defined(__AVX2__) )
-        #define TMATH_USE_FMA3
-    #endif
-
-    // 如果是MSVC，则判断有无开启AVX2
-    #if defined(TMATH_TEST_F16C) || ( defined(_MSC_VER) && defined(__AVX2__) )
-        #define TMATH_USE_F16C
-    #endif
-
     #undef __SSE2__
     #undef __SSE3__
     #undef __SSE4_1__
@@ -50,9 +40,20 @@
     #undef __FMA__
     #undef __F16C__
 
-    // 如果是MSVC，开启了FMA或F16C，则代表开启了AVX2
-    #if defined(_MSC_VER) && ( defined(TMATH_TEST_FMA3) || defined(TMATH_USE_F16C) )
-        #define TMATH_TEST_AVX2
+    // 如果是MSVC，则代表开启了AVX2
+    #if defined(TMATH_TEST_FMA3)
+        #define TMATH_USE_FMA3
+        #if defined(_MSC_VER)
+            #define TMATH_USE_AVX2
+        #endif
+    #endif
+
+    // 如果是MSVC，则代表开启了AVX2
+    #if defined(TMATH_TEST_F16C)
+        #define TMATH_USE_F16C
+        #if defined(_MSC_VER)
+            #define TMATH_USE_AVX2
+        #endif
     #endif
 
     #if defined(TMATH_TEST_SSE2)
@@ -281,8 +282,7 @@ TMATH_SIMD_NAMESPACE_BEGIN
 TMATH_SIMD_NAMESPACE_END
 
 
-// checker for testing
-#if defined (TMATH_IS_TESTING)
+// checker
 
 #include <initializer_list>
 
@@ -341,6 +341,74 @@ constexpr bool test_simd_intrinsics(std::initializer_list<bool> opened, std::ini
 // teste AVX2
 // static_assert(test_simd_intrinsics({use_SSE2, use_SSE3, use_SSE4_1, use_AVX, use_F16C, use_FMA3, use_AVX2}, {}));
 
-TMATH_SIMD_NAMESPACE_END
+#include <intrin.h>
 
+struct IntrinsicsCheckResult
+{
+    bool SSE2   = false;
+    bool SSE3   = false;
+    bool SSE4_1 = false;
+    bool AVX    = false;
+    bool AVX2   = false;
+    bool F16C   = false;
+    bool FMA3   = false;
+    bool SVML   = false;
+};
+
+inline IntrinsicsCheckResult runtime_check_simd_intrinsics() noexcept
+{
+    IntrinsicsCheckResult result{};
+
+    int regs[4] = { -1 };
+
+    // ===== CPUID.(EAX=1) =====
+    __cpuidex(regs, 1, 0);
+
+    const bool has_sse2   = (regs[3] & (1 << 26)) != 0;
+    const bool has_sse3   = (regs[2] & (1 <<  0)) != 0;
+    const bool has_sse41  = (regs[2] & (1 << 19)) != 0;
+    const bool has_avx    = (regs[2] & (1 << 28)) != 0;
+    const bool has_fma    = (regs[2] & (1 << 12)) != 0;
+    const bool has_f16c   = (regs[2] & (1 << 29)) != 0;
+    const bool has_osxsave= (regs[2] & (1 << 27)) != 0;
+
+    result.SSE2   = has_sse2;
+    result.SSE3   = has_sse3;
+    result.SSE4_1 = has_sse41;
+
+    // ===== OS 是否支持 AVX 状态保存 =====
+    bool os_supports_avx = false;
+    if (has_osxsave)
+    {
+        uint64_t xcr0 = _xgetbv(0);
+        // XMM (bit 1) + YMM (bit 2)
+        os_supports_avx = (xcr0 & 0x6) == 0x6;
+    }
+
+    if (has_avx && os_supports_avx)
+    {
+        result.AVX  = true;
+        result.FMA3 = has_fma;
+        result.F16C = has_f16c;
+    }
+
+    // ===== CPUID.(EAX=7, ECX=0) =====
+    __cpuidex(regs, 7, 0);
+    const bool has_avx2 = (regs[1] & (1 << 5)) != 0;
+
+    if (has_avx2 && os_supports_avx)
+    {
+        result.AVX2 = true;
+    }
+
+    // ===== SVML（只能通过编译器判断）=====
+#if defined(TMATH_USE_SVML)
+    result.SVML = true;
+#else
+    result.SVML = false;
 #endif
+
+    return result;
+}
+
+TMATH_SIMD_NAMESPACE_END

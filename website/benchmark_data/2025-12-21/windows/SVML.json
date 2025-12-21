@@ -1,0 +1,38 @@
+{
+    "function_groups": [
+        {
+            "fn_signature": "float4 cos(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 3281.250000000001,
+                    "cv": 0.033671751485075126,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 sin(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 3125.0,
+                    "cv": 0.043844470147052284,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 tan(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 7031.250000000002,
+                    "cv": 0.30122903626919234,
+                    "op_count": 512
+                }
+            ]
+        }
+    ],
+    "repetitions": 5
+}
