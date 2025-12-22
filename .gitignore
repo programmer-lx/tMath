@@ -3,6 +3,8 @@ cmake-build-release-msvc/
 cmake-build-debug-mingw/
 cmake-build-release-mingw/
 cmake-build-debug-msvc-clangcl/
+cmake-build-debug-clang/
+cmake-build-debug-msvc-clang/
 .idea/
 build/
 build-linux/
