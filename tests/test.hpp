@@ -7,6 +7,7 @@
 #include <random>
 #include <chrono>
 
+#include <cstddef>
 #include <gtest/gtest.h>
 
 #if !defined(TMATH_IS_TESTING)
