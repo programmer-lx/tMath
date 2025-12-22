@@ -212,7 +212,7 @@
         #endif
 
         // AVX header
-        #ifdef TMATH_USE_AVX
+        #if defined(TMATH_USE_AVX) || defined(TMATH_USE_FMA3) || defined(TMATH_USE_F16C)
             #include <immintrin.h>
         #endif
 

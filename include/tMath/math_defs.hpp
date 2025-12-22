@@ -129,11 +129,9 @@ namespace detail
         std::is_standard_layout_v<T> &&
         std::is_aggregate_v<T>;
 
-    template<typename T, typename Field, size_t N>
+    template<typename T, typename Field, int N>
     constexpr bool is_vector_n_layout_v = []()
     {
-        static_assert(N >= 2, "vectorN, N must >= 2");
-
         if constexpr (!is_pure_data_type<T>)
         {
             return false;
