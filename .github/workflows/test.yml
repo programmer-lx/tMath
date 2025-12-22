@@ -20,33 +20,41 @@ jobs:
           # =========================
           - os: windows-latest
             compiler: msvc
+            multi_config: true
             generator: "Visual Studio 17 2022"
             config: Debug
 
           - os: windows-latest
             compiler: msvc
+            multi_config: true
             generator: "Visual Studio 17 2022"
             config: Release
 
           - os: windows-latest
-            compiler: clang-cl
-            toolset: ClangCL
-            generator: "Visual Studio 17 2022"
+            compiler: clang
+            multi_config: true
+            generator: "Ninja Multi-Config"
             config: Debug
+            cc: clang
+            cxx: clang++
 
           - os: windows-latest
-            compiler: clang-cl
-            toolset: ClangCL
-            generator: "Visual Studio 17 2022"
+            compiler: clang
+            multi_config: true
+            generator: "Ninja Multi-Config"
             config: Release
+            cc: clang
+            cxx: clang++
 
           - os: windows-latest
             compiler: mingw
+            multi_config: false
             generator: "MinGW Makefiles"
             config: Debug
 
           - os: windows-latest
             compiler: mingw
+            multi_config: false
             generator: "MinGW Makefiles"
             config: Release
 
@@ -55,6 +63,7 @@ jobs:
           # =========================
           - os: ubuntu-latest
             compiler: gcc
+            multi_config: true
             generator: "Ninja Multi-Config"
             cc: gcc-13
             cxx: g++-13
@@ -62,6 +71,7 @@ jobs:
 
           - os: ubuntu-latest
             compiler: gcc
+            multi_config: true
             generator: "Ninja Multi-Config"
             cc: gcc-13
             cxx: g++-13
@@ -69,6 +79,7 @@ jobs:
 
           - os: ubuntu-latest
             compiler: clang
+            multi_config: true
             generator: "Ninja Multi-Config"
             cc: clang
             cxx: clang++
@@ -76,6 +87,7 @@ jobs:
 
           - os: ubuntu-latest
             compiler: clang
+            multi_config: true
             generator: "Ninja Multi-Config"
             cc: clang
             cxx: clang++
@@ -87,23 +99,21 @@ jobs:
           submodules: recursive
 
 
-      - name: Configure CMake (Multi-Config MSVC, clang)
-        if: matrix.compiler == 'msvc'
+      - name: Configure CMake (Multi-Config MSVC, clang++)
+        if: matrix.multi_config == true
         run: >
           cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }}
           -G "${{ matrix.generator }}"
-          ${{ matrix.toolset && format('-T {0}', matrix.toolset) }}
           -DTMATH_BUILD_TESTS=ON
         env:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
 
       - name: Configure CMake (Single-Config G++, MinGW)
-        if: matrix.compiler != 'msvc'
+        if: matrix.multi_config == false
         run: >
           cmake -S . -B build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }}
           -G "${{ matrix.generator }}"
-          ${{ matrix.toolset && format('-T {0}', matrix.toolset) }}
           -DCMAKE_BUILD_TYPE=${{ matrix.config }}
           -DTMATH_BUILD_TESTS=ON
         env:
@@ -112,11 +122,11 @@ jobs:
 
 
       - name: Build (Multi-Config)
-        if: matrix.compiler == 'msvc'
+        if: matrix.multi_config == true
         run: cmake --build build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }} --config ${{ matrix.config }}
 
       - name: Build (Single-Config)
-        if: matrix.compiler != 'msvc'
+        if: matrix.multi_config == false
         run: cmake --build build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }}
 
 
