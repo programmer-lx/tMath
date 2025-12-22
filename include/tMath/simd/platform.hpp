@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <initializer_list>
 
 // #ifndef _WIN64
 // #error "The library only support win64 system"
@@ -285,9 +286,6 @@ TMATH_SIMD_NAMESPACE_END
 
 
 // checker
-
-#include <initializer_list>
-
 
 // 如果这个宏被定义，就代表库的代码已经被包含
 // 对于测试，我们严格规定，测试代码必须在库代码之后，所以测试代码开头一定要检查这个宏有没有定义，如果没有定义，则给出编译报错

@@ -24,16 +24,6 @@
 #define TMATH_NODISCARD [[nodiscard]]
 
 
-#if defined(__clang__)
-    #define TMATH_CLANG_DIAGNOSTIC_PUSH _Pragma("clang diagnostic push")
-    #define TMATH_CLANG_DIAGNOSTIC_POP _Pragma("clang diagnostic pop")
-    #define TMATH_CLANG_DIAGNOSTIC_IGNORED(warning) _Pragma(#warning)
-#else
-    #define TMATH_CLANG_DIAGNOSTIC_PUSH
-    #define TMATH_CLANG_DIAGNOSTIC_POP
-    #define TMATH_CLANG_DIAGNOSTIC_IGNORED(warning)
-#endif
-
 // 遇到 struct { union { struct { a, b, c }; struct { d, e, f }; }; }; 这种嵌套了子对象的联合体，使用单对 {} 初始化，clang会警告，需要禁用警告
 #define TMATH_IGNORE_CLANG_SUBOBJECT_BRACES_WARNING TMATH_CLANG_DIAGNOSTIC_IGNORED(clang diagnostic ignored "-Wmissing-braces")
 

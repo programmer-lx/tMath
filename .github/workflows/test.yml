@@ -130,6 +130,5 @@ jobs:
         run: cmake --build build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }}
 
 
-      - name: Run CTest (TODO only windows msvc now)
-        if: runner.os == 'Windows' && matrix.compiler != 'mingw'
+      - name: Run CTest
         run: ctest --test-dir build-${{ matrix.os }}-${{ matrix.config }}-${{ matrix.compiler }} -C ${{ matrix.config }} --output-on-failure

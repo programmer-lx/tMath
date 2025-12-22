@@ -5,9 +5,6 @@
 #include "math_defs.hpp"
 #include "vector1.hpp"
 
-TMATH_CLANG_DIAGNOSTIC_PUSH
-TMATH_IGNORE_CLANG_SUBOBJECT_BRACES_WARNING
-
 TMATH_NAMESPACE_BEGIN
 
 // ============================================= operators =============================================
@@ -259,5 +256,3 @@ constexpr TVec2 lerp(const TVec2& a, const TVec2& b, const F t) noexcept
 }
 
 TMATH_NAMESPACE_END
-
-TMATH_CLANG_DIAGNOSTIC_POP
