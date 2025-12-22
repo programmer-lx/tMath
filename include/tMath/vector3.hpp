@@ -4,6 +4,9 @@
 
 #include "math_defs.hpp"
 
+TMATH_CLANG_DIAGNOSTIC_PUSH
+TMATH_IGNORE_CLANG_SUBOBJECT_BRACES_WARNING
+
 TMATH_NAMESPACE_BEGIN
 
 // ============================================= operators =============================================
@@ -267,3 +270,5 @@ constexpr TVec3 lerp(const TVec3& a, const TVec3& b, const F t) noexcept
 }
 
 TMATH_NAMESPACE_END
+
+TMATH_CLANG_DIAGNOSTIC_POP

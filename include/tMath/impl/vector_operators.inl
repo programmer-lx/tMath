@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef TMATH_VECTOR_OPERATORS_HEADER__
-#define TMATH_VECTOR_OPERATORS_HEADER__
-
 #include "../math_defs.hpp"
 
 TMATH_NAMESPACE_BEGIN
@@ -66,5 +63,3 @@ TVec safe_divide(const TVec& v, const vector_quat_field_t<TVec> divisor, const T
 }
 
 TMATH_NAMESPACE_END
-
-#endif // TMATH_VECTOR_OPERATORS_HEADER__
