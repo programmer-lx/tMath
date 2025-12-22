@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cstddef> // for ptrdiff_t (这个头文件一定要包含，因为下面有些头文件可能用到了 ptrdiff_t ，不包含，可能会编译报错)
+#include <cstdint>
+
 #include <limits>
 #include <concepts>
 #include <type_traits>
-#include <cstdint>
 
 #define TMATH_NAMESPACE_NAME tMath
 #define TMATH_NAMESPACE_BEGIN namespace TMATH_NAMESPACE_NAME {
