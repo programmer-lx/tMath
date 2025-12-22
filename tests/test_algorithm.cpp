@@ -27,7 +27,7 @@ static float sin_taylor_9(float x)
     // sin(a) == cos(PI/2 - a)，压缩到 [0, PI/4]
     if (val > tMath::QuarterPI<double>)
     {
-        return sign * cos_taylor_10(tMath::HalfPI<double> - val);
+        return static_cast<float>(sign * cos_taylor_10(static_cast<float>(tMath::HalfPI<double> - val)));
     }
 
     constexpr double c3 = -1.0 / 6.0;
@@ -79,7 +79,7 @@ static float cos_taylor_10(float x)
     // cos(a) == sin(PI/2 - a)，压缩到 [0, PI/4]
     if (val > tMath::QuarterPI<double>)
     {
-        return sign * sin_taylor_9(tMath::HalfPI<double> - val);
+        return static_cast<float>(sign * sin_taylor_9(static_cast<float>(tMath::HalfPI<double> - val)));
     }
 
     constexpr double c2 = -1.0 / 2.0;

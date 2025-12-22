@@ -155,6 +155,7 @@
         #define TMATH_USE_SSE2
     #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || defined(_M_ARM64EC) || __arm__ || __aarch64__
         #define TMATH_USE_ARM_NEON
+        #error "TODO: arm is unsupported."
     #elif !defined(TMATH_NO_SIMD)
         #error "tSimd does not support this target"
     #endif
@@ -315,33 +316,13 @@ constexpr bool test_simd_intrinsics(std::initializer_list<bool> opened, std::ini
     return true;
 }
 
-// usage for testing
 
-// no SIMD
-// static_assert(test_simd_intrinsics({}, {use_SSE2, use_SSE3, use_SSE4_1, use_AVX, use_AVX2, use_FMA3, use_F16C}));
-
-// test SSE2
-// static_assert(test_simd_intrinsics({use_SSE2}, {use_SSE3, use_SSE4_1, use_AVX, use_AVX2, use_FMA3, use_F16C}));
-
-// teste SSE3
-// static_assert(test_simd_intrinsics({use_SSE2, use_SSE3}, {use_SSE4_1, use_AVX, use_AVX2, use_FMA3, use_F16C}));
-
-// teste SSE4_1
-// static_assert(test_simd_intrinsics({use_SSE2, use_SSE3, use_SSE4_1}, {use_AVX, use_AVX2, use_FMA3, use_F16C}));
-
-// teste AVX
-// static_assert(test_simd_intrinsics({use_SSE2, use_SSE3, use_SSE4_1, use_AVX}, {use_AVX2, use_FMA3, use_F16C}));
-
-// teste FMA3
-// static_assert(test_simd_intrinsics({use_SSE2, use_SSE3, use_SSE4_1, use_AVX, use_FMA3}, {use_AVX2, use_F16C}));
-
-// teste F16C
-// static_assert(test_simd_intrinsics({use_SSE2, use_SSE3, use_SSE4_1, use_AVX, use_F16C}, {use_AVX2, use_FMA3}));
-
-// teste AVX2
-// static_assert(test_simd_intrinsics({use_SSE2, use_SSE3, use_SSE4_1, use_AVX, use_F16C, use_FMA3, use_AVX2}, {}));
-
-#include <intrin.h>
+#if defined(_MSC_VER)
+    #include <intrin.h>
+#elif defined(__GNUC__) || defined(__clang__)
+    #include <cpuid.h>
+    #include <xsaveintrin.h>
+#endif
 
 struct IntrinsicsCheckResult
 {

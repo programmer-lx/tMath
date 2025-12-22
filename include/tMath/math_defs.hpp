@@ -25,7 +25,7 @@
 TMATH_NAMESPACE_BEGIN
 
 struct quat_tag {};
-#define TMATH_MARK_AS_QUAT using is_quat = TMATH_NAMESPACE_NAME::quat_tag;
+#define TMATH_QUAT_TAG using is_quat = TMATH_NAMESPACE_NAME::quat_tag;
 
 #define TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name) \
     TMATH_FORCE_INLINE friend constexpr bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
@@ -85,7 +85,7 @@ struct quat_tag {};
     TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
 
 #define TMATH_QUAT(quat_type_name, field_type_name) \
-    TMATH_MARK_AS_QUAT \
+    TMATH_QUAT_TAG \
     union \
     { \
         struct { field_type_name x, y, z, w; }; \
@@ -129,17 +129,42 @@ namespace detail
         std::is_standard_layout_v<T> &&
         std::is_aggregate_v<T>;
 
-    template<typename T>
-    concept has_z = requires(T v)
+    template<typename T, typename Field, size_t N>
+    constexpr bool is_vector_n_layout_v = []()
     {
-        v.z;
-    };
+        static_assert(N >= 2, "vectorN, N must >= 2");
 
-    template<typename T>
-    concept has_w = requires(T v)
-    {
-        v.w;
-    };
+        if constexpr (!is_pure_data_type<T>)
+        {
+            return false;
+        }
+
+        if constexpr (sizeof(T) != N * sizeof(Field))
+        {
+            return false;
+        }
+
+        if constexpr (N == 2)
+        {
+            return  offsetof(T, x) == 0 &&
+                    offsetof(T, y) == sizeof(Field);
+        }
+        if constexpr (N == 3)
+        {
+            return  offsetof(T, x) == 0 &&
+                    offsetof(T, y) == sizeof(Field) &&
+                    offsetof(T, z) == sizeof(Field) * 2;
+        }
+        if constexpr (N == 4)
+        {
+            return  offsetof(T, x) == 0 &&
+                    offsetof(T, y) == sizeof(Field) &&
+                    offsetof(T, z) == sizeof(Field) * 2 &&
+                    offsetof(T, w) == sizeof(Field) * 3;
+        }
+
+        return true;
+    }();
 
     template<typename T>
     concept has_quat_tag = requires
@@ -157,7 +182,7 @@ namespace detail
         requires std::is_same_v<decltype(v.y), TField>;
 
         requires is_pure_data_type<TVec>;
-    } && !has_z<TVec> && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 2);
+    } && is_vector_n_layout_v<TVec, TField, 2>;
 
     template<typename TVec, typename TField>
     concept is_generic_vector3 = requires(TVec v)
@@ -170,7 +195,7 @@ namespace detail
         requires std::is_same_v<decltype(v.z), TField>;
 
         requires is_pure_data_type<TVec>;
-    } && !has_w<TVec> && (sizeof(TVec) == sizeof(TField) * 3);
+    } && is_vector_n_layout_v<TVec, TField, 3>;
 
     template<typename T, typename TField>
     concept is_vector4_or_quat = requires(T v)
@@ -185,7 +210,7 @@ namespace detail
         requires std::is_same_v<decltype(v.w), TField>;
 
         requires is_pure_data_type<T>;
-    } && (sizeof(T) == sizeof(TField) * 4);
+    } && is_vector_n_layout_v<T, TField, 4>;
 
     template<typename TVec, typename TField>
     concept is_generic_vector4 = is_vector4_or_quat<TVec, TField> && !has_quat_tag<TVec>;

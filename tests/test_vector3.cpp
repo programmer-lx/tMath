@@ -64,62 +64,6 @@ struct Vector4i32
     TMATH_VECTOR4(Vector4i32, int32_t)
 };
 
-TEST(vector3, constexpr_test)
-{
-    constexpr Vector3f a = { 1, 1, 1 };
-    constexpr Vector3f b = { 2, 2, 2 };
-    constexpr Vector3f o = { 0 ,0, 0 };
-    {
-        // ==
-        constexpr Vector3f t = {1, 1, 1};
-        constexpr bool result = t == a;
-    }
-    {
-        // !=
-        constexpr bool result = (a != b);
-    }
-    {
-        // +
-        constexpr Vector3f result = a + b;
-    }
-    {
-        // -
-        constexpr Vector3f result = a - b;
-    }
-    {
-        // *
-        constexpr Vector3f result = a * 2;
-    }
-    {
-        // /
-        constexpr Vector3f result = a / 2;
-    }
-    {
-        // cast
-        constexpr Vector3i32 result = tMath::vector_cast<Vector3i32>(a);
-    }
-    {
-        // to degree
-        constexpr Vector3f result = tMath::to_degrees(a);
-    }
-    {
-        // to radians
-        constexpr Vector3f result = tMath::to_radians(a);
-    }
-    {
-        // dot
-        constexpr float result = tMath::dot(a, b);
-        constexpr float result2 = tMath::dot(1.0f, 2.0f, 3.0f, 4.0f, 5.f, 6.f);
-    }
-    {
-        constexpr Vector3f r = tMath::cross(a, b);
-    }
-    {
-        constexpr Vector3f r = tMath::lerp(a, a, 0.5f);
-        EXPECT_TRUE(r == a);
-    }
-}
-
 
 TEST(vector3, fields)
 {
@@ -141,9 +85,10 @@ TEST(vector3, fields)
 TEST(vector3, equal)
 {
     {
-        Vector3f v1 = {1.5, 2.5, 5.5};
-        Vector3f v2 = { 1.5, 2.5, 5.5 };
-        EXPECT_TRUE(v1 == v2);
+        constexpr Vector3f v1 = {1.5, 2.5, 5.5};
+        constexpr Vector3f v2 = { 1.5, 2.5, 5.5 };
+        constexpr bool result = (v1 == v2);
+        EXPECT_TRUE(result);
     }
     {
         Vector3f v1 = {1.5, 2.50001, 1};
@@ -154,9 +99,10 @@ TEST(vector3, equal)
 
 TEST(vector3, not_equal)
 {
-    Vector3f v1 = {1.5, 2.5, 5.51};
-    Vector3f v2 = { 1.5, 2.5, 5.5 };
-    EXPECT_TRUE(v1 != v2);
+    constexpr Vector3f v1 = {1.5, 2.5, 5.51};
+    constexpr Vector3f v2 = { 1.5, 2.5, 5.5 };
+    constexpr bool result = (v1 != v2);
+    EXPECT_TRUE(result);
 }
 
 TEST(vector3, self_add)
@@ -197,42 +143,46 @@ TEST(vector3, self_div)
 TEST(vector3, add)
 {
     // +
-    Vector3f v1 = { 1.5, 2, 5.5 };
-    Vector3f v2 = { 3.5, 2.5, 5.5 };
-    EXPECT_TRUE(tMath::approximately(v1 + v2, { 5, 4.5, 11.0 }));
+    constexpr Vector3f v1 = { 1.5, 2, 5.5 };
+    constexpr Vector3f v2 = { 3.5, 2.5, 5.5 };
+    constexpr Vector3f result = v1 + v2;
+    EXPECT_TRUE(tMath::approximately(result, { 5, 4.5, 11.0 }));
 }
 
 TEST(vector3, sub)
 {
     // -
-    Vector3f v1 = { 1.5, 2, 15.5 };
+    constexpr Vector3f v1 = { 1.5, 2, 15.5 };
     constexpr Vector3f v2 = { 3.5, 2.5, 5.2 };
-    EXPECT_TRUE(tMath::approximately(v1 - v2, { -2, -0.5, 10.3 }));
+    constexpr Vector3f result = v1 - v2;
+    EXPECT_TRUE(tMath::approximately(result, { -2, -0.5, 10.3 }));
 }
 
 TEST(vector3, mul)
 {
     // *
-    Vector3f v1 = { 1.5, 2, 5.5 };
-    const float f = 3;
-    EXPECT_TRUE(tMath::approximately(v1 * f, { 4.5, 6, 16.5 }));
+    constexpr Vector3f v1 = { 1.5, 2, 5.5 };
+    constexpr float f = 3;
+    constexpr Vector3f result = v1 * f;
+    EXPECT_TRUE(tMath::approximately(result, { 4.5, 6, 16.5 }));
 }
 
 TEST(vector3, div)
 {
     // /
-    Vector3f v1 = { 1.5, 2, 5.5 };
-    const float f = 3;
-    EXPECT_TRUE(tMath::approximately(v1 / f, { 0.5, 2.0/3.0, 5.5/3.0 }));
+    constexpr Vector3f v1 = { 1.5, 2, 5.5 };
+    constexpr float f = 3;
+    constexpr Vector3f result = v1 / f;
+    EXPECT_TRUE(tMath::approximately(result, { 0.5, 2.0/3.0, 5.5/3.0 }));
 }
 
 TEST(vector3, dot)
 {
     // dot
     {
-        Vector3f v1 = { 1, 2, 3 };
-        Vector3f v2 = { 2, 3, 4 };
-        float f = tMath::dot(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+        constexpr Vector3f v1 = { 1, 2, 3 };
+        constexpr Vector3f v2 = { 2, 3, 4 };
+        constexpr float f = tMath::dot(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
         EXPECT_TRUE(tMath::approximately(f, 20.0f));
     }
     {
@@ -264,18 +214,20 @@ TEST(vector3, hadamard_div)
 TEST(vector3, cross)
 {
     // cross
-    Vector3f v1 = { -1, 1, 6 };
-    Vector3f v2 = { 1, 1, -10 };
-    EXPECT_TRUE(tMath::approximately(tMath::cross(v1, v2), { -16, -4, -2 }));
+    constexpr Vector3f v1 = { -1, 1, 6 };
+    constexpr Vector3f v2 = { 1, 1, -10 };
+    constexpr Vector3f result = tMath::cross(v1, v2);
+    EXPECT_TRUE(tMath::approximately(result, { -16, -4, -2 }));
 }
 
 TEST(vector3, casts)
 {
     // casts
     {
-        Vector3f v3f = { 1.1, 2.2, 3.3 };
-        Vector3i16 test = { 1, 2, 3 };
-        EXPECT_TRUE(tMath::vector_cast<Vector3i16>(v3f) == test);
+        constexpr Vector3f v3f = { 1.1, 2.2, 3.3 };
+        constexpr Vector3i16 test = { 1, 2, 3 };
+        constexpr Vector3i16 result = tMath::vector_cast<Vector3i16>(v3f);
+        EXPECT_TRUE(result == test);
     }
     {
         const float x = 1.111111f;
@@ -297,14 +249,16 @@ TEST(vector3, approximately)
 TEST(vector3, to_degrees)
 {
     // to degrees
-    Vector3f degrees = { 180, 180, 360 };
-    EXPECT_TRUE(tMath::approximately(tMath::to_radians(degrees), { tMath::PI<float>, tMath::PI<float>, tMath::PI<float> * 2 }));
+    constexpr Vector3f degrees = { 180, 180, 360 };
+    constexpr Vector3f result = tMath::to_radians(degrees);
+    EXPECT_TRUE(tMath::approximately(result, { tMath::PI<float>, tMath::PI<float>, tMath::PI<float> * 2 }));
 }
 
 TEST(vector3, to_radians)
 {
-    Vector3f radians = { 2 * tMath::PI<float>, tMath::PI<float>, tMath::PI<float> };
-    EXPECT_TRUE(tMath::approximately(tMath::to_degrees(radians), { 360, 180, 180 }));
+    constexpr Vector3f radians = { 2 * tMath::PI<float>, tMath::PI<float>, tMath::PI<float> };
+    constexpr Vector3f result = tMath::to_degrees(radians);
+    EXPECT_TRUE(tMath::approximately(result, { 360, 180, 180 }));
 }
 
 TEST(vector3, abs)
@@ -376,9 +330,10 @@ TEST(vector3, distance)
 TEST(vector3, lerp)
 {
     // lerp
-    Vector3f a = { -10, 10, -10 };
-    Vector3f b = { 10, 30, 10 };
-    EXPECT_TRUE(tMath::approximately(tMath::lerp(a, b, 0.6f), { 2.0f, 22.0f, 2.0f }));
+    constexpr Vector3f a = { -10, 10, -10 };
+    constexpr Vector3f b = { 10, 30, 10 };
+    constexpr Vector3f result = tMath::lerp(a, b, 0.6f);
+    EXPECT_TRUE(tMath::approximately(result, { 2.0f, 22.0f, 2.0f }));
 }
 
 TEST(vector3, zero_div)

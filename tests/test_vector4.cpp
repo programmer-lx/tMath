@@ -113,15 +113,6 @@ TEST(vector4, constexpr_test)
         EXPECT_TRUE(radians == test);
     }
     {
-        // dot
-        constexpr float result = tMath::dot(a, b);
-        constexpr float result2 = tMath::dot(1.f, 2.f, 3.f, 4.f, 1.f, 2.f, 2.f, 4.f);
-    }
-    {
-        // cross
-        constexpr Vector4f result = tMath::cross(a, b);
-    }
-    {
         // lerp
          constexpr Vector4f result = tMath::lerp(a, b, 0.5f);
         EXPECT_TRUE(result == a);
@@ -274,9 +265,9 @@ TEST(vector4, dot)
 {
     // dot
     {
-        Vector4f v1 = { 1, 2, 3, 3 };
-        Vector4f v2 = { 2, 3, 4, 4 };
-        float f = tMath::dot(v1.x, v1.y, v1.z, v1.w, v2.x, v2.y, v2.z, v2.w);
+        constexpr Vector4f v1 = { 1, 2, 3, 3 };
+        constexpr Vector4f v2 = { 2, 3, 4, 4 };
+        constexpr float f = tMath::dot(v1.x, v1.y, v1.z, v1.w, v2.x, v2.y, v2.z, v2.w);
         EXPECT_TRUE(tMath::approximately(f, 32.0f));
     }
     {
@@ -290,18 +281,20 @@ TEST(vector4, dot)
 TEST(vector4, cross)
 {
     // cross
-    Vector4f v1 = { -1, 1, 6, 5 };
-    Vector4f v2 = { 1, 1, -10, 10 };
-    EXPECT_TRUE(tMath::approximately(tMath::cross(v1, v2), { -16, -4, -2, 0 }));
+    constexpr Vector4f v1 = { -1, 1, 6, 5 };
+    constexpr Vector4f v2 = { 1, 1, -10, 10 };
+    constexpr Vector4f result = tMath::cross(v1, v2);
+    EXPECT_TRUE(tMath::approximately(result, { -16, -4, -2, 0 }));
 }
 
 TEST(vector4, casts)
 {
     // casts
     {
-        Vector4f v4f = { 1.1, 2.2, 3.3, 4.4 };
-        Vector4i16 test = { 1, 2, 3, 4 };
-        EXPECT_TRUE(tMath::vector_cast<Vector4i16>(v4f) == test);
+        constexpr Vector4f v4f = { 1.1, 2.2, 3.3, 4.4 };
+        constexpr Vector4i16 test = { 1, 2, 3, 4 };
+        constexpr Vector4i16 result = tMath::vector_cast<Vector4i16>(v4f);
+        EXPECT_TRUE(result == test);
     }
     {
         const float x = 1.111111f;

@@ -2,44 +2,6 @@
 
 #include "test.hpp"
 
-TEST(vector1, constexpr_test)
-{
-    constexpr float a = 1;
-    constexpr float b = 2;
-    constexpr float o = 0;
-    {
-        // to degree
-        constexpr float v = tMath::to_degrees(a);
-    }
-    {
-        // to radians
-        constexpr float v = tMath::to_radians(a);
-    }
-    {
-        // clamp
-        constexpr float v = tMath::clamp(a, 0.0f, 1.0f);
-    }
-    {
-        // lerp
-        constexpr float v = tMath::lerp(a, b, o);
-        EXPECT_TRUE(v == a);
-    }
-    {
-        // lerp saturated
-        constexpr float v = tMath::lerp_saturated(a, b, 10.0f);
-        EXPECT_TRUE(v == b);
-    }
-    {
-        // min
-        constexpr float result = tMath::min(1, 2);
-        EXPECT_EQ(result, 1);
-    }
-    {
-        // max
-        constexpr float result = tMath::max(2, 3);
-        EXPECT_EQ(result, 3);
-    }
-}
 
 TEST(vector1, approximately)
 {
@@ -49,7 +11,8 @@ TEST(vector1, approximately)
 
 TEST(vector1, to_radians)
 {
-    EXPECT_TRUE(tMath::approximately(tMath::to_radians(180.0f), tMath::PI<float>));
+    constexpr float result = tMath::to_radians(180.0f);
+    EXPECT_TRUE(tMath::approximately(result, tMath::PI<float>));
 }
 
 TEST(vector1, factorial)
@@ -62,7 +25,8 @@ TEST(vector1, factorial)
 
 TEST(vector1, degrees)
 {
-    EXPECT_TRUE(tMath::approximately(tMath::to_degrees(tMath::PI<float>), 180.0f));
+    constexpr float result = tMath::to_degrees(tMath::PI<float>);
+    EXPECT_TRUE(tMath::approximately(result, 180.0f));
 }
 
 TEST(vector1, exp)
@@ -89,34 +53,54 @@ TEST(vector1, abs)
 
 TEST(vector1, clamp)
 {
-    float a = 10;
-    EXPECT_TRUE(tMath::clamp(a, 0.0f, tMath::Epsilon<float>) == tMath::Epsilon<float>);
+    constexpr float a = 10;
+    constexpr float result = tMath::clamp(a, 0.0f, tMath::Epsilon<float>);
+    EXPECT_TRUE(result == tMath::Epsilon<float>);
 
-    EXPECT_TRUE(tMath::is_nan(tMath::clamp(tMath::NaN<float>, 1.f, 2.f)));
+    constexpr float result2 = tMath::clamp(tMath::NaN<float>, 1.f, 2.f);
+    EXPECT_TRUE(tMath::is_nan(result2));
 }
 
 TEST(vector1, lerp)
 {
-    EXPECT_TRUE(tMath::approximately(tMath::lerp(-10.0f, 10.0f, 0.6), 2.0f));
+    constexpr float result = tMath::lerp(-10.0f, 10.0f, 0.6);
+    EXPECT_TRUE(tMath::approximately(result, 2.0f));
 }
 
 TEST(vector1, lerp_saturated)
 {
-    EXPECT_TRUE(tMath::approximately(tMath::lerp_saturated(-10.0f, 10.0f, 1.2f), 10.0f));
-    EXPECT_TRUE(tMath::approximately(tMath::lerp_saturated(-10.0f, 10.0f, -2.f), -10.0f));
+    constexpr float r1 = tMath::lerp_saturated(-10.0f, 10.0f, 1.2f);
+    EXPECT_TRUE(tMath::approximately(r1, 10.0f));
+
+    constexpr float r2 = tMath::lerp_saturated(-10.0f, 10.0f, -2.f);
+    EXPECT_TRUE(tMath::approximately(r2, -10.0f));
+}
+
+TEST(vector1, min_max)
+{
+    {
+        // min
+        constexpr float result = tMath::min(1, 2);
+        EXPECT_EQ(result, 1);
+    }
+    {
+        // max
+        constexpr float result = tMath::max(2, 3);
+        EXPECT_EQ(result, 3);
+    }
 }
 
 TEST(vector1, triangle_functions)
 {
     float x = -0.1896513f;
     float y = 0.456987f;
-    EXPECT_TRUE(tMath::approximately(tMath::sin(x), sin(x)));
-    EXPECT_TRUE(tMath::approximately(tMath::asin(x), asin(x)));
-    EXPECT_TRUE(tMath::approximately(tMath::cos(x), cos(x)));
-    EXPECT_TRUE(tMath::approximately(tMath::acos(x), acos(x)));
-    EXPECT_TRUE(tMath::approximately(tMath::tan(x), tan(x)));
-    EXPECT_TRUE(tMath::approximately(tMath::atan(x), atan(x)));
-    EXPECT_TRUE(tMath::approximately(tMath::atan2(y, x), atan2(y, x)));
+    EXPECT_TRUE(tMath::approximately(tMath::sin(x), std::sin(x)));
+    EXPECT_TRUE(tMath::approximately(tMath::asin(x), std::asin(x)));
+    EXPECT_TRUE(tMath::approximately(tMath::cos(x), std::cos(x)));
+    EXPECT_TRUE(tMath::approximately(tMath::acos(x), std::acos(x)));
+    EXPECT_TRUE(tMath::approximately(tMath::tan(x), std::tan(x)));
+    EXPECT_TRUE(tMath::approximately(tMath::atan(x), std::atan(x)));
+    EXPECT_TRUE(tMath::approximately(tMath::atan2(y, x), std::atan2(y, x)));
 }
 
 TEST(vector1, zero_divide)
