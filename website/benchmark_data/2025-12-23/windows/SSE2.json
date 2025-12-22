@@ -1,0 +1,27 @@
+{
+    "function_groups": [
+        {
+            "fn_signature": "float4 dot4(float4 lhs, float4 rhs)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 1093.75,
+                    "cv": 0.06211299937499349,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 mul_add(float4 a, float4 b, float4 c)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 1406.2500000000002,
+                    "cv": 0.09507500301523485,
+                    "op_count": 512
+                }
+            ]
+        }
+    ],
+    "repetitions": 5
+}

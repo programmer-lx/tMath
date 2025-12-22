@@ -1,14 +1,18 @@
-#include <cstdlib>
-#include <iostream>
+#include <algorithm>
+#include <chrono>
 #include <cstdint>
-#include <vector>
-#include <string>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
+#include <iostream>
 #include <map>
+#include <print>
 #include <ranges>
-#include <algorithm>
+#include <set>
+#include <source_location>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -84,6 +88,20 @@ using Path = std::filesystem::path;
 #define FROM_JSON_IF_NOT_THEN_RETURN(var) do { auto it = json.find(#var); if (it == json.end()) { return; } else { it->get_to(obj.var); } } while (0)
 #define CHECK(exp, tips) do { if (!(exp)) { throw std::runtime_error(tips); } } while (0)
 
+void log(
+    const std::string_view& msg,
+    const std::source_location& loc = std::source_location::current()
+)
+{
+    std::println(
+        "[{}:{}] {}",
+        loc.file_name(),
+        loc.line(),
+        msg
+    );
+}
+
+
 
 int32_t g_repetitions = -1;
 
@@ -104,6 +122,7 @@ std::vector<std::string> split(const std::string& str, char separator)
         item += c;
     }
 
+    result.push_back(std::move(item));
     return result;
 }
 
@@ -422,6 +441,25 @@ Dates trim_dates(const Dates& dates)
     Dates result = dates;
     // 从新到旧排序，然后取前7个
 
+    // 去重
+    std::ranges::sort(result);
+    result.erase(std::ranges::unique(result).begin(), result.end());
+
+    // 检查是否去重成功
+    {
+        std::set<std::string> test_set;
+        for (const auto& d : result)
+        {
+            auto it = test_set.find(d);
+            if (it != test_set.end())
+            {
+                CHECK(false, "dates result is not unique");
+            }
+            test_set.insert(d);
+        }
+    }
+
+    // 按时间从新到旧排序
     std::ranges::sort(result, [](const std::string& a, const std::string& b)
     {
         DateString da = DateString::from_str(a);
@@ -514,7 +552,7 @@ int main(int argc, char** argv)
 
     try
     {
-        CHECK(argc == 4, "argc must be equal to 2, argv[1] is the path of benchmark.json, argv[2] is the path of dates.json, argv[3] is date");
+        CHECK(argc == 4, "argc must be equal to 4, argv[1] is the path of benchmark.json, argv[2] is the path of dates.json, argv[3] is date");
 
         std::string google_json_str;
 
@@ -539,6 +577,8 @@ int main(int argc, char** argv)
             Json tmath_bm_json = tmath_bm;
             std::string json_str = tmath_bm_json.dump(4);
             output.write_string(json_str);
+
+            log(std::format("write json to file: {}", file_path.string()));
         }
 
         // 更新 dates.json 文件
@@ -555,8 +595,13 @@ int main(int argc, char** argv)
             Json json = Json::parse(json_str);
 
             Dates dates = json;
-            DateString date = DateString::from_str(argv[3]);
+            dates.push_back(argv[3]);
             Dates dates_result = trim_dates(dates);
+
+            for (const auto& d : dates_result)
+            {
+                log(std::format("reserved date: {}", d));
+            }
 
             {
                 // 写回去
@@ -564,6 +609,8 @@ int main(int argc, char** argv)
                 Json out_dates_json = dates_result;
                 std::string out_dates_str = out_dates_json.dump(4);
                 dates_output.write_string(out_dates_str);
+
+                log(std::format("update file: {}", dates_json_file_path.string()));
             }
 
             // 删除所有过期的文件夹
@@ -578,13 +625,14 @@ int main(int argc, char** argv)
 
                 valid_dirs.push_back(absolute_path);
             }
-            for (auto entry : std::filesystem::directory_iterator(dates_dir))
+            for (auto& entry : std::filesystem::directory_iterator(dates_dir))
             {
                 if (std::filesystem::is_directory(entry.path()))
                 {
                     if (is_dir_out_of_date(entry.path(), valid_dirs))
                     {
                         std::filesystem::remove_all(entry.path());
+                        log(std::format("delete file: {}", entry.path().string()));
                     }
                 }
             }

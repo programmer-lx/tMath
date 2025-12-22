@@ -1,0 +1,16 @@
+{
+    "function_groups": [
+        {
+            "fn_signature": "float4 dot4(float4 lhs, float4 rhs)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 1562.5,
+                    "cv": 0.09515182882977727,
+                    "op_count": 512
+                }
+            ]
+        }
+    ],
+    "repetitions": 5
+}

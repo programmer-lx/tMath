@@ -51,7 +51,7 @@ static void setup_random_float32_4s(const benchmark::State& state)
 
     for (size_t i = 0; i < RandomFloatCount; ++i)
     {
-        g_random_float32_4s[i] = tSimd::set(dist(rng), dist(rng), dist(rng), dist(rng));
+        g_random_float32_4s[i] = tSimd::load(dist(rng), dist(rng), dist(rng), dist(rng));
     }
 }
 

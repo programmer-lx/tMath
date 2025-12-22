@@ -1,0 +1,94 @@
+{
+    "function_groups": [
+        {
+            "fn_signature": "float cos(float x)",
+            "functions": [
+                {
+                    "comment": "std::cos",
+                    "cpu_time_median": 2187.5,
+                    "cv": 0.06126213636985523,
+                    "op_count": 512
+                },
+                {
+                    "comment": "使用10阶泰勒展开的cos实现 (测试自己实现的算法与标准库的性能差距)",
+                    "cpu_time_median": 5625.000000000001,
+                    "cv": 0.03132350068953963,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float sin(float x)",
+            "functions": [
+                {
+                    "comment": "std::sin",
+                    "cpu_time_median": 2500.0,
+                    "cv": 0.053881156084329314,
+                    "op_count": 512
+                },
+                {
+                    "comment": "使用9阶泰勒展开的sin实现 (测试自己实现的算法与标准库的性能差距)",
+                    "cpu_time_median": 5625.000000000001,
+                    "cv": 0.04143647783634635,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 cos(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 8437.5,
+                    "cv": 0.024056097436169238,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 dot4(float4 lhs, float4 rhs)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 1250.0,
+                    "cv": 0.0,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 mul_add(float4 a, float4 b, float4 c)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 1406.2500000000002,
+                    "cv": 0.0,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 sin(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 8593.750000000002,
+                    "cv": 0.010031548672251228,
+                    "op_count": 512
+                }
+            ]
+        },
+        {
+            "fn_signature": "float4 tan(float4 v)",
+            "functions": [
+                {
+                    "comment": "",
+                    "cpu_time_median": 10937.5,
+                    "cv": 0.054549061214188975,
+                    "op_count": 512
+                }
+            ]
+        }
+    ],
+    "repetitions": 5
+}
