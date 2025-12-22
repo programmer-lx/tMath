@@ -1,5 +1,6 @@
 #pragma once
 
+#include <format>
 #include <stdexcept>
 #include <exception>
 #include <iostream>
@@ -8,18 +9,13 @@
 #include <chrono>
 
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <gtest/gtest.h>
 
 #if !defined(TMATH_IS_TESTING)
 #error "please define TMATH_IS_TESTING macro to enable testing."
 #endif
-
-#define TMATH_TEST_MAIN() \
-    GTEST_API_ int main(int argc, char **argv) { \
-      printf("Running main() from %s\n", __FILE__); \
-      testing::InitGoogleTest(&argc, argv); \
-      return RUN_ALL_TESTS(); \
-    }
 
 template<std::floating_point F>
 F random_f(F min, F max)
