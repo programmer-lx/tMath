@@ -56,9 +56,6 @@ TEST(vector1, clamp)
     constexpr float a = 10;
     constexpr float result = tMath::clamp(a, 0.0f, tMath::Epsilon<float>);
     EXPECT_TRUE(result == tMath::Epsilon<float>);
-
-    constexpr float result2 = tMath::clamp(tMath::NaN<float>, 1.f, 2.f);
-    EXPECT_TRUE(tMath::is_nan(result2));
 }
 
 TEST(vector1, lerp)

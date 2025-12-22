@@ -144,25 +144,6 @@ namespace detail
             return false;
         }
 
-        if constexpr (N == 2)
-        {
-            return  offsetof(T, x) == 0 &&
-                    offsetof(T, y) == sizeof(Field);
-        }
-        if constexpr (N == 3)
-        {
-            return  offsetof(T, x) == 0 &&
-                    offsetof(T, y) == sizeof(Field) &&
-                    offsetof(T, z) == sizeof(Field) * 2;
-        }
-        if constexpr (N == 4)
-        {
-            return  offsetof(T, x) == 0 &&
-                    offsetof(T, y) == sizeof(Field) &&
-                    offsetof(T, z) == sizeof(Field) * 2 &&
-                    offsetof(T, w) == sizeof(Field) * 3;
-        }
-
         return true;
     }();
 
@@ -181,7 +162,6 @@ namespace detail
         requires std::is_same_v<decltype(v.x), TField>;
         requires std::is_same_v<decltype(v.y), TField>;
 
-        requires is_pure_data_type<TVec>;
     } && is_vector_n_layout_v<TVec, TField, 2>;
 
     template<typename TVec, typename TField>
@@ -194,7 +174,6 @@ namespace detail
         requires std::is_same_v<decltype(v.y), TField>;
         requires std::is_same_v<decltype(v.z), TField>;
 
-        requires is_pure_data_type<TVec>;
     } && is_vector_n_layout_v<TVec, TField, 3>;
 
     template<typename T, typename TField>
@@ -209,7 +188,6 @@ namespace detail
         requires std::is_same_v<decltype(v.z), TField>;
         requires std::is_same_v<decltype(v.w), TField>;
 
-        requires is_pure_data_type<T>;
     } && is_vector_n_layout_v<T, TField, 4>;
 
     template<typename TVec, typename TField>

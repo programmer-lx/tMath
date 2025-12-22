@@ -321,7 +321,7 @@ constexpr bool test_simd_intrinsics(std::initializer_list<bool> opened, std::ini
     #include <intrin.h>
 #elif defined(__GNUC__) || defined(__clang__)
     #include <cpuid.h>
-    #include <xsaveintrin.h>
+    #include <x86gprintrin.h>
 #endif
 
 struct IntrinsicsCheckResult

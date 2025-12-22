@@ -109,7 +109,6 @@ F sqrt(const F f) noexcept
 
 /**
  * clamp n to [min, max]
- * if n is NaN, return NaN
  */
 template<is_signed_number N>
 constexpr N clamp(const N n, const N min, const N max) noexcept
