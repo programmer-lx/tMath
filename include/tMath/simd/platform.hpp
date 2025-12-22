@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 
 // #ifndef _WIN64
 // #error "The library only support win64 system"
@@ -319,9 +320,44 @@ constexpr bool test_simd_intrinsics(std::initializer_list<bool> opened, std::ini
 
 #if defined(_MSC_VER)
     #include <intrin.h>
+namespace detail
+{
+    inline void cpuidex(int regs[4], int eax, int ecx)
+    {
+        __cpuidex(regs, eax, ecx);
+    }
+
+    inline uint64_t xgetbv_0()
+    {
+        return _xgetbv(0);
+    }
+}
+
 #elif defined(__GNUC__) || defined(__clang__)
     #include <cpuid.h>
-    #include <x86gprintrin.h>
+namespace detail
+{
+    inline void cpuidex(int regs[4], int eax, int ecx)
+    {
+        unsigned int a, b, c, d;
+        __cpuid_count(eax, ecx, a, b, c, d);
+        regs[0] = a;
+        regs[1] = b;
+        regs[2] = c;
+        regs[3] = d;
+    }
+
+    inline uint64_t xgetbv_0()
+    {
+        uint32_t eax, edx;
+        __asm__ volatile (
+            "xgetbv"
+            : "=a"(eax), "=d"(edx)
+            : "c"(0)
+        );
+        return (static_cast<uint64_t>(edx) << 32) | eax;
+    }
+}
 #endif
 
 struct IntrinsicsCheckResult
@@ -343,7 +379,7 @@ inline IntrinsicsCheckResult runtime_check_simd_intrinsics() noexcept
     int regs[4] = { -1 };
 
     // ===== CPUID.(EAX=1) =====
-    __cpuidex(regs, 1, 0);
+    detail::cpuidex(regs, 1, 0);
 
     const bool has_sse2   = (regs[3] & (1 << 26)) != 0;
     const bool has_sse3   = (regs[2] & (1 <<  0)) != 0;
@@ -361,7 +397,7 @@ inline IntrinsicsCheckResult runtime_check_simd_intrinsics() noexcept
     bool os_supports_avx = false;
     if (has_osxsave)
     {
-        uint64_t xcr0 = _xgetbv(0);
+        uint64_t xcr0 = detail::xgetbv_0();
         // XMM (bit 1) + YMM (bit 2)
         os_supports_avx = (xcr0 & 0x6) == 0x6;
     }
@@ -374,7 +410,7 @@ inline IntrinsicsCheckResult runtime_check_simd_intrinsics() noexcept
     }
 
     // ===== CPUID.(EAX=7, ECX=0) =====
-    __cpuidex(regs, 7, 0);
+    detail::cpuidex(regs, 7, 0);
     const bool has_avx2 = (regs[1] & (1 << 5)) != 0;
 
     if (has_avx2 && os_supports_avx)
