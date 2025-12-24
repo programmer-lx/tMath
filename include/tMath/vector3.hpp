@@ -84,7 +84,7 @@ constexpr TVec3 to_radians(const TVec3& degrees) noexcept
 template<is_vector3 TVec3>
 TVec3 abs(const TVec3& v) noexcept
 {
-    return { TMATH_NAMESPACE_NAME::abs(v.x), TMATH_NAMESPACE_NAME::abs(v.y), TMATH_NAMESPACE_NAME::abs(v.z) };
+    return { std::abs(v.x), std::abs(v.y), std::abs(v.z) };
 }
 
 template<is_vector3 TVec3>

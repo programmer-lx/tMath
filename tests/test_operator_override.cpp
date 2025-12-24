@@ -4,7 +4,7 @@
 
 struct Vector2f
 {
-    TMATH_VECTOR2(Vector2f, float)
+    TMATH_FULL_VECTOR2(Vector2f, float)
 };
 
 static_assert(tMath::is_vector2_float<Vector2f>);

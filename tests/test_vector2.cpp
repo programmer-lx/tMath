@@ -6,62 +6,62 @@
 
 struct Vector2f
 {
-    TMATH_VECTOR2(Vector2f, float)
+    TMATH_FULL_VECTOR2(Vector2f, float)
 };
 
 struct Vector2d
 {
-    TMATH_VECTOR2(Vector2d, double)
+    TMATH_FULL_VECTOR2(Vector2d, double)
 };
 
 struct Vector2i16
 {
-    TMATH_VECTOR2(Vector2i16, int16_t)
+    TMATH_FULL_VECTOR2(Vector2i16, int16_t)
 };
 
 struct Vector2i32
 {
-    TMATH_VECTOR2(Vector2i32, int32_t)
+    TMATH_FULL_VECTOR2(Vector2i32, int32_t)
 };
 
 struct Vector3f
 {
-    TMATH_VECTOR3(Vector3f, float)
+    TMATH_FULL_VECTOR3(Vector3f, float)
 };
 
 struct Vector3d
 {
-    TMATH_VECTOR3(Vector3d, double)
+    TMATH_FULL_VECTOR3(Vector3d, double)
 };
 
 struct Vector3i32
 {
-    TMATH_VECTOR3(Vector3i32, int32_t)
+    TMATH_FULL_VECTOR3(Vector3i32, int32_t)
 };
 
 struct Vector3i16
 {
-    TMATH_VECTOR3(Vector3i16, int16_t)
+    TMATH_FULL_VECTOR3(Vector3i16, int16_t)
 };
 
 struct Vector4f
 {
-    TMATH_VECTOR4(Vector4f, float)
+    TMATH_FULL_VECTOR4(Vector4f, float)
 };
 
 struct Vector4d
 {
-    TMATH_VECTOR4(Vector4d, double)
+    TMATH_FULL_VECTOR4(Vector4d, double)
 };
 
 struct Vector4i16
 {
-    TMATH_VECTOR4(Vector4i16, int16_t)
+    TMATH_FULL_VECTOR4(Vector4i16, int16_t)
 };
 
 struct Vector4i32
 {
-    TMATH_VECTOR4(Vector4i32, int32_t)
+    TMATH_FULL_VECTOR4(Vector4i32, int32_t)
 };
 
 

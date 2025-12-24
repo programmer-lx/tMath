@@ -15,20 +15,20 @@
 
 struct Vector4f
 {
-    TMATH_VECTOR4(Vector4f, float)
+    TMATH_FULL_VECTOR4(Vector4f, float)
 };
 
 struct Vector4d
 {
-    TMATH_VECTOR4(Vector4d, double)
+    TMATH_FULL_VECTOR4(Vector4d, double)
 };
 
 struct alignas(16) Scalar_Vector4f_Align16
 {
-    TMATH_VECTOR4(Scalar_Vector4f_Align16, float)
+    TMATH_FULL_VECTOR4(Scalar_Vector4f_Align16, float)
 };
 
 struct alignas(32) Scalar_Vector4d_Align32
 {
-    TMATH_VECTOR4(Scalar_Vector4d_Align32, double)
+    TMATH_FULL_VECTOR4(Scalar_Vector4d_Align32, double)
 };

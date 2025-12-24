@@ -59,7 +59,7 @@ struct quat_tag {};
     field_type_name& operator[](int i) { return data_var_name[i]; } \
     const field_type_name& operator[](int i) const { return data_var_name[i]; }
 
-#define TMATH_VECTOR2(vector_type_name, field_type_name) \
+#define TMATH_FULL_VECTOR2(vector_type_name, field_type_name) \
     union \
     { \
         struct { field_type_name x, y; }; \
@@ -70,7 +70,7 @@ struct quat_tag {};
     TMATH_VECTOR_INDEX(field_type_name, data) \
     TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
 
-#define TMATH_VECTOR3(vector_type_name, field_type_name) \
+#define TMATH_FULL_VECTOR3(vector_type_name, field_type_name) \
     union \
     { \
         struct { field_type_name x, y, z; }; \
@@ -80,7 +80,7 @@ struct quat_tag {};
     TMATH_VECTOR_INDEX(field_type_name, data) \
     TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
 
-#define TMATH_VECTOR4(vector_type_name, field_type_name) \
+#define TMATH_FULL_VECTOR4(vector_type_name, field_type_name) \
     union \
     { \
         struct { field_type_name x, y, z, w; }; \
@@ -90,7 +90,7 @@ struct quat_tag {};
     TMATH_VECTOR_INDEX(field_type_name, data) \
     TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
 
-#define TMATH_QUAT(quat_type_name, field_type_name) \
+#define TMATH_FULL_QUAT(quat_type_name, field_type_name) \
     TMATH_QUAT_TAG \
     union \
     { \

@@ -28,13 +28,13 @@ TMATH_SIMD_NAMESPACE_BEGIN
 
     struct float32_4
     {
-        TMATH_VECTOR4(float32_4, float)
+        TMATH_FULL_VECTOR4(float32_4, float)
     };
     using float32_4_arg_in = const float32_4&;
 
     struct int32_4
     {
-        TMATH_VECTOR4(int32_4, int32_t)
+        TMATH_FULL_VECTOR4(int32_4, int32_t)
     };
     using int32_4_arg_in = const int32_4&;
 

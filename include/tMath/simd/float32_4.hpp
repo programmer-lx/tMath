@@ -242,10 +242,10 @@ inline float32_4 TMATH_SIMD_CALL_CONV sqrt(float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return {
-        TMATH_NAMESPACE_NAME::sqrt(v.x),
-        TMATH_NAMESPACE_NAME::sqrt(v.y),
-        TMATH_NAMESPACE_NAME::sqrt(v.z),
-        TMATH_NAMESPACE_NAME::sqrt(v.w)
+        std::sqrt(v.x),
+        std::sqrt(v.y),
+        std::sqrt(v.z),
+        std::sqrt(v.w)
     };
 #elif defined(TMATH_USE_SVML)
     return _mm_svml_sqrt_ps(v);

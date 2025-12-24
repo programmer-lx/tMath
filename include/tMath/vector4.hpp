@@ -90,17 +90,22 @@ constexpr TVec4 to_radians(const TVec4& degrees) noexcept
 template<is_vector4 TVec4>
 TVec4 abs(const TVec4& v) noexcept
 {
-    return { TMATH_NAMESPACE_NAME::abs(v.x), TMATH_NAMESPACE_NAME::abs(v.y), TMATH_NAMESPACE_NAME::abs(v.z), TMATH_NAMESPACE_NAME::abs(v.w) };
+    return {
+        std::abs(v.x),
+        std::abs(v.y),
+        std::abs(v.z),
+        std::abs(v.w)
+    };
 }
 
 template<is_vector4 TVec4>
 TVec4 sin(const TVec4& v) noexcept
 {
     return {
-        TMATH_NAMESPACE_NAME::sin(v.x),
-        TMATH_NAMESPACE_NAME::sin(v.y),
-        TMATH_NAMESPACE_NAME::sin(v.z),
-        TMATH_NAMESPACE_NAME::sin(v.w)
+        std::sin(v.x),
+        std::sin(v.y),
+        std::sin(v.z),
+        std::sin(v.w)
     };
 }
 
@@ -108,10 +113,10 @@ template<is_vector4 TVec4>
 TVec4 cos(const TVec4& v) noexcept
 {
     return {
-        TMATH_NAMESPACE_NAME::cos(v.x),
-        TMATH_NAMESPACE_NAME::cos(v.y),
-        TMATH_NAMESPACE_NAME::cos(v.z),
-        TMATH_NAMESPACE_NAME::cos(v.w)
+        std::cos(v.x),
+        std::cos(v.y),
+        std::cos(v.z),
+        std::cos(v.w)
     };
 }
 
@@ -119,10 +124,10 @@ template<is_vector4 TVec4>
 TVec4 tan(const TVec4& v) noexcept
 {
     return {
-        TMATH_NAMESPACE_NAME::tan(v.x),
-        TMATH_NAMESPACE_NAME::tan(v.y),
-        TMATH_NAMESPACE_NAME::tan(v.z),
-        TMATH_NAMESPACE_NAME::tan(v.w)
+        std::tan(v.x),
+        std::tan(v.y),
+        std::tan(v.z),
+        std::tan(v.w)
     };
 }
 
