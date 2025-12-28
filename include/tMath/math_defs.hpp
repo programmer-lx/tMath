@@ -24,82 +24,7 @@
 #define TMATH_NODISCARD [[nodiscard]]
 
 
-// 遇到 struct { union { struct { a, b, c }; struct { d, e, f }; }; }; 这种嵌套了子对象的联合体，使用单对 {} 初始化，clang会警告，需要禁用警告
-#define TMATH_IGNORE_CLANG_SUBOBJECT_BRACES_WARNING TMATH_CLANG_DIAGNOSTIC_IGNORED(clang diagnostic ignored "-Wmissing-braces")
-
-
 TMATH_NAMESPACE_BEGIN
-
-struct quat_tag {};
-#define TMATH_QUAT_TAG using is_quat = TMATH_NAMESPACE_NAME::quat_tag;
-
-#define TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name) \
-    TMATH_FORCE_INLINE friend constexpr bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator*=(vector_type_name& lhs, const field_type_name rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name& operator/=(vector_type_name& lhs, const field_type_name rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name operator*(const vector_type_name& lhs, const field_type_name rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
-    TMATH_FORCE_INLINE friend constexpr vector_type_name operator/(const vector_type_name& lhs, const field_type_name rhs) noexcept \
-    { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
-
-#define TMATH_VECTOR_INDEX(field_type_name, data_var_name) \
-    field_type_name& operator[](int i) { return data_var_name[i]; } \
-    const field_type_name& operator[](int i) const { return data_var_name[i]; }
-
-#define TMATH_FULL_VECTOR2(vector_type_name, field_type_name) \
-    union \
-    { \
-        struct { field_type_name x, y; }; \
-        struct { field_type_name r, g; }; \
-        struct { field_type_name u, v; }; \
-        field_type_name data[2]; \
-    }; \
-    TMATH_VECTOR_INDEX(field_type_name, data) \
-    TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
-
-#define TMATH_FULL_VECTOR3(vector_type_name, field_type_name) \
-    union \
-    { \
-        struct { field_type_name x, y, z; }; \
-        struct { field_type_name r, g, b; }; \
-        field_type_name data[3]; \
-    }; \
-    TMATH_VECTOR_INDEX(field_type_name, data) \
-    TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
-
-#define TMATH_FULL_VECTOR4(vector_type_name, field_type_name) \
-    union \
-    { \
-        struct { field_type_name x, y, z, w; }; \
-        struct { field_type_name r, g, b, a; }; \
-        field_type_name data[4]; \
-    }; \
-    TMATH_VECTOR_INDEX(field_type_name, data) \
-    TMATH_VECTOR_OPERATORS(vector_type_name, field_type_name)
-
-#define TMATH_FULL_QUAT(quat_type_name, field_type_name) \
-    TMATH_QUAT_TAG \
-    union \
-    { \
-        struct { field_type_name x, y, z, w; }; \
-        field_type_name data[4]; \
-    }; \
-    TMATH_VECTOR_INDEX(field_type_name, data)
-
-
 
 template<typename T>
 concept is_signed_int = std::is_integral_v<T> && std::is_signed_v<T>;
@@ -120,36 +45,35 @@ concept is_signed_number = TMATH_NAMESPACE_NAME::is_signed_int<T> || TMATH_NAMES
 template<typename T>
 concept is_number = std::is_arithmetic_v<T>;
 
+
+
 namespace detail
 {
-    /**
-     * 约束原则：
-     * 1. 保证VectorN只有x, y, z, w之类的变量 (使用sizeof进行限制，确保没有多余变量)
-     * 2. 保证VectorN没有虚函数，是一个类C结构体
-     * 3. 不允许自定义构造函数，要确保向量类能使用 `{...}` 构造
-     * 4. 允许开发者自定义拷贝函数、移动函数 (如果开发者定义了这类函数，意味着该类型不是trivial类型，
-     *    定义了拷贝函数、移动函数之后，该向量在C++标准上就不是trivial类型了，所以禁止使用memcpy等函数直接操作内存，只能使用运算符进行操作)
-     */
     template<typename T>
-    concept is_pure_data_type =
+    static constexpr bool is_pure_data_type_v =
         std::is_standard_layout_v<T> &&
         std::is_aggregate_v<T>;
+}
 
-    template<typename T, typename Field, int N>
-    constexpr bool is_vector_n_layout_v = []()
-    {
-        if constexpr (!is_pure_data_type<T>)
-        {
-            return false;
-        }
 
-        if constexpr (sizeof(T) != N * sizeof(Field))
-        {
-            return false;
-        }
+// =============================================== Vector ===============================================
 
-        return true;
-    }();
+struct quat_tag {};
+#define TMATH_QUAT_TAG using is_quat = TMATH_NAMESPACE_NAME::quat_tag;
+
+/**
+ * 约束原则：
+ * 1. 保证VectorN只有x, y, z, w之类的变量 (使用sizeof进行限制，确保没有多余变量)
+ * 2. 保证VectorN没有虚函数，是一个类C结构体
+ * 3. 不允许自定义构造函数，要确保向量类能使用 `{...}` 构造
+ * 4. 允许开发者自定义拷贝函数、移动函数 (如果开发者定义了这类函数，意味着该类型不是trivial类型，
+ *    定义了拷贝函数、移动函数之后，该向量在C++标准上就不是trivial类型了，所以禁止使用memcpy等函数直接操作内存，只能使用运算符进行操作)
+ */
+
+namespace detail
+{
+    template<typename T, typename Component, int N>
+    static constexpr bool is_vector_n_layout_v = is_pure_data_type_v<T> && (sizeof(T) == N * sizeof(Component));
 
     template<typename T>
     concept has_quat_tag = requires
@@ -158,51 +82,36 @@ namespace detail
         requires std::is_same_v<typename T::is_quat, TMATH_NAMESPACE_NAME::quat_tag>;
     };
 
-    template<typename TVec, typename TField>
+    template<typename TVec, typename TComponent>
     concept is_generic_vector2 = requires(TVec v)
     {
-        v.x;
-        v.y;
-        requires std::is_same_v<decltype(v.x), TField>;
-        requires std::is_same_v<decltype(v.y), TField>;
+        v.data;
+        requires std::is_same_v<std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<TVec>().data)>>, TComponent>;
 
-    } && is_vector_n_layout_v<TVec, TField, 2>;
+    } && is_vector_n_layout_v<TVec, TComponent, 2>;
 
-    template<typename TVec, typename TField>
+    template<typename TVec, typename TComponent>
     concept is_generic_vector3 = requires(TVec v)
     {
-        v.x;
-        v.y;
-        v.z;
-        requires std::is_same_v<decltype(v.x), TField>;
-        requires std::is_same_v<decltype(v.y), TField>;
-        requires std::is_same_v<decltype(v.z), TField>;
+        v.data;
+        requires std::is_same_v<std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<TVec>().data)>>, TComponent>;
 
-    } && is_vector_n_layout_v<TVec, TField, 3>;
+    } && is_vector_n_layout_v<TVec, TComponent, 3>;
 
-    template<typename T, typename TField>
+    template<typename T, typename TComponent>
     concept is_vector4_or_quat = requires(T v)
     {
-        v.x;
-        v.y;
-        v.z;
-        v.w;
-        requires std::is_same_v<decltype(v.x), TField>;
-        requires std::is_same_v<decltype(v.y), TField>;
-        requires std::is_same_v<decltype(v.z), TField>;
-        requires std::is_same_v<decltype(v.w), TField>;
+        v.data;
+        requires std::is_same_v<std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<T>().data)>>, TComponent>;
 
-    } && is_vector_n_layout_v<T, TField, 4>;
+    } && is_vector_n_layout_v<T, TComponent, 4>;
 
-    template<typename TVec, typename TField>
-    concept is_generic_vector4 = is_vector4_or_quat<TVec, TField> && !has_quat_tag<TVec>;
+    template<typename TVec, typename TComponent>
+    concept is_generic_vector4 = is_vector4_or_quat<TVec, TComponent> && !has_quat_tag<TVec>;
 
-    template<typename TQuat, typename TField>
-    concept is_generic_quat = is_vector4_or_quat<TQuat, TField> && has_quat_tag<TQuat>;
+    template<typename TQuat, typename TComponent>
+    concept is_generic_quat = is_vector4_or_quat<TQuat, TComponent> && has_quat_tag<TQuat>;
 }
-
-
-
 
 // ----------------------------------------------------
 // Vector2<T>
@@ -311,20 +220,203 @@ concept is_vector_n = is_vector2<T> || is_vector3<T> || is_vector4<T>;
 template<typename T>
 concept is_vector_n_or_quat = is_vector_n<T> || is_quat<T>;
 
-
 // ----------------------------------------------------
 // VectorN Quat 字段类型萃取
 // ----------------------------------------------------
 template<is_vector_n_or_quat V>
 struct vector_quat_traits
 {
-    using field_type = decltype(std::declval<V>().x);
+    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<V>().data)>>;
 };
 
 template<is_vector_n_or_quat V>
-using vector_quat_field_t = vector_quat_traits<V>::field_type;
+using vector_quat_component_t = vector_quat_traits<V>::component_type;
 
 
+#define TMATH_VECTOR_OPERATORS(vector_type_name) \
+    friend constexpr bool operator==(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
+    \
+    friend constexpr bool operator!=(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
+    \
+    friend constexpr vector_type_name& operator+=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
+    \
+    friend constexpr vector_type_name& operator-=(vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number N> \
+    friend constexpr vector_type_name& operator*=(vector_type_name& lhs, const N rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number N> \
+    friend constexpr vector_type_name& operator/=(vector_type_name& lhs, const N rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
+    \
+    friend constexpr vector_type_name operator+(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
+    \
+    friend constexpr vector_type_name operator-(const vector_type_name& lhs, const vector_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number N> \
+    friend constexpr vector_type_name operator*(const vector_type_name& lhs, const N rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number N> \
+    friend constexpr vector_type_name operator/(const vector_type_name& lhs, const N rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
+
+
+#define TMATH_VECTOR_DATA_INDEX(data_var_name) \
+    std::remove_reference_t<decltype(data_var_name[0])>& operator[](int i) { return data_var_name[i]; } \
+    const std::remove_reference_t<decltype(data_var_name[0])>& operator[](int i) const { return data_var_name[i]; }
+
+
+#define TMATH_FULL_VECTOR2(vector_type_name, component_type_name) \
+    union \
+    { \
+        component_type_name data[2]; \
+        struct { component_type_name x, y; }; \
+        struct { component_type_name r, g; }; \
+        struct { component_type_name u, v; }; \
+    }; \
+    TMATH_VECTOR_DATA_INDEX(data) \
+    TMATH_VECTOR_OPERATORS(vector_type_name)
+
+#define TMATH_FULL_VECTOR3(vector_type_name, component_type_name) \
+    union \
+    { \
+        component_type_name data[3]; \
+        struct { component_type_name x, y, z; }; \
+        struct { component_type_name r, g, b; }; \
+    }; \
+    TMATH_VECTOR_DATA_INDEX(data) \
+    TMATH_VECTOR_OPERATORS(vector_type_name)
+
+#define TMATH_FULL_VECTOR4(vector_type_name, component_type_name) \
+    union \
+    { \
+        component_type_name data[4]; \
+        struct { component_type_name x, y, z, w; }; \
+        struct { component_type_name r, g, b, a; }; \
+    }; \
+    TMATH_VECTOR_DATA_INDEX(data) \
+    TMATH_VECTOR_OPERATORS(vector_type_name)
+
+
+
+
+#define TMATH_QUAT_OPERATORS()
+
+#define TMATH_FULL_QUAT(quat_type_name, component_type_name) \
+    TMATH_QUAT_TAG \
+    union \
+    { \
+        component_type_name data[4]; \
+        struct { component_type_name x, y, z, w; }; \
+    }; \
+    TMATH_VECTOR_DATA_INDEX(data)
+
+
+
+
+
+// =============================================== Matrix ===============================================
+
+/*
+ * 矩阵属性:
+ * 1. 是否为方阵
+ * 2. 矩阵component数据类型，用于判断：位宽、有无符号、有无小数点
+ *
+ * 函数模板使用的concept:
+ * concept is_square_matrix<Mat>, 类型和行数则在函数内部萃取，使用 if constexpr 做分支
+ * concept is_non_square_matrix<Mat>, 类型和行列数在函数内部萃取，使用 if constexpr 做分支
+ */
+
+// 列主序标签
+struct column_major_matrix_tag {};
+#define TMATH_MATRIX_COLUMN_MAJOR_TAG using is_column_major = TMATH_NAMESPACE_NAME::column_major_matrix_tag;
+
+namespace detail
+{
+    template<typename T>
+    concept has_column_major_matrix_tag = requires
+    {
+        typename T::is_column_major;
+        requires std::is_same_v<typename T::is_column_major, TMATH_NAMESPACE_NAME::column_major_matrix_tag>;
+    };
+}
+
+// ----------------------------------------------------
+// Matrix 类型萃取
+// ----------------------------------------------------
+template<typename Mat>
+struct matrix_traits
+{
+    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<Mat>().data)>>;
+
+    static constexpr bool is_column_major = detail::has_column_major_matrix_tag<Mat>;
+
+    /**
+     * 逻辑行数 (如果是列主序，则表示为存储结构的列数，但是逻辑上还是行数)
+     */
+    static constexpr int row_count = is_column_major ? std::extent_v<decltype(std::declval<Mat>().data), 1> : std::extent_v<decltype(std::declval<Mat>().data), 0>;
+
+    /**
+     * 逻辑列数 (如果是列主序，则表示为存储结构的行数，但是逻辑上还是列数)
+     */
+    static constexpr int column_count = is_column_major ? std::extent_v<decltype(std::declval<Mat>().data), 0> : std::extent_v<decltype(std::declval<Mat>().data), 1>;
+
+    /**
+     * 是否为方阵
+     */
+    static constexpr bool is_square_matrix = (row_count == column_count);
+};
+
+template<typename Mat>
+using matrix_component_t = matrix_traits<Mat>::component_type;
+
+namespace detail
+{
+    template<typename Mat>
+    concept is_generic_matrix = requires
+    {
+        typename std::remove_reference_t<decltype(std::declval<Mat>().data)>; // .data 字段
+    }
+    && detail::is_pure_data_type_v<Mat> // 聚合初始化
+    && std::is_array_v<decltype(std::declval<Mat>().data)>
+    && (std::extent_v<decltype(std::declval<Mat>().data), 0> >= 2)
+    && (std::extent_v<decltype(std::declval<Mat>().data), 1> >= 2) // 2D数组
+    && (sizeof(matrix_component_t<Mat>) * (matrix_traits<Mat>::column_count * matrix_traits<Mat>::row_count) == sizeof(Mat)) // 大小符合要求
+    && std::is_same_v<std::remove_all_extents_t<decltype(std::declval<Mat>().data)>, matrix_component_t<Mat>>;
+}
+
+template<typename Mat>
+concept is_square_matrix_row_major = detail::is_generic_matrix<Mat> && !detail::has_column_major_matrix_tag<Mat>;
+
+template<typename Mat>
+concept is_square_matrix_column_major = detail::is_generic_matrix<Mat> && detail::has_column_major_matrix_tag<Mat>;
+
+
+
+#define TMATH_MATRIX_OPERATORS(matrix_type_name)
+
+// 无论是行主序还是列主序m01代表逻辑上第0行第1列，主序只是存储结构有变化，但是逻辑结构始终不变
+#define TMATH_FULL_MATRIX4X4_ROW_MAJOR(matrix_type_name, component_type_name) \
+    union \
+    { \
+        component_type_name data[4][4]; \
+        struct \
+        { \
+            component_type_name m00, m01, m02, m03, \
+                                m10, m11, m12, m13, \
+                                m20, m21, m22, m23, \
+                                m30, m31, m32, m33; \
+        }; \
+    }; \
+    TMATH_MATRIX_OPERATORS(matrix_type_name)
 
 
 // ----------------------------------------------------
@@ -362,23 +454,10 @@ template<is_floating_point F1, is_floating_point F2>
 using min_floating_point_t = std::conditional_t<(sizeof(F1) <= sizeof(F2)), F1, F2>;
 
 template<is_vector_n V1, is_vector_n V2>
-using max_field_floating_point_t = std::conditional_t<(sizeof(vector_quat_field_t<V1>) >= sizeof(vector_quat_field_t<V2>)), vector_quat_field_t<V1>, vector_quat_field_t<V2>>;
+using max_component_floating_point_t = std::conditional_t<(sizeof(vector_quat_component_t<V1>) >= sizeof(vector_quat_component_t<V2>)), vector_quat_component_t<V1>, vector_quat_component_t<V2>>;
 
 template<is_vector_n V1, is_vector_n V2>
-using min_field_floating_point_t = std::conditional_t<(sizeof(vector_quat_field_t<V1>) <= sizeof(vector_quat_field_t<V2>)), vector_quat_field_t<V1>, vector_quat_field_t<V2>>;
-
-
-
-// initializers
-template<auto... Values>
-struct vector_values
-{
-    template<typename T>
-    constexpr operator T() const noexcept
-    {
-        return T{ Values... };
-    }
-};
+using min_component_floating_point_t = std::conditional_t<(sizeof(vector_quat_component_t<V1>) <= sizeof(vector_quat_component_t<V2>)), vector_quat_component_t<V1>, vector_quat_component_t<V2>>;
 
 
 TMATH_NAMESPACE_END

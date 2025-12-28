@@ -26,7 +26,7 @@ constexpr Q& operator*=(Q& lhs, const Q& rhs) noexcept
 template<is_quat Q>
 constexpr Q identity() noexcept
 {
-    using Field = vector_quat_field_t<Q>;
+    using Field = vector_quat_component_t<Q>;
     return { static_cast<Field>(0), static_cast<Field>(0), static_cast<Field>(0), static_cast<Field>(1) };
 }
 

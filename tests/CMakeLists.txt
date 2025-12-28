@@ -45,6 +45,10 @@ action_for_test_target(test_quat)
 add_executable(test_operators_override test_operator_override.cpp)
 action_for_test_target(test_operators_override)
 
+# Matrix4x4
+add_executable(test_matrix_4x4_rm test_matrix4x4_row_major.cpp)
+action_for_test_target(test_matrix_4x4_rm)
+
 
 
 # SIMD float4
@@ -97,6 +101,7 @@ add_test(NAME Test_Vector3 COMMAND $<TARGET_FILE:test_vector3>)
 add_test(NAME Test_Vector4 COMMAND $<TARGET_FILE:test_vector4>)
 add_test(NAME Test_Quat COMMAND $<TARGET_FILE:test_quat>)
 add_test(NAME Test_OperatorOverride COMMAND $<TARGET_FILE:test_operators_override>)
+add_test(NAME Test_Matrix4x4_RM COMMAND $<TARGET_FILE:test_matrix_4x4_rm>)
 
 # SIMDs
 add_test(NAME Test_simd_SSE2 COMMAND $<TARGET_FILE:test_simd_SSE2>)

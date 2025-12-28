@@ -14,8 +14,7 @@
     #include "../vector2.hpp"
     #include "../vector3.hpp"
     #include "../vector4.hpp"
-    #include "../matrix3x3.hpp"
-    #include "../matrix4x4.hpp"
+    #include "../matrix_row_major.hpp"
 #endif
 
 #include "math_defs_simd.hpp"

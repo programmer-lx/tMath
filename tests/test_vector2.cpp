@@ -202,7 +202,7 @@ TEST(vector2, dot)
     {
         constexpr Vector2f v1 = { 1, 2 };
         constexpr Vector2f v2 = { 2, 3 };
-        constexpr float f = tMath::dot(v1.x, v1.y, v2.x, v2.y);
+        constexpr float f = tMath::dot(v1.data[0], v1.data[1], v2.data[0], v2.data[1]);
         EXPECT_TRUE(tMath::approximately(f, 8.0f));
     }
     {

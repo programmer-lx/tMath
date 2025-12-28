@@ -182,7 +182,7 @@ TEST(vector3, dot)
     {
         constexpr Vector3f v1 = { 1, 2, 3 };
         constexpr Vector3f v2 = { 2, 3, 4 };
-        constexpr float f = tMath::dot(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+        constexpr float f = tMath::dot(v1.data[0], v1.data[1], v1.data[2], v2.data[0], v2.data[1], v2.data[2]);
         EXPECT_TRUE(tMath::approximately(f, 20.0f));
     }
     {

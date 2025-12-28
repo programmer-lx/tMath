@@ -68,7 +68,6 @@ TEST(vector4, constexpr_test)
 {
     constexpr Vector4f a = { 1, 1, 1, 1 };
     constexpr Vector4f b = { 1, 1, 1, 1 };
-    constexpr Vector4f o = { 0, 0, 0, 0 };
     {
         // ==
         constexpr bool result = (a == b);
@@ -121,23 +120,51 @@ TEST(vector4, constexpr_test)
 
 TEST(vector4, fields)
 {
-    Vector4f v{1, 2, 3, 4};
-    EXPECT_TRUE(v[0] == 1);
-    EXPECT_TRUE(v[1] == 2);
-    EXPECT_TRUE(v[2] == 3);
-    EXPECT_TRUE(v[3] == 4);
-    EXPECT_TRUE(v.x == 1);
-    EXPECT_TRUE(v.y == 2);
-    EXPECT_TRUE(v.z == 3);
-    EXPECT_TRUE(v.w == 4);
-    EXPECT_TRUE(v.r == 1);
-    EXPECT_TRUE(v.g == 2);
-    EXPECT_TRUE(v.b == 3);
-    EXPECT_TRUE(v.a == 4);
-    EXPECT_TRUE(v.data[0] == 1);
-    EXPECT_TRUE(v.data[1] == 2);
-    EXPECT_TRUE(v.data[2] == 3);
-    EXPECT_TRUE(v.data[3] == 4);
+    {
+        constexpr Vector4f v{ 1, 2, 3, 4 };
+        EXPECT_TRUE(v[0] == 1);
+        EXPECT_TRUE(v[1] == 2);
+        EXPECT_TRUE(v[2] == 3);
+        EXPECT_TRUE(v[3] == 4);
+
+        EXPECT_TRUE(v.x == 1);
+        EXPECT_TRUE(v.y == 2);
+        EXPECT_TRUE(v.z == 3);
+        EXPECT_TRUE(v.w == 4);
+
+        EXPECT_TRUE(v.r == 1);
+        EXPECT_TRUE(v.g == 2);
+        EXPECT_TRUE(v.b == 3);
+        EXPECT_TRUE(v.a == 4);
+
+        EXPECT_TRUE(v.data[0] == 1);
+        EXPECT_TRUE(v.data[1] == 2);
+        EXPECT_TRUE(v.data[2] == 3);
+        EXPECT_TRUE(v.data[3] == 4);
+    }
+    {
+        Vector4f v = { 1, 2, 3, 4 };
+        v.r = 5;
+        v.g = 6;
+        v.b = 7;
+        v.a = 8;
+
+        Vector4f v2 = { 1, 2, 3, 4 };
+        float result = tMath::dot(v, v2);
+        EXPECT_TRUE(tMath::approximately(result, static_cast<float>(1 * 5 + 2 * 6 + 3 * 7 + 4 * 8)));
+    }
+    {
+        Vector4f v = {
+            .r = 1,
+            .g = 2,
+            .b = 3,
+            .a = 4
+        };
+
+        Vector4f v2 = { 1, 2, 3, 4 };
+        EXPECT_TRUE(tMath::approximately(v, v2));
+        EXPECT_TRUE(v == v2);
+    }
 }
 
 
@@ -267,13 +294,19 @@ TEST(vector4, dot)
     {
         constexpr Vector4f v1 = { 1, 2, 3, 3 };
         constexpr Vector4f v2 = { 2, 3, 4, 4 };
-        constexpr float f = tMath::dot(v1.x, v1.y, v1.z, v1.w, v2.x, v2.y, v2.z, v2.w);
+        constexpr float f = tMath::dot(v1.data[0], v1.data[1], v1.data[2], v1.data[3], v2.data[0], v2.data[1], v2.data[2], v2.data[3]);
         EXPECT_TRUE(tMath::approximately(f, 32.0f));
     }
     {
         Vector4f v1 = { 1, 2, 3, 3 };
         Vector4f v2 = { 2, 3, 4, 4 };
         float f = tMath::dot(v1, v2);
+        EXPECT_TRUE(tMath::approximately(f, 32.0f));
+    }
+    {
+        Vector4f v1 = { 1, 2, 3, 3 };
+        Vector4f v2 = { 2, 3, 4, 4 };
+        float f = tMath::dot4(&v1.x, &v2.x);
         EXPECT_TRUE(tMath::approximately(f, 32.0f));
     }
 }
