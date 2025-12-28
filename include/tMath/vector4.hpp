@@ -40,17 +40,17 @@ constexpr TVec4& operator-=(TVec4& lhs, const TVec4& rhs) noexcept
 template<is_vector4 TVec4, is_signed_number N>
 constexpr TVec4& operator*=(TVec4& lhs, const N rhs) noexcept
 {
-    using Field = vector_quat_component_t<TVec4>;
+    using Comp = vector_component_t<TVec4>;
 
-    lhs.data[0] *= static_cast<Field>(rhs);
-    lhs.data[1] *= static_cast<Field>(rhs);
-    lhs.data[2] *= static_cast<Field>(rhs);
-    lhs.data[3] *= static_cast<Field>(rhs);
+    lhs.data[0] *= static_cast<Comp>(rhs);
+    lhs.data[1] *= static_cast<Comp>(rhs);
+    lhs.data[2] *= static_cast<Comp>(rhs);
+    lhs.data[3] *= static_cast<Comp>(rhs);
     return lhs;
 }
 
 template<is_vector4 TVec4>
-constexpr TVec4& operator/=(TVec4& lhs, const vector_quat_component_t<TVec4> rhs) noexcept
+constexpr TVec4& operator/=(TVec4& lhs, const vector_component_t<TVec4> rhs) noexcept
 {
     lhs.data[0] /= rhs;
     lhs.data[1] /= rhs;
@@ -68,7 +68,7 @@ TMATH_NAMESPACE_BEGIN
 template<is_vector4 Ret, is_vector4 In>
 constexpr Ret vector_cast(const In& v) noexcept
 {
-    using F = vector_quat_component_t<Ret>;
+    using F = vector_component_t<Ret>;
     return { static_cast<F>(v.data[0]), static_cast<F>(v.data[1]), static_cast<F>(v.data[2]), static_cast<F>(v.data[3]) };
 }
 
@@ -166,7 +166,7 @@ constexpr N dot(
 }
 
 template<is_vector4 TVec4>
-constexpr vector_quat_component_t<TVec4> dot(const TVec4& lhs, const TVec4& rhs) noexcept
+constexpr vector_component_t<TVec4> dot(const TVec4& lhs, const TVec4& rhs) noexcept
 {
     return  lhs.data[0] * rhs.data[0] +
             lhs.data[1] * rhs.data[1] +
@@ -191,12 +191,12 @@ constexpr TVec4 cross(const TVec4& lhs, const TVec4& rhs) noexcept
         lhs.data[1] * rhs.data[2] - lhs.data[2] * rhs.data[1],
         lhs.data[2] * rhs.data[0] - lhs.data[0] * rhs.data[2],
         lhs.data[0] * rhs.data[1] - lhs.data[1] * rhs.data[0],
-        static_cast<vector_quat_component_t<TVec4>>(0)
+        static_cast<vector_component_t<TVec4>>(0)
     };
 }
 
 template<is_vector4_floating_point TVec4>
-bool approximately(const TVec4& a, const TVec4& b, const vector_quat_component_t<TVec4> tolerance = MinTolerance<vector_quat_component_t<TVec4>>) noexcept
+bool approximately(const TVec4& a, const TVec4& b, const vector_component_t<TVec4> tolerance = MinTolerance<vector_component_t<TVec4>>) noexcept
 {
     return  approximately(a.data[0], b.data[0], tolerance) &&
             approximately(a.data[1], b.data[1], tolerance) &&
@@ -216,7 +216,7 @@ F magnitude(const F x, const F y, const F z, const F w) noexcept
 }
 
 template<is_vector4_floating_point TVec4>
-vector_quat_component_t<TVec4> magnitude(const TVec4& v) noexcept
+vector_component_t<TVec4> magnitude(const TVec4& v) noexcept
 {
     return std::sqrt(
         v.data[0] * v.data[0] +
@@ -229,7 +229,7 @@ vector_quat_component_t<TVec4> magnitude(const TVec4& v) noexcept
 template<is_vector4_floating_point TVec4>
 void normalize_inplace(TVec4& v) noexcept
 {
-    using F = vector_quat_component_t<TVec4>;
+    using F = vector_component_t<TVec4>;
     const F inv_mag = static_cast<F>(1) / magnitude(v);
     v.data[0] *= inv_mag;
     v.data[1] *= inv_mag;
@@ -240,7 +240,7 @@ void normalize_inplace(TVec4& v) noexcept
 template<is_vector4_floating_point TVec4>
 void safe_normalize_inplace(TVec4& v, const TVec4& fallback) noexcept
 {
-    using F = vector_quat_component_t<TVec4>;
+    using F = vector_component_t<TVec4>;
     const F mag = magnitude(v);
     if (is_invalid_divisor(mag))
     {
@@ -266,7 +266,7 @@ TVec4 normalized(const TVec4& v) noexcept
 template<is_vector4_floating_point RetVec3, is_vector4_sint TVec4Int>
 RetVec3 normalized(const TVec4Int& v) noexcept
 {
-    using F = vector_quat_component_t<RetVec3>;
+    using F = vector_component_t<RetVec3>;
     const F inv_mag = static_cast<F>(1) / magnitude(static_cast<F>(v.data[0]), static_cast<F>(v.data[1]), static_cast<F>(v.data[2]), static_cast<F>(v.data[3]));
 
     return {
@@ -280,7 +280,7 @@ RetVec3 normalized(const TVec4Int& v) noexcept
 template<is_vector4_floating_point TVec4>
 TVec4 safe_normalized(const TVec4& v, const TVec4& fallback) noexcept
 {
-    using F = vector_quat_component_t<TVec4>;
+    using F = vector_component_t<TVec4>;
     const F mag = magnitude(v);
     if (is_invalid_divisor(mag))
     {
@@ -300,7 +300,7 @@ TVec4 safe_normalized(const TVec4& v, const TVec4& fallback) noexcept
 template<is_vector4_floating_point RetVec3, is_vector4_sint TVec4Int>
 RetVec3 safe_normalized(const TVec4Int& v, const RetVec3& fallback) noexcept
 {
-    using F = vector_quat_component_t<RetVec3>;
+    using F = vector_component_t<RetVec3>;
     const F mag = magnitude(static_cast<F>(v.data[0]), static_cast<F>(v.data[1]), static_cast<F>(v.data[2]), static_cast<F>(v.data[3]));
     if (is_invalid_divisor(mag))
     {
@@ -318,15 +318,15 @@ RetVec3 safe_normalized(const TVec4Int& v, const RetVec3& fallback) noexcept
 }
 
 template<is_vector4_floating_point TVec4>
-vector_quat_component_t<TVec4> distance(const TVec4& a, const TVec4& b) noexcept
+vector_component_t<TVec4> distance(const TVec4& a, const TVec4& b) noexcept
 {
     return magnitude(a - b);
 }
 
 template<is_vector4_sint TVec4Int>
-sint_to_floating_point_t<vector_quat_component_t<TVec4Int>> distance(const TVec4Int& a, const TVec4Int& b) noexcept
+sint_to_floating_point_t<vector_component_t<TVec4Int>> distance(const TVec4Int& a, const TVec4Int& b) noexcept
 {
-    using F = sint_to_floating_point_t<vector_quat_component_t<TVec4Int>>;
+    using F = sint_to_floating_point_t<vector_component_t<TVec4Int>>;
     const TVec4Int delta = a - b;
     return magnitude(static_cast<F>(delta.data[0]), static_cast<F>(delta.data[1]), static_cast<F>(delta.data[2]), static_cast<F>(delta.data[3]));
 }
@@ -342,5 +342,12 @@ constexpr TVec4 lerp(const TVec4& a, const TVec4& b, const F t) noexcept
     };
 }
 
+
+
+// 预设类型
+struct Vector4f
+{
+    TMATH_FULL_VECTOR4(Vector4f, float)
+};
 
 TMATH_NAMESPACE_END

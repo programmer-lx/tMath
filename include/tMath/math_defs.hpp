@@ -2,6 +2,7 @@
 
 #include <cstddef> // for ptrdiff_t (这个头文件一定要包含，因为下面有些头文件可能用到了 ptrdiff_t ，不包含，可能会编译报错)
 #include <cstdint>
+#include <cassert>
 
 #include <limits>
 #include <concepts>
@@ -22,6 +23,12 @@
 
 
 #define TMATH_NODISCARD [[nodiscard]]
+
+#if defined(TMATH_IS_TESTING)
+    #define TMATH_TEST_ASSERT(...) assert(__VA_ARGS__)
+#else
+    #define TMATH_TEST_ASSERT(...)
+#endif
 
 
 TMATH_NAMESPACE_BEGIN
@@ -53,6 +60,12 @@ namespace detail
     static constexpr bool is_pure_data_type_v =
         std::is_standard_layout_v<T> &&
         std::is_aggregate_v<T>;
+
+    template<typename T>
+    concept has_data_field = requires(T t)
+    {
+        t.data;
+    };
 }
 
 
@@ -60,6 +73,19 @@ namespace detail
 
 struct quat_tag {};
 #define TMATH_QUAT_TAG using is_quat = TMATH_NAMESPACE_NAME::quat_tag;
+
+// ----------------------------------------------------
+// VectorN 类型萃取
+// ----------------------------------------------------
+template<detail::has_data_field V>
+struct vector_traits
+{
+    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<V>().data)>>;
+    static constexpr int component_count = std::extent_v<decltype(std::declval<V>().data), 0>;
+};
+
+template<detail::has_data_field V>
+using vector_component_t = vector_traits<V>::component_type;
 
 /**
  * 约束原则：
@@ -220,17 +246,18 @@ concept is_vector_n = is_vector2<T> || is_vector3<T> || is_vector4<T>;
 template<typename T>
 concept is_vector_n_or_quat = is_vector_n<T> || is_quat<T>;
 
+
 // ----------------------------------------------------
-// VectorN Quat 字段类型萃取
+// Quat 字段类型萃取
 // ----------------------------------------------------
-template<is_vector_n_or_quat V>
-struct vector_quat_traits
+template<typename Q>
+struct quat_traits
 {
-    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<V>().data)>>;
+    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<Q>().data)>>;
 };
 
-template<is_vector_n_or_quat V>
-using vector_quat_component_t = vector_quat_traits<V>::component_type;
+template<typename Q>
+using quat_component_t = quat_traits<Q>::component_type;
 
 
 #define TMATH_VECTOR_OPERATORS(vector_type_name) \
@@ -269,9 +296,9 @@ using vector_quat_component_t = vector_quat_traits<V>::component_type;
     { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
 
 
-#define TMATH_VECTOR_DATA_INDEX(data_var_name) \
-    std::remove_reference_t<decltype(data_var_name[0])>& operator[](int i) { return data_var_name[i]; } \
-    const std::remove_reference_t<decltype(data_var_name[0])>& operator[](int i) const { return data_var_name[i]; }
+#define TMATH_VECTOR_DATA_INDEX \
+    constexpr std::remove_extent_t<decltype(data)>& operator[](int i) { return data[i]; } \
+    constexpr const std::remove_extent_t<decltype(data)>& operator[](int i) const { return data[i]; }
 
 
 #define TMATH_FULL_VECTOR2(vector_type_name, component_type_name) \
@@ -282,7 +309,7 @@ using vector_quat_component_t = vector_quat_traits<V>::component_type;
         struct { component_type_name r, g; }; \
         struct { component_type_name u, v; }; \
     }; \
-    TMATH_VECTOR_DATA_INDEX(data) \
+    TMATH_VECTOR_DATA_INDEX \
     TMATH_VECTOR_OPERATORS(vector_type_name)
 
 #define TMATH_FULL_VECTOR3(vector_type_name, component_type_name) \
@@ -292,7 +319,7 @@ using vector_quat_component_t = vector_quat_traits<V>::component_type;
         struct { component_type_name x, y, z; }; \
         struct { component_type_name r, g, b; }; \
     }; \
-    TMATH_VECTOR_DATA_INDEX(data) \
+    TMATH_VECTOR_DATA_INDEX \
     TMATH_VECTOR_OPERATORS(vector_type_name)
 
 #define TMATH_FULL_VECTOR4(vector_type_name, component_type_name) \
@@ -302,7 +329,7 @@ using vector_quat_component_t = vector_quat_traits<V>::component_type;
         struct { component_type_name x, y, z, w; }; \
         struct { component_type_name r, g, b, a; }; \
     }; \
-    TMATH_VECTOR_DATA_INDEX(data) \
+    TMATH_VECTOR_DATA_INDEX \
     TMATH_VECTOR_OPERATORS(vector_type_name)
 
 
@@ -317,7 +344,7 @@ using vector_quat_component_t = vector_quat_traits<V>::component_type;
         component_type_name data[4]; \
         struct { component_type_name x, y, z, w; }; \
     }; \
-    TMATH_VECTOR_DATA_INDEX(data)
+    TMATH_VECTOR_DATA_INDEX
 
 
 
@@ -352,30 +379,44 @@ namespace detail
 // ----------------------------------------------------
 // Matrix 类型萃取
 // ----------------------------------------------------
-template<typename Mat>
+template<detail::has_data_field Mat>
 struct matrix_traits
 {
-    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<Mat>().data)>>;
+    using vector_type = std::remove_all_extents_t<decltype(Mat::data)>;
+    using component_type = vector_component_t<vector_type>;
 
     static constexpr bool is_column_major = detail::has_column_major_matrix_tag<Mat>;
 
     /**
+     * 第0维数组的大小
+     */
+    static constexpr int vector_count = std::extent_v<decltype(Mat::data), 0>;
+
+    /**
+     * 第1维数组的大小 (内部向量长度)
+     */
+    static constexpr int vector_component_count = vector_traits<vector_type>::component_count;
+
+    /**
      * 逻辑行数 (如果是列主序，则表示为存储结构的列数，但是逻辑上还是行数)
      */
-    static constexpr int row_count = is_column_major ? std::extent_v<decltype(std::declval<Mat>().data), 1> : std::extent_v<decltype(std::declval<Mat>().data), 0>;
+    static constexpr int row_count = is_column_major ? vector_component_count : vector_count;
 
     /**
      * 逻辑列数 (如果是列主序，则表示为存储结构的行数，但是逻辑上还是列数)
      */
-    static constexpr int column_count = is_column_major ? std::extent_v<decltype(std::declval<Mat>().data), 0> : std::extent_v<decltype(std::declval<Mat>().data), 1>;
+    static constexpr int column_count = is_column_major ? vector_count : vector_component_count;
 
     /**
      * 是否为方阵
      */
     static constexpr bool is_square_matrix = (row_count == column_count);
+
+    // checK
+    static_assert(sizeof(component_type) * row_count * column_count == sizeof(Mat), "Matrix size mismatch!");
 };
 
-template<typename Mat>
+template<detail::has_data_field Mat>
 using matrix_component_t = matrix_traits<Mat>::component_type;
 
 namespace detail
@@ -388,35 +429,42 @@ namespace detail
     && detail::is_pure_data_type_v<Mat> // 聚合初始化
     && std::is_array_v<decltype(std::declval<Mat>().data)>
     && (std::extent_v<decltype(std::declval<Mat>().data), 0> >= 2)
-    && (std::extent_v<decltype(std::declval<Mat>().data), 1> >= 2) // 2D数组
-    && (sizeof(matrix_component_t<Mat>) * (matrix_traits<Mat>::column_count * matrix_traits<Mat>::row_count) == sizeof(Mat)) // 大小符合要求
-    && std::is_same_v<std::remove_all_extents_t<decltype(std::declval<Mat>().data)>, matrix_component_t<Mat>>;
+    && is_vector_n<std::remove_all_extents_t<decltype(std::declval<Mat>().data)>>; // 每一行(列)是向量类型
 }
 
 template<typename Mat>
-concept is_square_matrix_row_major = detail::is_generic_matrix<Mat> && !detail::has_column_major_matrix_tag<Mat>;
+concept is_matrix_row_major = detail::is_generic_matrix<Mat> && !detail::has_column_major_matrix_tag<Mat>;
 
 template<typename Mat>
-concept is_square_matrix_column_major = detail::is_generic_matrix<Mat> && detail::has_column_major_matrix_tag<Mat>;
+concept is_matrix_column_major = detail::is_generic_matrix<Mat> && detail::has_column_major_matrix_tag<Mat>;
+
+template<typename Mat>
+concept is_matrix_any_major = is_matrix_row_major<Mat> || is_matrix_column_major<Mat>;
+
+template<typename Mat>
+concept is_square_matrix_row_major = is_matrix_row_major<Mat> && matrix_traits<Mat>::is_square_matrix;
+
+template<typename Mat>
+concept is_square_matrix_column_major = is_matrix_column_major<Mat> && matrix_traits<Mat>::is_square_matrix;
+
+template<typename Mat>
+concept is_square_matrix_any_major = is_matrix_any_major<Mat> && matrix_traits<Mat>::is_square_matrix;
 
 
 
-#define TMATH_MATRIX_OPERATORS(matrix_type_name)
+#define TMATH_MATRIX_OPERATORS(matrix_type_name) \
+    template<TMATH_NAMESPACE_NAME::is_vector_n Vec> \
+    constexpr friend Vec operator*(const matrix_type_name& lhs, const Vec& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
+    \
+    constexpr friend matrix_type_name operator*(const matrix_type_name& lhs, const matrix_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
+    \
+    constexpr friend bool operator==(const matrix_type_name& lhs, const matrix_type_name& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); }
 
-// 无论是行主序还是列主序m01代表逻辑上第0行第1列，主序只是存储结构有变化，但是逻辑结构始终不变
-#define TMATH_FULL_MATRIX4X4_ROW_MAJOR(matrix_type_name, component_type_name) \
-    union \
-    { \
-        component_type_name data[4][4]; \
-        struct \
-        { \
-            component_type_name m00, m01, m02, m03, \
-                                m10, m11, m12, m13, \
-                                m20, m21, m22, m23, \
-                                m30, m31, m32, m33; \
-        }; \
-    }; \
-    TMATH_MATRIX_OPERATORS(matrix_type_name)
+
+#define TMATH_FULL_MATRIX4X4_ROW_MAJOR(matrix_type_name, component_type_name)
 
 
 // ----------------------------------------------------
@@ -454,10 +502,10 @@ template<is_floating_point F1, is_floating_point F2>
 using min_floating_point_t = std::conditional_t<(sizeof(F1) <= sizeof(F2)), F1, F2>;
 
 template<is_vector_n V1, is_vector_n V2>
-using max_component_floating_point_t = std::conditional_t<(sizeof(vector_quat_component_t<V1>) >= sizeof(vector_quat_component_t<V2>)), vector_quat_component_t<V1>, vector_quat_component_t<V2>>;
+using max_component_floating_point_t = std::conditional_t<(sizeof(vector_component_t<V1>) >= sizeof(vector_component_t<V2>)), vector_component_t<V1>, vector_component_t<V2>>;
 
 template<is_vector_n V1, is_vector_n V2>
-using min_component_floating_point_t = std::conditional_t<(sizeof(vector_quat_component_t<V1>) <= sizeof(vector_quat_component_t<V2>)), vector_quat_component_t<V1>, vector_quat_component_t<V2>>;
+using min_component_floating_point_t = std::conditional_t<(sizeof(vector_component_t<V1>) <= sizeof(vector_component_t<V2>)), vector_component_t<V1>, vector_component_t<V2>>;
 
 
 TMATH_NAMESPACE_END

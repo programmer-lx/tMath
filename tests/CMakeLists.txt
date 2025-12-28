@@ -41,6 +41,10 @@ action_for_test_target(test_vector4)
 add_executable(test_quat test_quat.cpp)
 action_for_test_target(test_quat)
 
+# large vector (N > 4)
+add_executable(test_large_vector test_large_vector.cpp)
+action_for_test_target(test_large_vector)
+
 # operators
 add_executable(test_operators_override test_operator_override.cpp)
 action_for_test_target(test_operators_override)
@@ -100,6 +104,7 @@ add_test(NAME Test_Vector2 COMMAND $<TARGET_FILE:test_vector2>)
 add_test(NAME Test_Vector3 COMMAND $<TARGET_FILE:test_vector3>)
 add_test(NAME Test_Vector4 COMMAND $<TARGET_FILE:test_vector4>)
 add_test(NAME Test_Quat COMMAND $<TARGET_FILE:test_quat>)
+add_test(NAME Test_LargeVector COMMAND $<TARGET_FILE:test_large_vector>)
 add_test(NAME Test_OperatorOverride COMMAND $<TARGET_FILE:test_operators_override>)
 add_test(NAME Test_Matrix4x4_RM COMMAND $<TARGET_FILE:test_matrix_4x4_rm>)
 
