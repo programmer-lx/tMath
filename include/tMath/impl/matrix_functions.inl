@@ -17,7 +17,7 @@ namespace detail
     constexpr matrix_traits<Mat>::vector_type scale_i_impl(const N scalar, std::index_sequence<J...>) noexcept
     {
         using C = matrix_traits<Mat>::component_type;
-        return { (I == J) ? static_cast<C>(scalar) : static_cast<C>(0)... };
+        return { static_cast<C>(I == J) * static_cast<C>(scalar)... };
     }
 
     template<is_square_matrix_any_major Mat, size_t... I, is_signed_number N>
