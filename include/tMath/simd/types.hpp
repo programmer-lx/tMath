@@ -10,7 +10,7 @@
 // #define TMATH_USE_AVX2 // test
 // #define TMATH_DISABLE_SVML // test
 #if defined(TMATH_NO_SIMD)
-    #include "../vector1.hpp"
+    #include "../floating_point.hpp"
     #include "../vector2.hpp"
     #include "../vector3.hpp"
     #include "../vector4.hpp"

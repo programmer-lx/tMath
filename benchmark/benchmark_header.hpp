@@ -1,7 +1,7 @@
 #pragma once
 
+#include <tMath/floating_point.hpp>
 #include <tMath/simd/float32_4.hpp>
-#include <tMath/vector1.hpp>
 #include <tMath/vector2.hpp>
 #include <tMath/vector3.hpp>
 #include <tMath/vector4.hpp>

@@ -116,8 +116,8 @@ constexpr N clamp(const N n, const N min, const N max) noexcept
     return (n < min) ? min : (n > max) ? max : n;
 }
 
-template<is_floating_point F, is_floating_point T>
-constexpr F lerp(const F a, const F b, const T t) noexcept
+template<is_floating_point F, is_floating_point F2>
+constexpr F lerp(const F a, const F b, const F2 t) noexcept
 {
     return a + (b - a) * static_cast<F>(t);
 }

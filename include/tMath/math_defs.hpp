@@ -12,6 +12,38 @@
 #define TMATH_NAMESPACE_BEGIN namespace TMATH_NAMESPACE_NAME {
 #define TMATH_NAMESPACE_END }
 
+
+#define TMATH_VERSION_MAJOR 0
+#define TMATH_VERSION_MINOR 0
+#define TMATH_VERSION_PATCH 1
+
+/**
+ * @param major 63-48 (16bit)
+ * @param minor 47-32 (16bit)
+ * @param patch 31-0  (32bit)
+ */
+#define TMATH_MAKE_VERSION(major, minor, patch) \
+    (   (((major) & 0xffffull) << 48ull) | \
+        (((minor) & 0xffffull) << 32ull) | \
+        ( (patch) & 0xffffffffull)   )
+
+#define TMATH_VERSION ( TMATH_MAKE_VERSION(TMATH_VERSION_MAJOR, TMATH_VERSION_MINOR, TMATH_VERSION_PATCH) )
+
+TMATH_NAMESPACE_BEGIN
+namespace Version
+{
+    static constexpr uint64_t version = TMATH_VERSION;
+    static constexpr uint64_t make_version(const uint16_t major, const uint16_t minor, const uint32_t patch) noexcept
+    {
+        return TMATH_MAKE_VERSION(major, minor, patch);
+    }
+    static constexpr uint16_t major = TMATH_VERSION_MAJOR;
+    static constexpr uint16_t minor = TMATH_VERSION_MINOR;
+    static constexpr uint32_t patch = TMATH_VERSION_PATCH;
+}
+TMATH_NAMESPACE_END
+
+
 // force inline
 #if defined (_MSC_VER)
     #define TMATH_FORCE_INLINE __forceinline
@@ -52,6 +84,13 @@ concept is_signed_number = TMATH_NAMESPACE_NAME::is_signed_int<T> || TMATH_NAMES
 template<typename T>
 concept is_number = std::is_arithmetic_v<T>;
 
+// 用于在 requires 排除某些 conditions(或concepts)
+template<bool... Conditions>
+static constexpr bool exclude = !(Conditions || ...);
+
+
+template<bool... Conditions>
+static constexpr bool match_all = (Conditions && ...);
 
 
 namespace detail
@@ -107,63 +146,32 @@ namespace detail
         typename T::is_quat;
         requires std::is_same_v<typename T::is_quat, TMATH_NAMESPACE_NAME::quat_tag>;
     };
-
-    template<typename TVec, typename TComponent>
-    concept is_generic_vector2 = requires(TVec v)
+    
+    template<typename V>
+    concept is_generic_vector = requires(V v)
     {
         v.data;
-        requires std::is_same_v<std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<TVec>().data)>>, TComponent>;
-
-    } && is_vector_n_layout_v<TVec, TComponent, 2>;
-
-    template<typename TVec, typename TComponent>
-    concept is_generic_vector3 = requires(TVec v)
-    {
-        v.data;
-        requires std::is_same_v<std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<TVec>().data)>>, TComponent>;
-
-    } && is_vector_n_layout_v<TVec, TComponent, 3>;
-
-    template<typename T, typename TComponent>
-    concept is_vector4_or_quat = requires(T v)
-    {
-        v.data;
-        requires std::is_same_v<std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<T>().data)>>, TComponent>;
-
-    } && is_vector_n_layout_v<T, TComponent, 4>;
-
-    template<typename TVec, typename TComponent>
-    concept is_generic_vector4 = is_vector4_or_quat<TVec, TComponent> && !has_quat_tag<TVec>;
-
-    template<typename TQuat, typename TComponent>
-    concept is_generic_quat = is_vector4_or_quat<TQuat, TComponent> && has_quat_tag<TQuat>;
+        requires std::is_same_v<std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<V>().data)>>, typename vector_traits<V>::component_type>;
+        requires is_vector_n_layout_v<V, typename vector_traits<V>::component_type, vector_traits<V>::component_count>;
+        requires std::rank_v<decltype(std::declval<V>().data)> == 1; // 数组维度必须是1
+        requires is_signed_number<std::remove_all_extents_t<decltype(std::declval<V>().data)>>; // component的类型必须是有符号数字
+    };
 }
 
 // ----------------------------------------------------
 // Vector2<T>
 // ----------------------------------------------------
 template<typename T>
-concept is_vector2_float = detail::is_generic_vector2<T, float>;
-template<typename T>
-concept is_vector2_double = detail::is_generic_vector2<T, double>;
-template<typename T>
-concept is_vector2_long_double = detail::is_generic_vector2<T, long double>;
-template<typename T>
-concept is_vector2_floating_point = is_vector2_float<T> || is_vector2_double<T> || is_vector2_long_double<T>;
+concept is_vector2 = detail::is_generic_vector<T> && (vector_traits<T>::component_count == 2);
 
 template<typename T>
-concept is_vector2_i8 = detail::is_generic_vector2<T, int8_t>;
-template<typename T>
-concept is_vector2_i16 = detail::is_generic_vector2<T, int16_t>;
-template<typename T>
-concept is_vector2_i32 = detail::is_generic_vector2<T, int32_t>;
-template<typename T>
-concept is_vector2_i64 = detail::is_generic_vector2<T, int64_t>;
-template<typename T>
-concept is_vector2_sint = is_vector2_i8<T> || is_vector2_i16<T> || is_vector2_i32<T> || is_vector2_i64<T>;
+concept is_vector2_float = is_vector2<T> && std::is_same_v<vector_component_t<T>, float>;
 
 template<typename T>
-concept is_vector2 = is_vector2_floating_point<T> || is_vector2_sint<T>;
+concept is_vector2_floating_point = is_vector2<T> && is_floating_point<vector_component_t<T>>;
+
+template<typename T>
+concept is_vector2_sint = is_vector2<T> && is_signed_int<vector_component_t<T>>;
 
 
 
@@ -171,27 +179,16 @@ concept is_vector2 = is_vector2_floating_point<T> || is_vector2_sint<T>;
 // Vector3<T>
 // ----------------------------------------------------
 template<typename T>
-concept is_vector3_float = detail::is_generic_vector3<T, float>;
-template<typename T>
-concept is_vector3_double = detail::is_generic_vector3<T, double>;
-template<typename T>
-concept is_vector3_long_double = detail::is_generic_vector3<T, long double>;
-template<typename T>
-concept is_vector3_floating_point = is_vector3_float<T> || is_vector3_double<T> || is_vector3_long_double<T>;
+concept is_vector3 = detail::is_generic_vector<T> && (vector_traits<T>::component_count == 3);
 
 template<typename T>
-concept is_vector3_i8 = detail::is_generic_vector3<T, int8_t>;
-template<typename T>
-concept is_vector3_i16 = detail::is_generic_vector3<T, int16_t>;
-template<typename T>
-concept is_vector3_i32 = detail::is_generic_vector3<T, int32_t>;
-template<typename T>
-concept is_vector3_i64 = detail::is_generic_vector3<T, int64_t>;
-template<typename T>
-concept is_vector3_sint = is_vector3_i8<T> || is_vector3_i16<T> || is_vector3_i32<T> || is_vector3_i64<T>;
+concept is_vector3_float = is_vector3<T> && std::is_same_v<vector_component_t<T>, float>;
 
 template<typename T>
-concept is_vector3 = is_vector3_floating_point<T> || is_vector3_sint<T>;
+concept is_vector3_floating_point = is_vector3<T> && is_floating_point<vector_component_t<T>>;
+
+template<typename T>
+concept is_vector3_sint = is_vector3<T> && is_signed_int<vector_component_t<T>>;
 
 
 
@@ -199,65 +196,29 @@ concept is_vector3 = is_vector3_floating_point<T> || is_vector3_sint<T>;
 // Vector4<T>
 // ----------------------------------------------------
 template<typename T>
-concept is_vector4_float = detail::is_generic_vector4<T, float>;
-template<typename T>
-concept is_vector4_double = detail::is_generic_vector4<T, double>;
-template<typename T>
-concept is_vector4_long_double = detail::is_generic_vector4<T, long double>;
-template<typename T>
-concept is_vector4_floating_point = is_vector4_float<T> || is_vector4_double<T> || is_vector4_long_double<T>;
+concept is_vector4 = detail::is_generic_vector<T> && (vector_traits<T>::component_count == 4) && !detail::has_quat_tag<T>;
 
 template<typename T>
-concept is_vector4_i8 = detail::is_generic_vector4<T, int8_t>;
-template<typename T>
-concept is_vector4_i16 = detail::is_generic_vector4<T, int16_t>;
-template<typename T>
-concept is_vector4_i32 = detail::is_generic_vector4<T, int32_t>;
-template<typename T>
-concept is_vector4_i64 = detail::is_generic_vector4<T, int64_t>;
-template<typename T>
-concept is_vector4_sint = is_vector4_i8<T> || is_vector4_i16<T> || is_vector4_i32<T> || is_vector4_i64<T>;
+concept is_vector4_float = is_vector4<T> && std::is_same_v<vector_component_t<T>, float>;
 
 template<typename T>
-concept is_vector4 = is_vector4_floating_point<T> || is_vector4_sint<T>;
+concept is_vector4_floating_point = is_vector4<T> && is_floating_point<vector_component_t<T>>;
 
-// ----------------------------------------------------
-// Quat<T> T only floating point
-// ----------------------------------------------------
 template<typename T>
-concept is_quat_float = detail::is_generic_quat<T, float>;
-template<typename T>
-concept is_quat_double = detail::is_generic_quat<T, double>;
-template<typename T>
-concept is_quat_long_double = detail::is_generic_quat<T, long double>;
-template<typename T>
-concept is_quat = is_quat_float<T> || is_quat_double<T> || is_quat_long_double<T>;
-
-
+concept is_vector4_sint = is_vector4<T> && is_signed_int<vector_component_t<T>>;
 
 
 // ----------------------------------------------------
 // VectorN<T>
 // ----------------------------------------------------
 template<typename T>
-concept is_vector_n = is_vector2<T> || is_vector3<T> || is_vector4<T>;
-
+concept is_vector_n = detail::is_generic_vector<T>;
 
 template<typename T>
-concept is_vector_n_or_quat = is_vector_n<T> || is_quat<T>;
+concept is_vector_n_floating_point = is_vector_n<T> && is_floating_point<vector_component_t<T>>;
 
-
-// ----------------------------------------------------
-// Quat 字段类型萃取
-// ----------------------------------------------------
-template<typename Q>
-struct quat_traits
-{
-    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<Q>().data)>>;
-};
-
-template<typename Q>
-using quat_component_t = quat_traits<Q>::component_type;
+template<typename T>
+concept is_vector_n_sint = is_vector_n<T> && is_signed_int<vector_component_t<T>>;
 
 
 #define TMATH_VECTOR_OPERATORS(vector_type_name) \
@@ -333,6 +294,29 @@ using quat_component_t = quat_traits<Q>::component_type;
     TMATH_VECTOR_OPERATORS(vector_type_name)
 
 
+
+
+// ----------------------------------------------------
+// Quat<T> T only floating point
+// ----------------------------------------------------
+
+// ----------------------------------------------------
+// Quat 字段类型萃取
+// ----------------------------------------------------
+template<typename Q>
+struct quat_traits
+{
+    using component_type = std::remove_all_extents_t<std::remove_reference_t<decltype(std::declval<Q>().data)>>;
+    static constexpr int component_count = std::extent_v<decltype(std::declval<Q>().data), 0>;
+
+    static_assert(component_count == 4, "quat's component count MUST be 4.");
+};
+
+template<typename Q>
+using quat_component_t = quat_traits<Q>::component_type;
+
+template<typename T>
+concept is_quat = detail::is_generic_vector<T> && (quat_traits<T>::component_count == 4) && detail::has_quat_tag<T>;
 
 
 #define TMATH_QUAT_OPERATORS()
@@ -412,7 +396,7 @@ struct matrix_traits
      */
     static constexpr bool is_square_matrix = (row_count == column_count);
 
-    // checK
+    // check
     static_assert(sizeof(component_type) * row_count * column_count == sizeof(Mat), "Matrix size mismatch!");
 };
 
@@ -421,15 +405,19 @@ using matrix_component_t = matrix_traits<Mat>::component_type;
 
 namespace detail
 {
+    template<typename Mat, typename Component, int Rows, int Columns>
+    static constexpr bool is_matrix_layout_v = is_pure_data_type_v<Mat> && (sizeof(Mat) == sizeof(Component) * Rows * Columns);
+
     template<typename Mat>
     concept is_generic_matrix = requires
     {
         typename std::remove_reference_t<decltype(std::declval<Mat>().data)>; // .data 字段
-    }
-    && detail::is_pure_data_type_v<Mat> // 聚合初始化
-    && std::is_array_v<decltype(std::declval<Mat>().data)>
-    && (std::extent_v<decltype(std::declval<Mat>().data), 0> >= 2)
-    && is_vector_n<std::remove_all_extents_t<decltype(std::declval<Mat>().data)>>; // 每一行(列)是向量类型
+        requires std::is_array_v<decltype(std::declval<Mat>().data)>; // data字段是一个数组
+        requires std::rank_v<decltype(std::declval<Mat>().data)> == 1; // .data数组维度必须是1
+        requires std::extent_v<decltype(std::declval<Mat>().data), 0> >= 2; // 数组长度必须 >= 2 至少是 mat2x2
+        requires is_vector_n<std::remove_all_extents_t<decltype(std::declval<Mat>().data)>>; // 每一行(列)是向量类型
+        requires is_matrix_layout_v<Mat, matrix_component_t<Mat>, matrix_traits<Mat>::row_count, matrix_traits<Mat>::column_count>; // 内存布局符合要求
+    };
 }
 
 template<typename Mat>
@@ -468,29 +456,20 @@ concept is_square_matrix_any_major = is_matrix_any_major<Mat> && matrix_traits<M
 
 
 // ----------------------------------------------------
-// 整数 -> 浮点数 (根据传入的整数的bit大小，自动判断需要用多少bit的浮点数)
+// 任意数 -> 浮点数 (根据传入的整数的bit大小，自动判断需要用多少bit的浮点数)
 // ----------------------------------------------------
-template<is_signed_int I>
-struct sint_to_floating_point
+template<is_number N>
+struct number_to_floating_point
 {
-private:
-    static constexpr bool requires_double = std::numeric_limits<I>::digits > std::numeric_limits<float>::digits;
-    static constexpr bool requires_long_double = std::numeric_limits<I>::digits > std::numeric_limits<double>::digits;
-
-public:
     using type = std::conditional_t<
-        requires_double,
-        std::conditional_t<
-            requires_long_double,
-            long double,
-            double
-        >,
+        (std::numeric_limits<N>::digits > std::numeric_limits<float>::digits),
+        double,
         float
     >;
 };
 
-template<is_signed_int I>
-using sint_to_floating_point_t = sint_to_floating_point<I>::type;
+template<is_number N>
+using number_to_floating_point_t = number_to_floating_point<N>::type;
 
 
 // 提取两个输入的浮点类型的size最大的类型

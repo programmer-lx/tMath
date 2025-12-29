@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../floating_point.hpp"
 #include "defs.hpp"
-#include "../vector1.hpp"
 
 TMATH_COMPILE_TIME_NAMESPACE_BEGIN
 

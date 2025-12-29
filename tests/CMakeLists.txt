@@ -17,6 +17,10 @@ if(MSVC)
     add_compile_definitions(UNICODE _UNICODE)
 endif()
 
+# type traits test
+add_executable(test_type_traits test_type_traits.cpp)
+action_for_test_target(test_type_traits)
+
 # algorithm test
 add_executable(test_algorithm test_algorithm.cpp)
 action_for_test_target(test_algorithm)
@@ -99,6 +103,7 @@ action_for_test_target(test_compile_time_vector1)
 
 # 添加测试
 add_test(NAME Test_Algorithm COMMAND $<TARGET_FILE:test_algorithm>)
+add_test(NAME Test_TypeTraits COMMAND $<TARGET_FILE:test_type_traits>)
 add_test(NAME Test_Float COMMAND $<TARGET_FILE:test_float>)
 add_test(NAME Test_Vector2 COMMAND $<TARGET_FILE:test_vector2>)
 add_test(NAME Test_Vector3 COMMAND $<TARGET_FILE:test_vector3>)

@@ -303,15 +303,6 @@ TEST(vector4, dot)
         float f = tMath::dot(v1, v2);
         EXPECT_TRUE(tMath::approximately(f, 32.0f));
     }
-    {
-        Vector4f v1 = { 1, 2, 3, 3 };
-        Vector4f v2 = { 2, 3, 4, 4 };
-        float f = tMath::dot4(&v1.x, &v2.x);
-        EXPECT_TRUE(tMath::approximately(f, 32.0f));
-
-        float f2 = tMath::dot4(v1.data, v2.data);
-        EXPECT_TRUE(tMath::approximately(f2, 32.0f));
-    }
 }
 
 TEST(vector4, cross)

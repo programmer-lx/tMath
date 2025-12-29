@@ -1,6 +1,6 @@
 #include "../test.hpp"
 
-#include <tMath/compile_time/vector1.hpp>
+#include <tMath/compile_time/floating_point.hpp>
 
 namespace ct = tMath::CompileTime;
 
