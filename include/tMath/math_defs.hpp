@@ -55,15 +55,6 @@ TMATH_NAMESPACE_END
     #error "TMATH_FORCE_INLINE has not defined!"
 #endif
 
-// consteval
-#if defined (__GNUC__) || defined (__clang__)
-    #define TMATH_CONSTEVAL_FN consteval
-    #define TMATH_IF_CONSTEVAL if consteval
-#else
-    #define TMATH_CONSTEVAL_FN constexpr
-    #define TMATH_IF_CONSTEVAL if (std::is_constant_evaluated())
-#endif
-
 // std constexpr floating point functions
 #if defined (__GNUC__)
     #define TMATH_HAS_STD_CONSTEXPR_FLOATING_POINT_FUNCTIONS

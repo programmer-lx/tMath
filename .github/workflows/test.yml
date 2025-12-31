@@ -16,10 +16,14 @@ jobs:
         os: [windows-latest, ubuntu-latest]
 
     steps:
-      - name: Checkout repo
+      - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Run All Tests
         # 使用 max 模式进行全量测试

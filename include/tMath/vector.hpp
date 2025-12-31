@@ -225,7 +225,7 @@ constexpr VecN to_radians(const VecN& degrees) noexcept
 }
 
 template<is_vector_n VecN>
-constexpr VecN abs(const VecN& v) noexcept
+VecN abs(const VecN& v) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
     
@@ -343,7 +343,7 @@ constexpr auto dot(const N... comp) noexcept
 }
 
 template<is_vector_n_floating_point VecN>
-constexpr bool approximately(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = MinTolerance<vector_component_t<VecN>>) noexcept
+bool approximately(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = MinTolerance<vector_component_t<VecN>>) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
 

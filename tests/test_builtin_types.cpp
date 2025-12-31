@@ -18,7 +18,7 @@ TEST(builtin_types, vec2)
     constexpr tMath::Vector2<float> result = v1 + v2;
     constexpr tMath::Vector2<float> test = { 4, 6 };
 
-    static_assert(tMath::approximately(result, test));
+    static_assert(result == test);
 
     SUCCEED();
 }
@@ -30,7 +30,7 @@ TEST(builtin_types, vec3)
     constexpr tMath::Vector3<float> result = v1 + v2;
     constexpr tMath::Vector3<float> test = { 4, 6, 8 };
 
-    static_assert(tMath::approximately(result, test));
+    static_assert(result == test);
 
     SUCCEED();
 }
@@ -42,7 +42,7 @@ TEST(builtin_types, vec4)
     constexpr tMath::Vector4<float> result = v1 + v2;
     constexpr tMath::Vector4<float> test = { 4, 6, 8, 10 };
 
-    static_assert(tMath::approximately(result, test));
+    static_assert(result == test);
 
     SUCCEED();
 }

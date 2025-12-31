@@ -18,13 +18,13 @@ TEST(vector2, generic)
 {
     constexpr TestGenericVector2<float> v = { 1, 2 };
     constexpr TestGenericVector2<float> v2 = { 1, 2 };
-    static_assert(tMath::approximately(v, v2));
+    static_assert(v == v2);
 
     constexpr TestGenericVectorN<double, 3> v3 = { 1, 2, 3 };
     constexpr TestGenericVectorN<double, 4> v4 = { 1, 2, 3, 4 };
-    static_assert(tMath::approximately(v3,
-        tMath::vector_cast<TestGenericVectorN<double, 3>>(v4)
-        ));
+    static_assert(
+        v3 == tMath::vector_cast<TestGenericVectorN<double, 3>>(v4)
+        );
 
     SUCCEED();
 }

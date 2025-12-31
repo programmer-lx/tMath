@@ -262,10 +262,6 @@ TEST(vector3, to_radians)
 TEST(vector3, abs)
 {
     {
-        constexpr Vector3f negative = { -180, -3, -150.123f };
-        static_assert(tMath::approximately(tMath::abs(negative), Vector3f{ 180, 3, 150.123f }));
-    }
-    {
         Vector3f negative = { -180, -3, -150.123f };
         EXPECT_TRUE(tMath::approximately(tMath::abs(negative), { 180, 3, 150.123f }));
     }

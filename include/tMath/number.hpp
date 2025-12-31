@@ -88,36 +88,9 @@ template<is_signed_number N>
 static constexpr N NaN = QuietNaN<N>;
 
 
-namespace detail
-{
-    template<is_number N>
-    TMATH_CONSTEVAL_FN N compile_time_abs(const N x) noexcept
-    {
-        if constexpr (is_floating_point<N>)
-        {
-            if (x == static_cast<N>(-0.0))
-            {
-                return static_cast<N>(+0.0);
-            }
-        }
+// ======================================== floating point functions ======================================
 
-        return x < static_cast<N>(0) ? -x : x;
-    }
-}
-
-// ======================================== compile-time floating point functions ======================================
-
-template<is_number N>
-constexpr N abs(const N n) noexcept
-{
-    TMATH_IF_CONSTEVAL
-    {
-        return detail::compile_time_abs(n);
-    }
-
-    return std::abs(n);
-}
-
+using std::abs;
 using std::exp;
 using std::sin;
 using std::asin;
@@ -186,7 +159,7 @@ constexpr F lerp_saturated(const F a, const F b, const T t) noexcept
 }
 
 template<is_floating_point F1, is_floating_point F2>
-constexpr bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = MinTolerance<min_floating_point_t<F1, F2>>) noexcept
+bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = MinTolerance<min_floating_point_t<F1, F2>>) noexcept
 {
     using max_float_t = max_floating_point_t<F1, F2>;
 

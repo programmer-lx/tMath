@@ -314,10 +314,6 @@ TEST(vector2, to_degrees)
 TEST(vector2, abs)
 {
     {
-        constexpr Vector2f negative = { -180, -3 };
-        static_assert(tMath::approximately(tMath::abs(negative), { 180, 3 }));
-    }
-    {
         Vector2f negative = { -180, -3 };
         EXPECT_TRUE(tMath::approximately(tMath::abs(negative), { 180, 3 }));
     }
