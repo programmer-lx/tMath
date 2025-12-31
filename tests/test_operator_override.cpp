@@ -1,4 +1,4 @@
-#include <tMath/vector2.hpp>
+#include <tMath/vector.hpp>
 
 #include "test.hpp"
 

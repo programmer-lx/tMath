@@ -1,5 +1,5 @@
 #include <tMath/matrix.hpp>
-#include <tMath/vector4.hpp>
+#include <tMath/vector.hpp>
 
 #include "test.hpp"
 

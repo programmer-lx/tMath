@@ -1,38 +1,41 @@
+#include <tMath/number.hpp>
+
 #include "../test.hpp"
 
-#include <tMath/compile_time/floating_point.hpp>
-
-namespace ct = tMath::CompileTime;
-
-
-TEST(ct_vector1, fmod)
+constexpr int basic_test() noexcept
 {
+    TMATH_IF_CONSTEVAL
     {
-        constexpr long double r = ct::fmod(50.123l, 123.456l);
-        EXPECT_DOUBLE_EQ(r, std::fmod(50.123l, 123.456l));
+        return 1;
     }
-    {
-        constexpr long double r = ct::fmod(-50.123l, 123.456l);
-        EXPECT_DOUBLE_EQ(r, std::fmod(-50.123l, 123.456l));
-    }
-    {
-        constexpr long double r = ct::fmod(-50.123l, -123.456l);
-        EXPECT_DOUBLE_EQ(r, std::fmod(-50.123l, -123.456l));
-    }
-    {
-        constexpr long double r = ct::fmod(50.123l, -123.456l);
-        EXPECT_DOUBLE_EQ(r, std::fmod(50.123l, -123.456l));
-    }
+
+    return 2;
 }
+
+TEST(ct_vector1, basic_test)
+{
+    static_assert(basic_test() == 1);
+    static_assert(basic_test() != 2);
+
+    constexpr int c_result = basic_test();
+    EXPECT_EQ(c_result, 1);
+
+    int result = basic_test();
+    EXPECT_EQ(result, 2);
+
+    EXPECT_EQ(basic_test(), 2);
+    EXPECT_NE(basic_test(), 1);
+}
+
+constinit int a = tMath::abs(-1);
 
 TEST(ct_vector1, abs)
 {
-    {
-        constexpr int x = ct::abs(-5);
-        EXPECT_EQ(x, 5);
-    }
-    {
-        constexpr float x = ct::abs(-0.0f);
-        EXPECT_EQ(x, 0.0f);
-    }
+    static_assert(tMath::abs(-1) == 1);
+    static_assert(tMath::abs(-1.0f) == 1.0f);
+    static_assert(tMath::abs(-0.0) == 0.0);
+    static_assert(tMath::abs(-0.0F) == 0.0F);
+    static_assert(tMath::abs(-0.0L) == 0.0L);
+
+    EXPECT_EQ(a, 1);
 }

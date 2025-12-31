@@ -2,7 +2,7 @@
 
 #include "test.hpp"
 
-#include <tMath/floating_point.hpp>
+#include <tMath/number.hpp>
 
 static float cos_taylor_10(float x);
 

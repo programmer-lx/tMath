@@ -1,12 +1,13 @@
-#include <tMath/vector2.hpp>
-#include <tMath/vector3.hpp>
-#include <tMath/vector4.hpp>
+#include <tMath/vector.hpp>
 
 #include "test.hpp"
 
 struct Vector2f
 {
     TMATH_FULL_VECTOR2(Vector2f, float)
+
+    // template<tMath::is_vector_n Ret>
+    // operator Ret() noexcept { return tMath::vector_cast<Ret>(*this); }
 };
 
 struct Vector2d
@@ -323,6 +324,21 @@ TEST(vector4, casts)
         constexpr Vector4i16 result = tMath::vector_cast<Vector4i16>(v4f);
         EXPECT_TRUE(result == test);
     }
+    // Vector2 -> Vector4 补零
+    {
+        constexpr Vector2f v2f = { 5.5f, 6.6f };
+        constexpr Vector4f expected = { 5.5f, 6.6f, 0.f, 0.f };
+        constexpr Vector4f result = tMath::vector_cast<Vector4f>(v2f);
+        EXPECT_TRUE(result == expected);
+    }
+    // Vector4 -> Vector2 截断
+    {
+        constexpr Vector4f v4f = { 7.7f, 8.8f, 9.9f, 10.10f };
+        constexpr Vector2f expected = { 7.7f, 8.8f };
+        constexpr Vector2f result = tMath::vector_cast<Vector2f>(v4f);
+        EXPECT_TRUE(result == expected);
+    }
+
     {
         const float x = 1.111111f;
         const float y = 2.222222f;
@@ -356,8 +372,14 @@ TEST(vector4, to_degrees)
 
 TEST(vector4, abs)
 {
-    Vector4f negative = { -180, -3, -150.123f, -256.12 };
-    EXPECT_TRUE(tMath::approximately(tMath::abs(negative), { 180, 3, 150.123f, 256.12 }));
+    {
+        constexpr Vector4f negative = { -180, -3, -150.123f, -256.12 };
+        static_assert(tMath::approximately(tMath::abs(negative), Vector4f{ 180, 3, 150.123f, 256.12 }));
+    }
+    {
+        Vector4f negative = { -180, -3, -150.123f, -256.12 };
+        EXPECT_TRUE(tMath::approximately(tMath::abs(negative), { 180, 3, 150.123f, 256.12 }));
+    }
 }
 
 TEST(vector4, triangle_functions)

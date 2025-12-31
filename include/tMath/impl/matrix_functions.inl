@@ -2,12 +2,9 @@
 
 #include <utility>
 
-#include "../floating_point.hpp"
 #include "../math_defs.hpp"
-#include "../vector2.hpp"
-#include "../vector3.hpp"
-#include "../vector4.hpp"
-#include "../vector_n.hpp"
+#include "../number.hpp"
+#include "../vector.hpp"
 
 TMATH_NAMESPACE_BEGIN
 

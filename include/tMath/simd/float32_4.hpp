@@ -48,7 +48,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV load(float x, float y, float z, float w) n
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
-inline float32_4 TMATH_SIMD_CALL_CONV load_point(const TVec3& vec) noexcept
+float32_4 TMATH_SIMD_CALL_CONV load_point(const TVec3& vec) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return { vec.x, vec.y, vec.z, 1.0f };
@@ -58,7 +58,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV load_point(const TVec3& vec) noexcept
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
-inline float32_4 TMATH_SIMD_CALL_CONV load_point(const TVec2& vec) noexcept
+float32_4 TMATH_SIMD_CALL_CONV load_point(const TVec2& vec) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return { vec.x, vec.y, 0.0f, 1.0f };
@@ -68,7 +68,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV load_point(const TVec2& vec) noexcept
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
-inline float32_4 TMATH_SIMD_CALL_CONV load_vector(const TVec3& vec) noexcept
+float32_4 TMATH_SIMD_CALL_CONV load_vector(const TVec3& vec) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return { vec.x, vec.y, vec.z, 0.0f };
@@ -78,7 +78,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV load_vector(const TVec3& vec) noexcept
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
-inline float32_4 TMATH_SIMD_CALL_CONV load_vector(const TVec2& vec) noexcept
+float32_4 TMATH_SIMD_CALL_CONV load_vector(const TVec2& vec) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return { vec.x, vec.y, 0.0f, 0.0f };
@@ -88,7 +88,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV load_vector(const TVec2& vec) noexcept
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4>
-inline void TMATH_SIMD_CALL_CONV store(TVec4& vec, float32_4_arg_in v) noexcept
+void TMATH_SIMD_CALL_CONV store(TVec4& vec, float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     vec.x = v.x;
@@ -101,7 +101,7 @@ inline void TMATH_SIMD_CALL_CONV store(TVec4& vec, float32_4_arg_in v) noexcept
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector3_float TVec3>
-inline void TMATH_SIMD_CALL_CONV store(TVec3& vec, float32_4_arg_in v) noexcept
+void TMATH_SIMD_CALL_CONV store(TVec3& vec, float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     vec.x = v.x;
@@ -117,7 +117,7 @@ inline void TMATH_SIMD_CALL_CONV store(TVec3& vec, float32_4_arg_in v) noexcept
 }
 
 template<TMATH_NAMESPACE_NAME::is_vector2_float TVec2>
-inline void TMATH_SIMD_CALL_CONV store(TVec2& vec, float32_4_arg_in v) noexcept
+void TMATH_SIMD_CALL_CONV store(TVec2& vec, float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     vec.x = v.x;

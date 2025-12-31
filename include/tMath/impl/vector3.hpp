@@ -2,8 +2,7 @@
 
 #include <cmath>
 
-#include "math_defs.hpp"
-#include "vector_n.hpp"
+#include "../math_defs.hpp"
 
 TMATH_NAMESPACE_BEGIN
 
@@ -38,17 +37,5 @@ constexpr Vec3 cross(const Vec3& lhs, const Vec3& rhs) noexcept
         lhs.data[0] * rhs.data[1] - lhs.data[1] * rhs.data[0]
     };
 }
-
-
-// 预设类型
-struct Vector3f
-{
-    TMATH_FULL_VECTOR3(Vector3f, float)
-};
-
-struct Vector3d
-{
-    TMATH_FULL_VECTOR3(Vector3d, double)
-};
 
 TMATH_NAMESPACE_END

@@ -1,6 +1,4 @@
-#include <tMath/vector2.hpp>
-#include <tMath/vector3.hpp>
-#include <tMath/vector4.hpp>
+#include <tMath/vector.hpp>
 
 #include "test.hpp"
 
@@ -315,8 +313,14 @@ TEST(vector2, to_degrees)
 
 TEST(vector2, abs)
 {
-    Vector2f negative = { -180, -3 };
-    EXPECT_TRUE(tMath::approximately(tMath::abs(negative), { 180, 3 }));
+    {
+        constexpr Vector2f negative = { -180, -3 };
+        static_assert(tMath::approximately(tMath::abs(negative), { 180, 3 }));
+    }
+    {
+        Vector2f negative = { -180, -3 };
+        EXPECT_TRUE(tMath::approximately(tMath::abs(negative), { 180, 3 }));
+    }
 }
 
 TEST(vector2, magnitude)

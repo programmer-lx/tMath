@@ -2,8 +2,7 @@
 
 #include <cmath>
 
-#include "math_defs.hpp"
-#include "vector_n.hpp"
+#include "../math_defs.hpp"
 
 TMATH_NAMESPACE_BEGIN
 
@@ -43,17 +42,5 @@ constexpr Vec4 cross(const Vec4& lhs, const Vec4& rhs) noexcept
         static_cast<vector_component_t<Vec4>>(0)
     };
 }
-
-
-// 预设类型
-struct Vector4f
-{
-    TMATH_FULL_VECTOR4(Vector4f, float)
-};
-
-struct Vector4d
-{
-    TMATH_FULL_VECTOR4(Vector4d, double)
-};
 
 TMATH_NAMESPACE_END

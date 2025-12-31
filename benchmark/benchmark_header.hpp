@@ -1,13 +1,13 @@
 #pragma once
 
-#include <tMath/floating_point.hpp>
+#include <../include/tMath/impl/vector2.hpp>
+#include <../include/tMath/impl/vector4.hpp>
+#include <tMath/number.hpp>
 #include <tMath/simd/float32_4.hpp>
-#include <tMath/vector2.hpp>
 #include <tMath/vector3.hpp>
-#include <tMath/vector4.hpp>
 
-#include "bm_counters.hpp"
 #include "benchmark_utils.hpp"
+#include "bm_counters.hpp"
 
 #if !defined(TMATH_IS_DOING_BENCHMARK) || !defined(TMATH_IS_TESTING)
 #error "Please define TMATH_IS_DOING_BENCHMARK and TMATH_IS_TESTING to enable benchmark."

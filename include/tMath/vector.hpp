@@ -6,8 +6,12 @@
 #include <numeric>
 
 #include "math_defs.hpp"
-#include "fwd.hpp"
-#include "floating_point.hpp"
+#include "impl/fwd_vector.hpp"
+#include "number.hpp"
+#include "impl/vector2.hpp"
+#include "impl/vector3.hpp"
+#include "impl/vector4.hpp"
+
 
 TMATH_NAMESPACE_BEGIN
 
@@ -165,17 +169,30 @@ VecN safe_divide(const VecN& v, const Num divisor, const VecN& fallback) noexcep
 template<is_vector_n Ret, is_vector_n In>
 constexpr Ret vector_cast(const In& v) noexcept
 {
-    static_assert(vector_traits<Ret>::component_count == vector_traits<In>::component_count, "The component count of two vector MUST be equal.");
-
     using comp_t = vector_component_t<Ret>;
-    constexpr auto N = vector_traits<Ret>::component_count;
+    constexpr auto RetN = vector_traits<Ret>::component_count;
+    constexpr auto InN = vector_traits<In>::component_count;
 
-    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> Ret
+    // 截断/直接返回
+    if constexpr (RetN <= InN)
     {
-        return {
-            static_cast<comp_t>(v.data[I])...
-        };
-    }(std::make_index_sequence<N>{});
+        return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> Ret
+        {
+            return {
+                static_cast<comp_t>(v.data[I])...
+            };
+        }(std::make_index_sequence<RetN>{});
+    }
+    // Ret多出来的位置填充0
+    else // RetN > InN
+    {
+        return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> Ret
+        {
+            return {
+                (I < InN ? static_cast<comp_t>(v.data[I]) : static_cast<comp_t>(0))...
+            };
+        }(std::make_index_sequence<RetN>{});
+    }
 }
 
 
@@ -208,14 +225,14 @@ constexpr VecN to_radians(const VecN& degrees) noexcept
 }
 
 template<is_vector_n VecN>
-VecN abs(const VecN& v) noexcept
+constexpr VecN abs(const VecN& v) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
     
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
         return {
-            std::abs(v.data[I])...
+            TMATH_NAMESPACE_NAME::abs(v.data[I])...
         };
     }(std::make_index_sequence<N>{});
 }
@@ -303,7 +320,7 @@ constexpr vector_component_t<VecN> dot(const VecN& lhs, const VecN& rhs) noexcep
 }
 
 template<is_number... N>
-    requires exclude<sizeof...(N) == 4, sizeof...(N) == 6, sizeof...(N) == 8> // 已经给vector2, 3, 4特化，include "vector2.hpp" to use dot(x1, y1, x2, y2), ...
+    requires exclude<sizeof...(N) == 4, sizeof...(N) == 6, sizeof...(N) == 8>
 constexpr auto dot(const N... comp) noexcept
 {
     // static_assert(sizeof...(N) != 4, "you can include vector2.hpp to use dot(x1, y1, x2, y2)");
@@ -326,7 +343,7 @@ constexpr auto dot(const N... comp) noexcept
 }
 
 template<is_vector_n_floating_point VecN>
-bool approximately(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = MinTolerance<vector_component_t<VecN>>) noexcept
+constexpr bool approximately(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = MinTolerance<vector_component_t<VecN>>) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
 
@@ -362,11 +379,11 @@ vector_component_t<VecN> magnitude(const VecN& v) noexcept
  * 求N维向量的模长
  * @param comp 分量，按照 x, y, z, w, ... 的顺序输入
  */
-template<typename... Comp>
-    requires (sizeof...(Comp) >= 2 && match_all<is_number<Comp>...>)
+template<is_number... Comp>
+    requires (sizeof...(Comp) >= 2)
 auto magnitude(const Comp... comp) noexcept
 {
-    using ret_t = number_to_floating_point_t<std::common_type_t<Comp...>>;
+    using ret_t = std::common_type_t<number_to_floating_point_t<Comp>...>;
 
     if constexpr (sizeof...(Comp) <= 3)
     {
@@ -530,5 +547,92 @@ constexpr VecN lerp(const VecN& a, const VecN& b, const F t) noexcept
         };
     }(std::make_index_sequence<N>{});
 }
+
+
+
+// ...参数是 vector_type_name，考虑到有些向量类型是泛型类型，比如Vector<float, 4>，这个逗号会被认为是宏参数的分隔符
+#define TMATH_GENERIC_VECTOR_OPERATORS(...) \
+    friend constexpr inline bool operator==(const __VA_ARGS__& lhs, const __VA_ARGS__& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator==(lhs, rhs); } \
+    \
+    friend constexpr inline bool operator!=(const __VA_ARGS__& lhs, const __VA_ARGS__& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator!=(lhs, rhs); } \
+    \
+    friend constexpr inline __VA_ARGS__& operator+=(__VA_ARGS__& lhs, const __VA_ARGS__& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator+=(lhs, rhs); } \
+    \
+    friend constexpr inline __VA_ARGS__& operator-=(__VA_ARGS__& lhs, const __VA_ARGS__& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator-=(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number Num> \
+    friend constexpr inline __VA_ARGS__& operator*=(__VA_ARGS__& lhs, const Num rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator*=(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number Num> \
+    friend constexpr inline __VA_ARGS__& operator/=(__VA_ARGS__& lhs, const Num rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator/=(lhs, rhs); } \
+    \
+    friend constexpr inline __VA_ARGS__ operator+(const __VA_ARGS__& lhs, const __VA_ARGS__& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator+(lhs, rhs); } \
+    \
+    friend constexpr inline __VA_ARGS__ operator-(const __VA_ARGS__& lhs, const __VA_ARGS__& rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator-(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number Num> \
+    friend constexpr inline __VA_ARGS__ operator*(const __VA_ARGS__& lhs, const Num rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator*(lhs, rhs); } \
+    \
+    template<TMATH_NAMESPACE_NAME::is_signed_number Num> \
+    friend constexpr inline __VA_ARGS__ operator/(const __VA_ARGS__& lhs, const Num rhs) noexcept \
+    { return TMATH_NAMESPACE_NAME::operator/(lhs, rhs); }
+
+#define TMATH_VECTOR_OPERATORS(vector_type_name) TMATH_GENERIC_VECTOR_OPERATORS(vector_type_name)
+
+
+#define TMATH_VECTOR_DATA_INDEX \
+    constexpr std::remove_extent_t<decltype(data)>& operator[](int i) { return data[i]; } \
+    constexpr const std::remove_extent_t<decltype(data)>& operator[](int i) const { return data[i]; }
+
+
+#define TMATH_FULL_VECTOR2(vector_type_name, component_type_name) \
+    union \
+    { \
+        component_type_name data[2]; \
+        struct { component_type_name x, y; }; \
+        struct { component_type_name r, g; }; \
+        struct { component_type_name u, v; }; \
+    }; \
+    TMATH_VECTOR_DATA_INDEX \
+    TMATH_VECTOR_OPERATORS(vector_type_name)
+
+#define TMATH_FULL_VECTOR3(vector_type_name, component_type_name) \
+    union \
+    { \
+        component_type_name data[3]; \
+        struct { component_type_name x, y, z; }; \
+        struct { component_type_name r, g, b; }; \
+    }; \
+    TMATH_VECTOR_DATA_INDEX \
+    TMATH_VECTOR_OPERATORS(vector_type_name)
+
+#define TMATH_FULL_VECTOR4(vector_type_name, component_type_name) \
+    union \
+    { \
+        component_type_name data[4]; \
+        struct { component_type_name x, y, z, w; }; \
+        struct { component_type_name r, g, b, a; }; \
+    }; \
+    TMATH_VECTOR_DATA_INDEX \
+    TMATH_VECTOR_OPERATORS(vector_type_name)
+
+
+
+// 预设向量类
+template<is_signed_number ComponentType, int Dimension>
+struct Vector
+{
+    ComponentType data[Dimension];
+    TMATH_VECTOR_DATA_INDEX
+};
 
 TMATH_NAMESPACE_END

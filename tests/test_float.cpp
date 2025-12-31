@@ -1,4 +1,4 @@
-#include <tMath/floating_point.hpp>
+#include <tMath/number.hpp>
 
 #include "test.hpp"
 

@@ -1,6 +1,7 @@
 function(action_for_test_target TARGET_NAME)
     if(MSVC)
-        target_compile_options(${TARGET_NAME} PRIVATE /arch:AVX2 /arch:AVX) # /arch:SSE4.2 /arch:SSE2 现在对MSVC无效
+        target_compile_options(${TARGET_NAME} PRIVATE /utf-8 /arch:AVX2 /arch:AVX) # /arch:SSE4.2 /arch:SSE2 现在对MSVC无效
+        target_compile_definitions(${TARGET_NAME} PRIVATE UNICODE _UNICODE)
     else()
         target_compile_options(${TARGET_NAME} PRIVATE -mavx2 -mfma -mf16c -msse4.1 -msse3 -msse2)
     endif()
@@ -12,117 +13,18 @@ function(action_for_test_target TARGET_NAME)
     message(STATUS "${TARGET_NAME} compile options: ${OPTIONS}")
 endfunction()
 
-if(MSVC)
-    add_compile_options(/utf-8)
-    add_compile_definitions(UNICODE _UNICODE)
-endif()
+file(GLOB_RECURSE TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
 
-# type traits test
-add_executable(test_type_traits test_type_traits.cpp)
-action_for_test_target(test_type_traits)
+foreach(SOURCE_FILE ${TEST_SOURCES})
+    # 读取文件路径，变成test target的名字: "simd/SSE2.cpp" -> "test_simd_SSE2"
+    string(REPLACE "/" "_" TEST_TARGET_NAME "${SOURCE_FILE}")
+    get_filename_component(TEST_TARGET_NAME ${TEST_TARGET_NAME} NAME_WE)
 
-# algorithm test
-add_executable(test_algorithm test_algorithm.cpp)
-action_for_test_target(test_algorithm)
+    add_executable(${TEST_TARGET_NAME} ${SOURCE_FILE})
+    action_for_test_target(${TEST_TARGET_NAME})
 
-# float
-add_executable(test_float test_float.cpp)
-action_for_test_target(test_float)
+    # 自动添加到 CTest
+    add_test(NAME ${TEST_TARGET_NAME} COMMAND $<TARGET_FILE:${TEST_TARGET_NAME}>)
 
-# Vector2
-add_executable(test_vector2 test_vector2.cpp)
-action_for_test_target(test_vector2)
-
-# Vector3
-add_executable(test_vector3 test_vector3.cpp)
-action_for_test_target(test_vector3)
-
-# Vector4
-add_executable(test_vector4 test_vector4.cpp)
-action_for_test_target(test_vector4)
-
-# quat
-add_executable(test_quat test_quat.cpp)
-action_for_test_target(test_quat)
-
-# large vector (N > 4)
-add_executable(test_large_vector test_large_vector.cpp)
-action_for_test_target(test_large_vector)
-
-# operators
-add_executable(test_operators_override test_operator_override.cpp)
-action_for_test_target(test_operators_override)
-
-# Matrix4x4
-add_executable(test_matrix_4x4_rm test_matrix4x4_row_major.cpp)
-action_for_test_target(test_matrix_4x4_rm)
-
-
-
-# SIMD float4
-# SSE2
-add_executable(test_simd_SSE2 simd/SSE2.cpp)
-action_for_test_target(test_simd_SSE2)
-
-# SSE3
-add_executable(test_simd_SSE3 simd/SSE3.cpp)
-action_for_test_target(test_simd_SSE3)
-
-# SSE4.1
-add_executable(test_simd_SSE4_1 simd/SSE4_1.cpp)
-action_for_test_target(test_simd_SSE4_1)
-
-# AVX
-add_executable(test_simd_AVX simd/AVX.cpp)
-action_for_test_target(test_simd_AVX)
-
-# FMA3
-add_executable(test_simd_FMA3 simd/FMA3.cpp)
-action_for_test_target(test_simd_FMA3)
-
-# F16C
-add_executable(test_simd_F16C simd/F16C.cpp)
-action_for_test_target(test_simd_F16C)
-
-# AVX2
-add_executable(test_simd_AVX2 simd/AVX2.cpp)
-action_for_test_target(test_simd_AVX2)
-
-# no SIMD
-add_executable(test_no_SIMD simd/no_simd.cpp)
-action_for_test_target(test_no_SIMD)
-
-# no SVML
-add_executable(test_no_SVML simd/no_SVML.cpp)
-action_for_test_target(test_no_SVML)
-
-# compile time vector1
-add_executable(test_compile_time_vector1 compile_time/test_vector1.cpp)
-action_for_test_target(test_compile_time_vector1)
-
-
-# 添加测试
-add_test(NAME Test_Algorithm COMMAND $<TARGET_FILE:test_algorithm>)
-add_test(NAME Test_TypeTraits COMMAND $<TARGET_FILE:test_type_traits>)
-add_test(NAME Test_Float COMMAND $<TARGET_FILE:test_float>)
-add_test(NAME Test_Vector2 COMMAND $<TARGET_FILE:test_vector2>)
-add_test(NAME Test_Vector3 COMMAND $<TARGET_FILE:test_vector3>)
-add_test(NAME Test_Vector4 COMMAND $<TARGET_FILE:test_vector4>)
-add_test(NAME Test_Quat COMMAND $<TARGET_FILE:test_quat>)
-add_test(NAME Test_LargeVector COMMAND $<TARGET_FILE:test_large_vector>)
-add_test(NAME Test_OperatorOverride COMMAND $<TARGET_FILE:test_operators_override>)
-add_test(NAME Test_Matrix4x4_RM COMMAND $<TARGET_FILE:test_matrix_4x4_rm>)
-
-# SIMDs
-add_test(NAME Test_simd_SSE2 COMMAND $<TARGET_FILE:test_simd_SSE2>)
-add_test(NAME Test_simd_SSE3 COMMAND $<TARGET_FILE:test_simd_SSE3>)
-add_test(NAME Test_simd_SSE4_1 COMMAND $<TARGET_FILE:test_simd_SSE4_1>)
-add_test(NAME Test_simd_AVX COMMAND $<TARGET_FILE:test_simd_AVX>)
-add_test(NAME Test_simd_FMA3 COMMAND $<TARGET_FILE:test_simd_FMA3>)
-add_test(NAME Test_simd_F16C COMMAND $<TARGET_FILE:test_simd_F16C>)
-add_test(NAME Test_simd_AVX2 COMMAND $<TARGET_FILE:test_simd_AVX2>)
-add_test(NAME Test_no_SIMD COMMAND $<TARGET_FILE:test_no_SIMD>)
-add_test(NAME Test_no_SVML COMMAND $<TARGET_FILE:test_no_SVML>)
-
-# compile time
-add_test(NAME Test_compile_time_Vector1 COMMAND $<TARGET_FILE:test_compile_time_vector1>)
+#    message(STATUS "Auto-detected test: ${TEST_TARGET_NAME} from ${SOURCE_FILE}")
+endforeach()

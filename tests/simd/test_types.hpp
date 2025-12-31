@@ -1,9 +1,7 @@
 #pragma once
 
 #include <tMath/simd/float32_4.hpp>
-#include <tMath/vector2.hpp>
-#include <tMath/vector3.hpp>
-#include <tMath/vector4.hpp>
+#include <tMath/vector.hpp>
 
 struct Vector4f
 {

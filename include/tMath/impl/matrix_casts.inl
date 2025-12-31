@@ -37,7 +37,7 @@ constexpr Ret matrix_cast(const In& m) noexcept
     {
         // 不同主序
         // 相当于是转置之后再返回
-        TMATH_TEST_ASSERT(false && "TODO");
+        TMATH_ASSERT(false && "TODO");
         return {};
     }
 }
