@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <numbers>
 #include <limits>
+#include <cstring>
 
 #include "math_defs.hpp"
 
@@ -63,9 +64,6 @@ static constexpr F Deg2Rad = static_cast<F>(0.01745329251994329576923690768489L)
 
 
 // ======================================== precision ========================================
-template<is_floating_point F>
-static constexpr F MinTolerance = static_cast<F>(10) * std::numeric_limits<F>::epsilon();
-
 template<is_signed_number N>
 static constexpr N Epsilon = std::numeric_limits<N>::epsilon();
 
@@ -106,6 +104,15 @@ using std::max;
 
 
 // ======================================== functions ========================================
+
+template<is_floating_point F>
+F one_block() noexcept
+{
+    F f;
+    // memset 的第二个参数 value, 只用其低8位
+    std::memset(&f, 0xff, sizeof(F));
+    return f;
+}
 
 template<is_floating_point F>
 constexpr F to_degrees(const F radians) noexcept
@@ -159,11 +166,11 @@ constexpr F lerp_saturated(const F a, const F b, const T t) noexcept
 }
 
 template<is_floating_point F1, is_floating_point F2>
-bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = MinTolerance<min_floating_point_t<F1, F2>>) noexcept
+bool approximately(const F1 a, const F2 b, const min_floating_point_t<F1, F2> tolerance = Epsilon<min_floating_point_t<F1, F2>>) noexcept
 {
     using max_float_t = max_floating_point_t<F1, F2>;
 
-    return TMATH_NAMESPACE_NAME::abs(static_cast<max_float_t>(a) - static_cast<max_float_t>(b)) < static_cast<max_float_t>(tolerance);
+    return TMATH_NAMESPACE_NAME::abs(static_cast<max_float_t>(a) - static_cast<max_float_t>(b)) <= static_cast<max_float_t>(tolerance);
 }
 
 template<is_floating_point N>
@@ -188,7 +195,7 @@ bool is_nan(N n) noexcept
 template<is_floating_point F>
 bool is_invalid_divisor(F f) noexcept
 {
-    return !is_finite(f) || (abs(f) <= MinTolerance<F>);
+    return !is_finite(f) || (abs(f) <= Epsilon<F>);
 }
 
 template<is_int I>

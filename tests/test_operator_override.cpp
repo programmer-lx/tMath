@@ -14,6 +14,6 @@ TEST(tMath, operator_override)
     Vector2f a = {1, 1};
     Vector2f b = { 2, 2 };
     Vector2f c = a + b;
-    EXPECT_TRUE(tMath::approximately(c, {3, 3}));
+    EXPECT_TRUE(tMath::approximately_all(c, {3, 3}));
 }
 

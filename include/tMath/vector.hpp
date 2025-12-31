@@ -225,6 +225,32 @@ constexpr VecN to_radians(const VecN& degrees) noexcept
 }
 
 template<is_vector_n VecN>
+constexpr VecN min(const VecN& a, const VecN& b) noexcept
+{
+    constexpr auto N = vector_traits<VecN>::component_count;
+
+    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
+    {
+        return {
+            TMATH_NAMESPACE_NAME::min(a.data[I], b.data[I])...
+        };
+    }(std::make_index_sequence<N>{});
+}
+
+template<is_vector_n VecN>
+constexpr VecN max(const VecN& a, const VecN& b) noexcept
+{
+    constexpr auto N = vector_traits<VecN>::component_count;
+
+    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
+    {
+        return {
+            TMATH_NAMESPACE_NAME::max(a.data[I], b.data[I])...
+        };
+    }(std::make_index_sequence<N>{});
+}
+
+template<is_vector_n VecN>
 VecN abs(const VecN& v) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
@@ -238,7 +264,7 @@ VecN abs(const VecN& v) noexcept
 }
 
 template<is_vector_n VecN>
-constexpr VecN hadamard_mul(const VecN& lhs, const VecN& rhs) noexcept
+constexpr VecN cwise_mul(const VecN& lhs, const VecN& rhs) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
     using comp_t = vector_component_t<VecN>;
@@ -252,7 +278,7 @@ constexpr VecN hadamard_mul(const VecN& lhs, const VecN& rhs) noexcept
 }
 
 template<is_vector_n VecN>
-constexpr VecN hadamard_div(const VecN& lhs, const VecN& rhs) noexcept
+constexpr VecN cwise_div(const VecN& lhs, const VecN& rhs) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
     using comp_t = vector_component_t<VecN>;
@@ -343,13 +369,30 @@ constexpr auto dot(const N... comp) noexcept
 }
 
 template<is_vector_n_floating_point VecN>
-bool approximately(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = MinTolerance<vector_component_t<VecN>>) noexcept
+bool approximately_all(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = Epsilon<vector_component_t<VecN>>) noexcept
 {
     constexpr auto N = vector_traits<VecN>::component_count;
 
-    return [&]<size_t... I>(std::index_sequence<I...>) constexpr
+    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> bool
     {
         return ( (approximately(a.data[I], b.data[I], tolerance)) && ... );
+    }(std::make_index_sequence<N>{});
+}
+
+/**
+ * @return 若该分量近似相等，则该分量全部bit置为1，否则被置为0
+ */
+template<is_vector_n_floating_point VecN>
+VecN approximately_cwise(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = Epsilon<vector_component_t<VecN>>) noexcept
+{
+    constexpr auto N = vector_traits<VecN>::component_count;
+    using comp_t = vector_component_t<VecN>;
+
+    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
+    {
+        return {
+            (approximately(a.data[I], b.data[I], tolerance) ? one_block<comp_t>() : static_cast<comp_t>(0))...
+        };
     }(std::make_index_sequence<N>{});
 }
 
@@ -532,6 +575,19 @@ auto distance(const VecN_SInt& a, const VecN_SInt& b) noexcept
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> ret_t
     {
         return static_cast<ret_t>(magnitude(static_cast<ret_t>(delta.data[I])...));
+    }(std::make_index_sequence<N>{});
+}
+
+template<is_vector_n_floating_point VecN>
+constexpr VecN clamp(const VecN& v, const VecN& min, const VecN& max) noexcept
+{
+    constexpr auto N = vector_traits<VecN>::component_count;
+
+    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
+    {
+        return {
+            clamp(v.data[I], min.data[I], max.data[I])...
+        };
     }(std::make_index_sequence<N>{});
 }
 

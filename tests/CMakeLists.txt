@@ -1,16 +1,47 @@
-function(action_for_test_target TARGET_NAME)
+function(add_extra_test_compile_and_link_options TARGET_NAME)
     if(MSVC)
-        target_compile_options(${TARGET_NAME} PRIVATE /utf-8 /arch:AVX2 /arch:AVX) # /arch:SSE4.2 /arch:SSE2 现在对MSVC无效
-        target_compile_definitions(${TARGET_NAME} PRIVATE UNICODE _UNICODE)
+        if(TMATH_TEST_OPTION STREQUAL "od")
+            target_compile_options(${TARGET_NAME} PRIVATE /Od) # Debug: Od
+        endif()
+        if(TMATH_TEST_OPTION STREQUAL "o2")
+            target_compile_options(${TARGET_NAME} PRIVATE /O2) # Release: O2
+        endif()
+        if(TMATH_TEST_OPTION STREQUAL "gl")
+            target_compile_options(${TARGET_NAME} PRIVATE /O2 /GL) # Release: O2 GL
+            target_link_options(${TARGET_NAME} PRIVATE /LTCG)
+        endif()
     else()
-        target_compile_options(${TARGET_NAME} PRIVATE -mavx2 -mfma -mf16c -msse4.1 -msse3 -msse2)
+        if(TMATH_TEST_OPTION STREQUAL "od")
+            target_compile_options(${TARGET_NAME} PRIVATE -O0) # Debug: O0
+        endif()
+        if(TMATH_TEST_OPTION STREQUAL "o2")
+            target_compile_options(${TARGET_NAME} PRIVATE -O2) # Release: O2
+        endif()
+        if(TMATH_TEST_OPTION STREQUAL "gl")
+            target_compile_options(${TARGET_NAME} PRIVATE -O2 -flto) # Release: O2 -flto
+            target_link_options(${TARGET_NAME} PRIVATE -flto=auto)
+        endif()
     endif()
+endfunction()
 
-    target_compile_definitions(${TARGET_NAME} PRIVATE TMATH_IS_TESTING)
-    target_link_libraries(${TARGET_NAME} PRIVATE gtest gtest_main tMath)
+function(add_tmath_test_target TARGET_NAME SOURCE_FILE)
+    set(FINAL_TARGET_NAME ${TARGET_NAME}_${TMATH_TEST_OPTION})
+    add_executable(${FINAL_TARGET_NAME} ${SOURCE_FILE})
+    if(MSVC)
+        target_compile_options(${FINAL_TARGET_NAME} PRIVATE /utf-8 /arch:AVX2 /arch:AVX) # /arch:SSE4.2 /arch:SSE2 现在对MSVC无效
+        target_compile_definitions(${FINAL_TARGET_NAME} PRIVATE UNICODE _UNICODE)
+    else()
+        target_compile_options(${FINAL_TARGET_NAME} PRIVATE -mavx2 -mfma -mf16c -msse4.1 -msse3 -msse2)
+    endif()
+    add_extra_test_compile_and_link_options(${FINAL_TARGET_NAME})
 
-    get_target_property(OPTIONS ${TARGET_NAME} COMPILE_OPTIONS)
-    message(STATUS "${TARGET_NAME} compile options: ${OPTIONS}")
+    target_compile_definitions(${FINAL_TARGET_NAME} PRIVATE TMATH_IS_TESTING)
+    target_link_libraries(${FINAL_TARGET_NAME} PRIVATE gtest gtest_main tMath)
+
+    get_target_property(OPTIONS ${FINAL_TARGET_NAME} COMPILE_OPTIONS)
+    message(STATUS "${FINAL_TARGET_NAME} compile options: ${OPTIONS}")
+
+    add_test(NAME ${FINAL_TARGET_NAME} COMMAND $<TARGET_FILE:${FINAL_TARGET_NAME}>)
 endfunction()
 
 file(GLOB_RECURSE TEST_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
@@ -20,11 +51,5 @@ foreach(SOURCE_FILE ${TEST_SOURCES})
     string(REPLACE "/" "_" TEST_TARGET_NAME "${SOURCE_FILE}")
     get_filename_component(TEST_TARGET_NAME ${TEST_TARGET_NAME} NAME_WE)
 
-    add_executable(${TEST_TARGET_NAME} ${SOURCE_FILE})
-    action_for_test_target(${TEST_TARGET_NAME})
-
-    # 自动添加到 CTest
-    add_test(NAME ${TEST_TARGET_NAME} COMMAND $<TARGET_FILE:${TEST_TARGET_NAME}>)
-
-#    message(STATUS "Auto-detected test: ${TEST_TARGET_NAME} from ${SOURCE_FILE}")
+    add_tmath_test_target(${TEST_TARGET_NAME} ${SOURCE_FILE})
 endforeach()

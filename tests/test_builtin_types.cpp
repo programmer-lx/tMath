@@ -8,7 +8,7 @@ TEST(builtin_types, vecN)
     constexpr tMath::Vector<float, 4> v2 = { 5, 6, 7, 8 };
     constexpr tMath::Vector<float, 4> result = v1 + v2;
 
-    EXPECT_TRUE(tMath::approximately(result, { 6, 8, 10, 12 }));
+    EXPECT_TRUE(tMath::approximately_all(result, { 6, 8, 10, 12 }));
 }
 
 TEST(builtin_types, vec2)

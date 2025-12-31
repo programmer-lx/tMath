@@ -22,14 +22,6 @@ if(TMATH_BUILD_EXAMPLES)
 endif()
 
 
-# macros for benchmark and test
-if(TMATH_BUILD_TESTS)
-#    add_compile_definitions(TMATH_IS_TESTING)
-endif()
-if(TMATH_BUILD_BENCHMARKS)
-#    add_compile_definitions(TMATH_IS_DOING_BENCHMARK)
-endif()
-
 if(TMATH_BUILD_TESTS)
     set(BUILD_GMOCK OFF)
     add_subdirectory(3rdparty/googletest)

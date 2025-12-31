@@ -5,6 +5,8 @@ import argparse
 from pathlib import Path
 
 
+OS_NAME = platform.system().lower()
+
 def run_command(command):
     """
     运行系统命令。
@@ -20,23 +22,22 @@ def get_compiler_configs(test_mode):
     字段规则:
     (test name, c compiler, c++ compiler, build dir)
     """
-    current_os = platform.system().lower()
     
-    if current_os == "windows":
+    if OS_NAME == "windows":
         print("--- Windows Environment Detected ---")
         all_configs = [
             ("MSVC",   "cl",                     "cl",                     "msvc"),
             ("MinGW",  "x86_64-w64-mingw32-gcc", "x86_64-w64-mingw32-g++", "mingw"),
             ("Clang",  "clang",                  "clang++",                "clang"),
         ]
-    elif current_os == "linux":
+    elif OS_NAME == "linux":
         print("--- Linux Environment Detected ---")
         all_configs = [
             ("GCC-13", "gcc-13", "g++-13", "gcc"),
             ("Clang", "clang", "clang++", "clang"),
         ]
     else:
-        raise RuntimeError(f"Unsupported platform: {current_os}.")
+        raise RuntimeError(f"Unsupported platform: {OS_NAME}.")
     
     # 如果是 min 模式，只取第一个编译器
     return all_configs[:1] if test_mode == "min" else all_configs
@@ -55,7 +56,10 @@ def main():
 
         test_mode = args.test_mode
 
-        build_configs = ["Debug"] if test_mode == "min" else ["Debug", "Release"]
+        """
+        编译选项: 格式 (build config, -DTMATH_TEST_OPTION[od, o2, gl])
+        """
+        build_options = [("Debug", "od")] if test_mode == "min" else [("Debug", "od"), ("Release", "o2"), ("Release", "gl")]
 
 
         # resolve() 获取绝对路径，不受当前终端工作目录影响
@@ -66,23 +70,24 @@ def main():
         # 获取当前平台的编译器列表
         configs = get_compiler_configs(test_mode)
 
-        for name, c_compiler, cxx_compiler, build_subdir in configs:
-            current_build_dir = build_base / build_subdir
+        for build_cfg, test_option in build_options:
+            for name, c_compiler, cxx_compiler, build_subdir in configs:
+                current_build_dir = build_base / (build_subdir + '_' + OS_NAME + '_' + build_cfg + '_' + test_option)
 
-            # 1. 配置 (每个编译器只运行一次 CMake 配置)(使用Multi-Config生成器)
-            run_command([
-                "cmake",
-                "-S", str(project_root),
-                "-B", str(current_build_dir),
-                "-G", "Ninja Multi-Config",
-                f"-DCMAKE_C_COMPILER={c_compiler}",
-                f"-DCMAKE_CXX_COMPILER={cxx_compiler}",
-                "-DTMATH_BUILD_TESTS=ON"
-            ])
+                # 1. 配置
+                run_command([
+                    "cmake",
+                    "-S", str(project_root),
+                    "-B", str(current_build_dir),
+                    "-G", "Ninja Multi-Config",
+                    f"-DCMAKE_C_COMPILER={c_compiler}",
+                    f"-DCMAKE_CXX_COMPILER={cxx_compiler}",
+                    "-DTMATH_BUILD_TESTS=ON",
+                    f"-DTMATH_TEST_OPTION={test_option}"
+                ])
 
-            for build_cfg in build_configs:
                 print("\n" + "=" * 50)
-                print(f" Test Target: {name} | Config: {build_cfg}")
+                print(f" Test Target: {name} | Config: {build_cfg} | TestOption: {test_option}")
                 print("=" * 50)
 
                 # 2. 编译
