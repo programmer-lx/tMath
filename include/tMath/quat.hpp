@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math_defs.hpp"
+#include "impl/fwd_vector.hpp"
 
 TMATH_NAMESPACE_BEGIN
 
@@ -45,7 +46,7 @@ constexpr Q axis_angle(const Vec3& axis, const F angle)
 
 #define TMATH_QUAT_OPERATORS(quat_type_name) TMATH_GENERIC_QUAT_OPERATORS(quat_type_name)
 
-#define TMATH_FULL_QUAT(quat_type_name, component_type_name) \
+#define TMATH_FULL_QUAT_BUILTIN(quat_type_name, component_type_name) \
     TMATH_QUAT_TAG \
     union \
     { \
@@ -53,6 +54,10 @@ constexpr Q axis_angle(const Vec3& axis, const F angle)
         struct { component_type_name x, y, z, w; }; \
     }; \
     TMATH_VECTOR_DATA_INDEX
+
+#define TMATH_FULL_QUAT(quat_type_name, component_type_name) \
+    TMATH_FULL_QUAT_BUILTIN(quat_type_name, component_type_name) \
+    TMATH_GENERIC_QUAT_OPERATORS(quat_type_name)
 
 
 TMATH_NAMESPACE_END

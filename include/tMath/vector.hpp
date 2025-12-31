@@ -589,12 +589,15 @@ constexpr VecN lerp(const VecN& a, const VecN& b, const F t) noexcept
 #define TMATH_VECTOR_OPERATORS(vector_type_name) TMATH_GENERIC_VECTOR_OPERATORS(vector_type_name)
 
 
-#define TMATH_VECTOR_DATA_INDEX \
-    constexpr std::remove_extent_t<decltype(data)>& operator[](int i) { return data[i]; } \
-    constexpr const std::remove_extent_t<decltype(data)>& operator[](int i) const { return data[i]; }
+#define TMATH_FULL_VECTOR_N_BUILTIN(component_type_name, dimension) \
+    component_type_name data[dimension]; \
+    TMATH_VECTOR_DATA_INDEX
 
+#define TMATH_FULL_VECTOR_N(vector_type_name, component_type_name, dimension) \
+    TMATH_FULL_VECTOR_N_BUILTIN(component_type_name, dimension) \
+    TMATH_GENERIC_VECTOR_OPERATORS(vector_type_name)
 
-#define TMATH_FULL_VECTOR2(vector_type_name, component_type_name) \
+#define TMATH_FULL_VECTOR2_BUILTIN(component_type_name) \
     union \
     { \
         component_type_name data[2]; \
@@ -602,28 +605,37 @@ constexpr VecN lerp(const VecN& a, const VecN& b, const F t) noexcept
         struct { component_type_name r, g; }; \
         struct { component_type_name u, v; }; \
     }; \
-    TMATH_VECTOR_DATA_INDEX \
-    TMATH_VECTOR_OPERATORS(vector_type_name)
+    TMATH_VECTOR_DATA_INDEX
 
-#define TMATH_FULL_VECTOR3(vector_type_name, component_type_name) \
+#define TMATH_FULL_VECTOR2(vector_type_name, component_type_name) \
+    TMATH_FULL_VECTOR2_BUILTIN(component_type_name) \
+    TMATH_GENERIC_VECTOR_OPERATORS(vector_type_name)
+
+#define TMATH_FULL_VECTOR3_BUILTIN(component_type_name) \
     union \
     { \
         component_type_name data[3]; \
         struct { component_type_name x, y, z; }; \
         struct { component_type_name r, g, b; }; \
     }; \
-    TMATH_VECTOR_DATA_INDEX \
-    TMATH_VECTOR_OPERATORS(vector_type_name)
+    TMATH_VECTOR_DATA_INDEX
 
-#define TMATH_FULL_VECTOR4(vector_type_name, component_type_name) \
+#define TMATH_FULL_VECTOR3(vector_type_name, component_type_name) \
+    TMATH_FULL_VECTOR3_BUILTIN(component_type_name) \
+    TMATH_GENERIC_VECTOR_OPERATORS(vector_type_name)
+
+#define TMATH_FULL_VECTOR4_BUILTIN(component_type_name) \
     union \
     { \
         component_type_name data[4]; \
         struct { component_type_name x, y, z, w; }; \
         struct { component_type_name r, g, b, a; }; \
     }; \
-    TMATH_VECTOR_DATA_INDEX \
-    TMATH_VECTOR_OPERATORS(vector_type_name)
+    TMATH_VECTOR_DATA_INDEX
+
+#define TMATH_FULL_VECTOR4(vector_type_name, component_type_name) \
+    TMATH_FULL_VECTOR4_BUILTIN(component_type_name) \
+    TMATH_GENERIC_VECTOR_OPERATORS(vector_type_name)
 
 
 
@@ -631,8 +643,25 @@ constexpr VecN lerp(const VecN& a, const VecN& b, const F t) noexcept
 template<is_signed_number ComponentType, int Dimension>
 struct Vector
 {
-    ComponentType data[Dimension];
-    TMATH_VECTOR_DATA_INDEX
+    TMATH_FULL_VECTOR_N_BUILTIN(ComponentType, Dimension)
+};
+
+template<is_signed_number ComponentType>
+struct Vector4
+{
+    TMATH_FULL_VECTOR4_BUILTIN(ComponentType)
+};
+
+template<is_signed_number ComponentType>
+struct Vector3
+{
+    TMATH_FULL_VECTOR3_BUILTIN(ComponentType)
+};
+
+template<is_signed_number ComponentType>
+struct Vector2
+{
+    TMATH_FULL_VECTOR2_BUILTIN(ComponentType)
 };
 
 TMATH_NAMESPACE_END

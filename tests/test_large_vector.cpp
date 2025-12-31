@@ -2,6 +2,33 @@
 
 #include "test.hpp"
 
+template<typename T>
+struct TestGenericVector2
+{
+    TMATH_FULL_VECTOR2(TestGenericVector2, T)
+};
+
+template<typename T, int D>
+struct TestGenericVectorN
+{
+    TMATH_FULL_VECTOR_N(TestGenericVectorN, T, D)
+};
+
+TEST(vector2, generic)
+{
+    constexpr TestGenericVector2<float> v = { 1, 2 };
+    constexpr TestGenericVector2<float> v2 = { 1, 2 };
+    static_assert(tMath::approximately(v, v2));
+
+    constexpr TestGenericVectorN<double, 3> v3 = { 1, 2, 3 };
+    constexpr TestGenericVectorN<double, 4> v4 = { 1, 2, 3, 4 };
+    static_assert(tMath::approximately(v3,
+        tMath::vector_cast<TestGenericVectorN<double, 3>>(v4)
+        ));
+
+    SUCCEED();
+}
+
 TEST(magnitude_n, Int2D)
 {
     auto r = tMath::magnitude(3, 4);

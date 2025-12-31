@@ -4,6 +4,11 @@
 
 TMATH_NAMESPACE_BEGIN
 
+#define TMATH_VECTOR_DATA_INDEX \
+    constexpr std::remove_extent_t<decltype(data)>& operator[](int i) { return data[i]; } \
+    constexpr const std::remove_extent_t<decltype(data)>& operator[](int i) const { return data[i]; }
+
+
 // ---------------------------------------------- vec2 ----------------------------------------------
 
 
@@ -11,6 +16,7 @@ TMATH_NAMESPACE_BEGIN
 
 
 // ---------------------------------------------- vec4 ----------------------------------------------
+
 
 // ---------------------------------------------- vecN ----------------------------------------------
 

@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 #include <numbers>
 #include <limits>
 
@@ -104,10 +105,8 @@ namespace detail
     }
 }
 
-// ======================================== constexpr floating point function ======================================
-#ifdef TMATH_HAS_STD_CONSTEXPR_FLOATING_POINT_FUNCTIONS
-using std::abs;
-#else
+// ======================================== compile-time floating point functions ======================================
+
 template<is_number N>
 constexpr N abs(const N n) noexcept
 {
@@ -118,7 +117,6 @@ constexpr N abs(const N n) noexcept
 
     return std::abs(n);
 }
-#endif
 
 using std::exp;
 using std::sin;
