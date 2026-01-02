@@ -345,12 +345,12 @@ TEST(zero_divide, normal)
     // zero divide
     {
         int t = 0;
-        float f = 10.0 / t;
+        float f = 10.0f / t;
         EXPECT_TRUE(tMath::is_infinity(f));
     }
     {
         int t = 0;
-        float f = 0.0 / t;
+        float f = 0.0f / t;
         EXPECT_TRUE(tMath::is_nan(f));
     }
     {

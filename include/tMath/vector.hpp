@@ -402,20 +402,10 @@ vector_component_t<VecN> magnitude(const VecN& v) noexcept
     constexpr auto N = vector_traits<VecN>::component_count;
     using comp_t = vector_component_t<VecN>;
 
-    if constexpr (N <= 3)
+    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> comp_t
     {
-        return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> comp_t
-        {
-            return static_cast<comp_t>(std::hypot( v.data[I]... ));
-        }(std::make_index_sequence<N>{});
-    }
-    else
-    {
-        return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> comp_t
-        {
-            return static_cast<comp_t>(TMATH_NAMESPACE_NAME::sqrt( ((v.data[I] * v.data[I]) + ...) ));
-        }(std::make_index_sequence<N>{});
-    }
+        return static_cast<comp_t>(TMATH_NAMESPACE_NAME::sqrt( ((v.data[I] * v.data[I]) + ...) ));
+    }(std::make_index_sequence<N>{});
 }
 
 /**
@@ -424,7 +414,7 @@ vector_component_t<VecN> magnitude(const VecN& v) noexcept
  */
 template<is_number... Comp>
     requires (sizeof...(Comp) >= 2)
-auto magnitude(const Comp... comp) noexcept
+std::common_type_t<number_to_floating_point_t<Comp>...> magnitude(const Comp... comp) noexcept
 {
     using ret_t = std::common_type_t<number_to_floating_point_t<Comp>...>;
 
@@ -449,45 +439,40 @@ void normalize_inplace(VecN& v) noexcept
     }(std::make_index_sequence<N>{});
 }
 
-/**
- * 向量归一化，如果向量是0，返回0，如果任一分量是inf, nan，或者向量模长，返回 nan 向量
- * @param comp 向量的所有分量，按照 x, y, z, w, ... 的顺序传入
- * @tparam VecN 返回值向量类型，维度必须与 comp 的数量相等
- */
-template<is_vector_n VecN, is_number... Num>
-VecN normalized(const Num... comp) noexcept
-{
-    using F = vector_component_t<VecN>;
-    constexpr auto N = vector_traits<VecN>::component_count;
-
-    static_assert(N == sizeof...(Num), "component count must be equal to VecN's dimension.");
-    static_assert(is_floating_point<F>, "VecN must be a floating point vector.");
-
-    const F mag = magnitude(comp...);
-    const F inv_mag = (mag > 0) ? (static_cast<F>(1) / mag) : mag;
-
-    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
-    {
-        return {
-            static_cast<F>(comp * inv_mag)...
-        };
-    }(std::make_index_sequence<N>{});
-}
-
 template<is_vector_n_floating_point VecN>
 VecN normalized(const VecN& v) noexcept
 {
     using F = vector_component_t<VecN>;
     constexpr auto N = vector_traits<VecN>::component_count;
 
+    // 1. 如果 mag == 0, inv_mag = 0 (后续计算结果为0)
+    // 2. 如果 mag == inf, 需要特殊处理返回 NaN
+    // 3. 如果 mag == nan, 保持计算，利用传播性返回 NaN
+
     const F mag = magnitude(v);
-    const F inv_mag = (mag > 0) ? (static_cast<F>(1) / mag) : mag;
+
+    const bool is_inf = is_infinity(mag);
+
+    // 计算因子：只有在既不是 0 也是不是 Inf 的时候才计算正常的倒数
+    // 如果是 0，我们给 0；如果是 Inf，我们给 0 (稍后会被覆盖成 NaN)
+    const F inv_mag = (mag != static_cast<F>(0)) ? (static_cast<F>(1) / mag) : static_cast<F>(0);
 
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
+        // auto calc_component = [&](F comp) -> F {
+        //     // 如果是 Inf 向量，根据你的要求，所有分量强制返回 NaN
+        //     if (is_inf) return std::numeric_limits<F>::quiet_NaN();
+        //
+        //     // 正常逻辑或 0 逻辑
+        //     // 如果 mag 是 0，inv_mag 为 0，结果为 0
+        //     // 如果 comp 是 NaN，nan * inv_mag 依然是 NaN，满足传播
+        //     return comp * inv_mag;
+        // };
+        // return { calc_component(v.data[I])... };
         return {
-            (v.data[I] * inv_mag)...
+            (is_inf ? QuietNaN<F> : (v.data[I] * inv_mag))...
         };
+
     }(std::make_index_sequence<N>{});
 }
 

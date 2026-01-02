@@ -2,11 +2,26 @@
 
 #include <cstring>
 #include <cstdint>
+#include <cmath>
+#include <type_traits>
 
 #include "test_types.hpp"
 
 #include "../test.hpp"
 
+
+#define EXPECT_VEC4_NAN(v) \
+    EXPECT_TRUE(std::isnan(tSimd::get_x(v))); \
+    EXPECT_TRUE(std::isnan(tSimd::get_y(v))); \
+    EXPECT_TRUE(std::isnan(tSimd::get_z(v))); \
+    EXPECT_TRUE(std::isnan(tSimd::get_w(v)))
+
+// 辅助宏：判断 float32_4 的四个分量是否全为 0
+#define EXPECT_VEC4_ZERO(v) \
+    EXPECT_FLOAT_EQ(tSimd::get_x(v), 0.0f); \
+    EXPECT_FLOAT_EQ(tSimd::get_y(v), 0.0f); \
+    EXPECT_FLOAT_EQ(tSimd::get_z(v), 0.0f); \
+    EXPECT_FLOAT_EQ(tSimd::get_w(v), 0.0f)
 
 
 using tSimd::float32_4;
@@ -479,4 +494,310 @@ TEST(simd_magnitude, magnitude4_special) {
     float32_4 res = tSimd::magnitude4(v);
 
     EXPECT_NEAR(tSimd::get_x(res), 11.0f, 1e-6f);
+}
+
+// =========================================== normalize2 ===========================================
+// 1. normal 正常数测试
+TEST(simd_normalize2, normal_2d) {
+    // 向量 (3.0, 4.0)，模长应为 5.0，归一化后为 (0.6, 0.8)
+    // 注意：normalized2 只处理前两个分量，但 SIMD 通常会返回全分量结果
+    float32_4 v = tSimd::load(3.0f, 4.0f, 0.0f, 0.0f);
+    float32_4 res = tSimd::normalize2(v);
+
+    EXPECT_NEAR(tSimd::get_x(res), 0.6f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_y(res), 0.8f, 1e-6f);
+}
+
+// 2. zero / epsilon 测试
+TEST(simd_normalize2, zero_vector) {
+    // 0向量：要求安全返回 0 向量
+    float32_4 v_zero = tSimd::load(0.0f, 0.0f, 0.0f, 0.0f);
+    float32_4 res_zero = tSimd::normalize2(v_zero);
+    EXPECT_VEC4_ZERO(res_zero);
+
+    // 极小向量
+    float epsilon = tMath::Epsilon<float>;
+    float32_4 v_eps = tSimd::load(epsilon, 0.0f, 0.0f, 0.0f);
+    float32_4 res_eps = tSimd::normalize2(v_eps);
+    // 这种情况 mag > 0，通常返回 (1, 0, 0, 0)
+    EXPECT_NEAR(tSimd::get_x(res_eps), 1.0f, 1e-6f);
+}
+
+// 3. big_num 测试：模长平方溢出为 inf
+TEST(simd_normalize2, big_num_overflow) {
+    // 1e20^2 = 1e40，超过了 float 最大值 (~3.4e38)
+    // 这会导致 len_sq 变为 Inf，从而触发你的 mag_correct 掩码
+    float big = 1e30f;
+    float32_4 v = tSimd::load(big, big, 0.0f, 0.0f);
+    float32_4 res = tSimd::normalize2(v);
+
+    // 根据逻辑：mag == inf，返回 QuietNaN 向量
+    EXPECT_VEC4_NAN(res);
+}
+
+// 4. inf 测试：输入包含 inf
+TEST(simd_normalize2, input_has_inf) {
+    float inf = std::numeric_limits<float>::infinity();
+
+    // 情况 A：分量中有 Inf，导致模长也是 Inf
+    float32_4 v = tSimd::load(inf, 1.0f, 0.0f, 0.0f);
+    float32_4 res = tSimd::normalize2(v);
+
+    EXPECT_VEC4_NAN(res);
+}
+
+// 5. nan 测试：输入包含 nan
+TEST(simd_normalize2, input_has_nan) {
+    float nan = std::numeric_limits<float>::quiet_NaN();
+
+    // 情况 A：分量中有 NaN
+    float32_4 v = tSimd::load(nan, 1.0f, 0.0f, 0.0f);
+    float32_4 res = tSimd::normalize2(v);
+
+    // 逻辑：nan 会导致 mag 也是 nan，cmpneq(nan, inf) 为真，
+    // 但 div_ps(nan, nan) 会传播 nan
+    EXPECT_VEC4_NAN(res);
+}
+
+// =========================================== normalize3 ===========================================
+// 1. normal 正常数测试
+TEST(simd_normalize3, normal_3d) {
+    // 向量 (1.0, 1.0, 1.0)，模长应为 sqrt(3) ≈ 1.7320508
+    // 归一化后各分量应约为 0.57735026
+    float32_4 v = tSimd::load(1.0f, 1.0f, 1.0f, 0.0f);
+    float32_4 res = tSimd::normalize3(v);
+
+    float expected = 1.0f / std::sqrt(3.0f);
+    EXPECT_NEAR(tSimd::get_x(res), expected, 1e-6f);
+    EXPECT_NEAR(tSimd::get_y(res), expected, 1e-6f);
+    EXPECT_NEAR(tSimd::get_z(res), expected, 1e-6f);
+}
+
+// 2. zero / epsilon 测试
+TEST(simd_normalize3, zero_vector_3d) {
+    // 0向量：要求安全返回 0 向量
+    float32_4 v_zero = tSimd::load(0.0f, 0.0f, 0.0f, 0.0f);
+    float32_4 res_zero = tSimd::normalize3(v_zero);
+    EXPECT_VEC4_ZERO(res_zero);
+
+    // 极小向量测试
+    float epsilon = tMath::Epsilon<float>;
+    // (eps, eps, eps) 的模长为 sqrt(3)*eps，依然大于 0
+    float32_4 v_eps = tSimd::load(epsilon, epsilon, epsilon, 0.0f);
+    float32_4 res_eps = tSimd::normalize3(v_eps);
+
+    float expected = 1.0f / std::sqrt(3.0f);
+    EXPECT_NEAR(tSimd::get_x(res_eps), expected, 1e-6f);
+    EXPECT_NEAR(tSimd::get_y(res_eps), expected, 1e-6f);
+    EXPECT_NEAR(tSimd::get_z(res_eps), expected, 1e-6f);
+}
+
+// 3. big_num 测试：模长平方溢出为 inf
+TEST(simd_normalize3, big_num_overflow_3d) {
+    // 在 3D 中，三个大数平方相加更容易溢出
+    float big = 2e30f;
+    float32_4 v = tSimd::load(big, big, big, 0.0f);
+    float32_4 res = tSimd::normalize3(v);
+
+    // mag == inf -> 返回 QuietNaN 向量
+    EXPECT_VEC4_NAN(res);
+}
+
+// 4. inf 测试：输入包含 inf
+TEST(simd_normalize3, input_has_inf_3d) {
+    float inf = std::numeric_limits<float>::infinity();
+
+    // 只要有一个分量是 Inf，模长即为 Inf
+    float32_4 v = tSimd::load(1.0f, inf, 1.0f, 0.0f);
+    float32_4 res = tSimd::normalize3(v);
+
+    EXPECT_VEC4_NAN(res);
+}
+
+// 5. nan 测试：输入包含 nan
+TEST(simd_normalize3, input_has_nan_3d) {
+    float nan = std::numeric_limits<float>::quiet_NaN();
+
+    // Z 分量包含 NaN
+    float32_4 v = tSimd::load(1.0f, 1.0f, nan, 0.0f);
+    float32_4 res = tSimd::normalize3(v);
+
+    EXPECT_VEC4_NAN(res);
+}
+
+// =========================================== normalize4 ===========================================
+// 1. normal 正常数测试
+TEST(simd_normalize4, normal_4d) {
+    // 向量 (1.0, 1.0, 1.0, 1.0)，模长 = sqrt(1^2 + 1^2 + 1^2 + 1^2) = 2.0
+    // 归一化结果应为 (0.5, 0.5, 0.5, 0.5)
+    float32_4 v = tSimd::load(1.0f, 1.0f, 1.0f, 1.0f);
+    float32_4 res = tSimd::normalize4(v);
+
+    EXPECT_FLOAT_EQ(tSimd::get_x(res), 0.5f);
+    EXPECT_FLOAT_EQ(tSimd::get_y(res), 0.5f);
+    EXPECT_FLOAT_EQ(tSimd::get_z(res), 0.5f);
+    EXPECT_FLOAT_EQ(tSimd::get_w(res), 0.5f);
+}
+
+// 2. zero / epsilon 测试
+TEST(simd_normalize4, zero_vector_4d) {
+    // 0向量：要求安全返回 0 向量
+    float32_4 v_zero = tSimd::load(0.0f, 0.0f, 0.0f, 0.0f);
+    float32_4 res_zero = tSimd::normalize4(v_zero);
+    EXPECT_VEC4_ZERO(res_zero);
+
+    // 极小向量测试：(eps, 0, 0, 0) -> (1, 0, 0, 0)
+    float epsilon = tMath::Epsilon<float>;
+    float32_4 v_eps = tSimd::load(0.0f, 0.0f, 0.0f, epsilon); // 测试 w 分量
+    float32_4 res_eps = tSimd::normalize4(v_eps);
+
+    EXPECT_NEAR(tSimd::get_w(res_eps), 1.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_x(res_eps), 0.0f, 1e-6f);
+}
+
+// 3. big_num 测试：模长平方溢出为 inf
+TEST(simd_normalize4, big_num_overflow_4d) {
+    // 四个大数平方相加。2e30^2 = 4e60 (Inf)
+    float big = 2e30f;
+    float32_4 v = tSimd::load(big, big, big, big);
+    float32_4 res = tSimd::normalize4(v);
+
+    // 根据逻辑：mag == inf -> 返回全分量 NaN 向量
+    EXPECT_VEC4_NAN(res);
+}
+
+// 4. inf 测试：输入包含 inf
+TEST(simd_normalize4, input_has_inf_4d) {
+    float inf = std::numeric_limits<float>::infinity();
+
+    // 只要有一个分量（如 w）是 Inf，结果应为全分量 NaN
+    float32_4 v = tSimd::load(1.0f, 2.0f, 3.0f, inf);
+    float32_4 res = tSimd::normalize4(v);
+
+    EXPECT_VEC4_NAN(res);
+}
+
+// 5. nan 测试：输入包含 nan
+TEST(simd_normalize4, input_has_nan_4d) {
+    float nan = std::numeric_limits<float>::quiet_NaN();
+
+    // w 分量包含 NaN
+    float32_4 v = tSimd::load(1.0f, 1.0f, 1.0f, nan);
+    float32_4 res = tSimd::normalize4(v);
+
+    // 传播性测试：由于 mag 计算涉及 w，结果应为全分量 NaN
+    EXPECT_VEC4_NAN(res);
+}
+
+// ==================================================== magnitudeN sq ====================================================
+// 1. 2D 向量模长平方测试
+TEST(simd_magnitude_sq, magnitude2_sq_basic) {
+    // 输入 (3, 4, 7, 11)，只应计算 3^2 + 4^2 = 25
+    float32_4 v = tSimd::load(3.0f, 4.0f, 7.0f, 11.0f);
+    float32_4 res = tSimd::magnitude2_sq(v);
+
+    EXPECT_FLOAT_EQ(tSimd::get_x(res), 25.0f);
+    EXPECT_FLOAT_EQ(tSimd::get_y(res), 25.0f);
+    EXPECT_FLOAT_EQ(tSimd::get_z(res), 25.0f);
+    EXPECT_FLOAT_EQ(tSimd::get_w(res), 25.0f);
+}
+
+// 2. 3D 向量模长平方测试
+TEST(simd_magnitude_sq, magnitude3_sq_basic) {
+    // 输入 (1, 2, 3, 10)，只应计算 1^2 + 2^2 + 3^2 = 14
+    float32_4 v = tSimd::load(1.0f, 2.0f, 3.0f, 10.0f);
+    float32_4 res = tSimd::magnitude3_sq(v);
+
+    EXPECT_FLOAT_EQ(tSimd::get_x(res), 14.0f);
+}
+
+// 3. 4D 向量模长平方测试
+TEST(simd_magnitude_sq, magnitude4_sq_basic) {
+    // 输入 (1, 1, 1, 1)，计算 1^2 + 1^2 + 1^2 + 1^2 = 4
+    float32_4 v = tSimd::load(1.0f, 1.0f, 1.0f, 1.0f);
+    float32_4 res = tSimd::magnitude4_sq(v);
+
+    EXPECT_FLOAT_EQ(tSimd::get_x(res), 4.0f);
+}
+
+// 4. 边界值测试：溢出检查
+TEST(simd_magnitude_sq, overflow_check) {
+    // 使用足够大的数使其平方后溢出
+    float big = 2e20f; // (2e20)^2 = 4e40 > FLT_MAX
+    float32_4 v = tSimd::load(big, 0.0f, 0.0f, 0.0f);
+    float32_4 res = tSimd::magnitude4_sq(v);
+
+    EXPECT_TRUE(std::isinf(tSimd::get_x(res)));
+}
+
+// 5. 边界值测试：NaN 传播
+TEST(simd_magnitude_sq, nan_propagation) {
+    float nan = std::numeric_limits<float>::quiet_NaN();
+    // 即使只有 z 是 NaN，magnitude3_sq 也应该返回 NaN
+    float32_4 v = tSimd::load(1.0f, 1.0f, nan, 1.0f);
+    float32_4 res = tSimd::magnitude3_sq(v);
+
+    EXPECT_TRUE(std::isnan(tSimd::get_x(res)));
+}
+
+// ======================================================= is_nan =======================================================
+// 1. 测试全正常数值 (No NaN)
+TEST(simd_is_nan, all_normal_values) {
+    float32_4 v = tSimd::load(1.0f, -2.5f, 0.0f, 1e10f);
+    float32_4 mask = tSimd::is_nan(v);
+
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_x(mask)), 0x00000000U);
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_y(mask)), 0x00000000U);
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_z(mask)), 0x00000000U);
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_w(mask)), 0x00000000U);
+}
+
+// 2. 测试全 NaN 数值
+TEST(simd_is_nan, all_nan_values) {
+    float nan = std::numeric_limits<float>::quiet_NaN();
+    float32_4 v = tSimd::load(nan, nan, nan, nan);
+    float32_4 mask = tSimd::is_nan(v);
+
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_x(mask)), 0xFFFFFFFFU);
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_y(mask)), 0xFFFFFFFFU);
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_z(mask)), 0xFFFFFFFFU);
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_w(mask)), 0xFFFFFFFFU);
+}
+
+// 3. 测试混合分量 (一部分 NaN，一部分正常)
+TEST(simd_is_nan, mixed_components) {
+    float nan = std::numeric_limits<float>::quiet_NaN();
+    // 只有 X 和 Z 是 NaN
+    float32_4 v = tSimd::load(nan, 1.23f, nan, 0.0f);
+    float32_4 mask = tSimd::is_nan(v);
+
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_x(mask)), 0xFFFFFFFFU); // NaN
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_y(mask)), 0x00000000U); // Normal
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_z(mask)), 0xFFFFFFFFU); // NaN
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_w(mask)), 0x00000000U); // Normal
+}
+
+// 4. 边界值测试：Infinity 不应被视为 NaN
+TEST(simd_is_nan, infinity_is_not_nan) {
+    float inf = std::numeric_limits<float>::infinity();
+    float neg_inf = -std::numeric_limits<float>::infinity();
+    float nan = std::numeric_limits<float>::quiet_NaN();
+
+    float32_4 v = tSimd::load(inf, neg_inf, 3.14f, nan);
+    float32_4 mask = tSimd::is_nan(v);
+
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_x(mask)), 0x00000000U); // +Inf
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_y(mask)), 0x00000000U); // -Inf
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_z(mask)), 0x00000000U); // Normal
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_w(mask)), 0xFFFFFFFFU); // NaN
+}
+
+// 5. 特殊 NaN 测试 (Signaling NaN)
+TEST(simd_is_nan, signaling_nan) {
+    float snan = std::numeric_limits<float>::signaling_NaN();
+    float32_4 v = tSimd::load(snan, 0.0f, 0.0f, 0.0f);
+    float32_4 mask = tSimd::is_nan(v);
+
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_x(mask)), 0xFFFFFFFFU);
+    EXPECT_EQ(std::bit_cast<uint32_t>(tSimd::get_y(mask)), 0x00000000U);
 }

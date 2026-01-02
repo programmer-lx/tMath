@@ -195,10 +195,13 @@
 #endif
 
 
-// 浮点位宽检查
+// 浮点检查
 #if !defined(TMATH_NO_SIMD)
-    static_assert(sizeof(double) == 8, "tSimd requires 8-byte double");
     static_assert(sizeof(float) == 4, "tSimd requires 4-byte float");
+    static_assert(std::numeric_limits<float>::is_iec559, "tSimd requires IEEE 754 float");
+
+    static_assert(sizeof(double) == 8, "tSimd requires 8-byte double");
+    static_assert(std::numeric_limits<double>::is_iec559, "tSimd requires IEEE 754 double");
 #endif
 
 

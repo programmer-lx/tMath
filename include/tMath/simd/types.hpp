@@ -75,20 +75,20 @@ struct alignas(TMATH_SIMD_128_ALIGNMENT) _128bits_mem_block
     }
 };
 
-namespace value128
+namespace detail128
 {
-    static constexpr _128bits_mem_block ZeroBlock = _128bits_mem_block::make_from_uint32(0x0, 0x0, 0x0, 0x0);
-    static constexpr _128bits_mem_block OneBlock = _128bits_mem_block::make_from_uint32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
-
-    // 四个数，符号位是0，其余位是1
-    static constexpr _128bits_mem_block Abs4 = _128bits_mem_block::make_from_uint32(0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff);
-
     static constexpr _128bits_mem_block Lane0 = _128bits_mem_block::make_from_uint32(0xffffffff, 0x0, 0x0, 0x0);
     static constexpr _128bits_mem_block Lane1 = _128bits_mem_block::make_from_uint32(0x0, 0xffffffff, 0x0, 0x0);
     static constexpr _128bits_mem_block Lane2 = _128bits_mem_block::make_from_uint32(0x0, 0x0, 0xffffffff, 0x0);
     static constexpr _128bits_mem_block Lane3 = _128bits_mem_block::make_from_uint32(0x0, 0x0, 0x0, 0xffffffff);
     static constexpr _128bits_mem_block Lane01 = _128bits_mem_block::make_from_uint32(0xffffffff, 0xffffffff, 0x0, 0x0);
     static constexpr _128bits_mem_block Lane012 = _128bits_mem_block::make_from_uint32(0xffffffff, 0xffffffff, 0xffffffff, 0x0);
+
+    // 四个数，符号位是0，其余位是1
+    static constexpr _128bits_mem_block Abs4 = _128bits_mem_block::make_from_uint32(0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff);
+
+    static constexpr _128bits_mem_block Inf = _128bits_mem_block::make_from_uint32(0x7f800000, 0x7f800000, 0x7f800000, 0x7f800000);
+    static constexpr _128bits_mem_block QuietNaN = _128bits_mem_block::make_from_uint32(0x7fC00000, 0x7fC00000, 0x7fC00000, 0x7fC00000);
 }
 
 #endif
