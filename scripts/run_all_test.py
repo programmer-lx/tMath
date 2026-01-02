@@ -59,7 +59,9 @@ def main():
         """
         编译选项: 格式 (build config, -DTMATH_TEST_OPTION[od, o2, gl])
         """
-        build_options = [("Debug", "od")] if test_mode == "min" else [("Debug", "od"), ("Release", "o2"), ("Release", "gl")]
+        build_options = [("Debug", "od")] if test_mode == "min" else [
+            ("Debug", "od"), ("Release", "o2"), ("Release", "gl")
+        ]
 
 
         # resolve() 获取绝对路径，不受当前终端工作目录影响

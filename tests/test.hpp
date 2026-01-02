@@ -17,6 +17,10 @@
 #error "please define TMATH_IS_TESTING macro to enable testing."
 #endif
 
+#define TMATH_EXPECT_IS_NAN(val) EXPECT_TRUE(std::isnan(val))
+#define TMATH_EXPECT_IS_POSITIVE(val) EXPECT_TRUE(!std::signbit(val))
+#define TMATH_EXPECT_IS_NEGATIVE(val) EXPECT_TRUE(std::signbit(val))
+
 template<std::floating_point F>
 F random_f(F min, F max)
 {

@@ -300,7 +300,7 @@ VecN sin(const VecN& v) noexcept
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
         return {
-            static_cast<comp_t>(std::sin(v.data[I]))...
+            static_cast<comp_t>(TMATH_NAMESPACE_NAME::sin(v.data[I]))...
         };
     }(std::make_index_sequence<N>{});
 }
@@ -314,7 +314,7 @@ VecN cos(const VecN& v) noexcept
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
         return {
-            static_cast<comp_t>(std::cos(v.data[I]))...
+            static_cast<comp_t>(TMATH_NAMESPACE_NAME::cos(v.data[I]))...
         };
     }(std::make_index_sequence<N>{});
 }
@@ -328,7 +328,7 @@ VecN tan(const VecN& v) noexcept
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
         return {
-            static_cast<comp_t>(std::tan(v.data[I]))...
+            static_cast<comp_t>(TMATH_NAMESPACE_NAME::tan(v.data[I]))...
         };
     }(std::make_index_sequence<N>{});
 }
@@ -380,7 +380,7 @@ bool approximately_all(const VecN& a, const VecN& b, const vector_component_t<Ve
 }
 
 /**
- * @return 若该分量近似相等，则该分量全部bit置为1，否则被置为0
+ * @return 若该分量近似相等，则该分量不为0(因为通用向量库假定浮点数在各平台的位宽不确定，所以不保证一定能取到0xffffffff)，否则被置为0
  */
 template<is_vector_n_floating_point VecN>
 VecN approximately_cwise(const VecN& a, const VecN& b, const vector_component_t<VecN> tolerance = Epsilon<vector_component_t<VecN>>) noexcept
@@ -391,7 +391,7 @@ VecN approximately_cwise(const VecN& a, const VecN& b, const vector_component_t<
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
         return {
-            (approximately(a.data[I], b.data[I], tolerance) ? one_block<comp_t>() : static_cast<comp_t>(0))...
+            static_cast<comp_t>(approximately(a.data[I], b.data[I], tolerance))...
         };
     }(std::make_index_sequence<N>{});
 }
@@ -413,7 +413,7 @@ vector_component_t<VecN> magnitude(const VecN& v) noexcept
     {
         return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> comp_t
         {
-            return static_cast<comp_t>(std::sqrt( ((v.data[I] * v.data[I]) + ...) ));
+            return static_cast<comp_t>(TMATH_NAMESPACE_NAME::sqrt( ((v.data[I] * v.data[I]) + ...) ));
         }(std::make_index_sequence<N>{});
     }
 }
@@ -428,23 +428,20 @@ auto magnitude(const Comp... comp) noexcept
 {
     using ret_t = std::common_type_t<number_to_floating_point_t<Comp>...>;
 
-    if constexpr (sizeof...(Comp) <= 3)
-    {
-        return static_cast<ret_t>(std::hypot( static_cast<ret_t>(comp)... ));
-    }
-    else
-    {
-        return static_cast<ret_t>(std::sqrt( ((static_cast<ret_t>(comp) * static_cast<ret_t>(comp)) + ...) ));
-    }
+    return static_cast<ret_t>(TMATH_NAMESPACE_NAME::sqrt( ((static_cast<ret_t>(comp) * static_cast<ret_t>(comp)) + ...) ));
 }
 
+/**
+ * 原地归一化向量，如果传入的向量无效，则直接将他赋值为0向量
+ */
 template<is_vector_n_floating_point VecN>
 void normalize_inplace(VecN& v) noexcept
 {
     using F = vector_component_t<VecN>;
     constexpr auto N = vector_traits<VecN>::component_count;
 
-    const F inv_mag = static_cast<F>(1) / magnitude(v);
+    const F mag = magnitude(v);
+    const F inv_mag = (mag > 0) ? (static_cast<F>(1) / mag) : mag;
 
     [&]<size_t... I>(std::index_sequence<I...>) constexpr
     {
@@ -452,23 +449,28 @@ void normalize_inplace(VecN& v) noexcept
     }(std::make_index_sequence<N>{});
 }
 
-template<is_vector_n_floating_point VecN>
-void safe_normalize_inplace(VecN& v, const VecN& fallback) noexcept
+/**
+ * 向量归一化，如果向量是0，返回0，如果任一分量是inf, nan，或者向量模长，返回 nan 向量
+ * @param comp 向量的所有分量，按照 x, y, z, w, ... 的顺序传入
+ * @tparam VecN 返回值向量类型，维度必须与 comp 的数量相等
+ */
+template<is_vector_n VecN, is_number... Num>
+VecN normalized(const Num... comp) noexcept
 {
     using F = vector_component_t<VecN>;
     constexpr auto N = vector_traits<VecN>::component_count;
 
-    const F mag = magnitude(v);
-    if (is_invalid_divisor(mag))
-    {
-        v = fallback;
-        return;
-    }
+    static_assert(N == sizeof...(Num), "component count must be equal to VecN's dimension.");
+    static_assert(is_floating_point<F>, "VecN must be a floating point vector.");
 
-    const F inv_mag = static_cast<F>(1) / mag;
-    [&]<size_t... I>(std::index_sequence<I...>) constexpr
+    const F mag = magnitude(comp...);
+    const F inv_mag = (mag > 0) ? (static_cast<F>(1) / mag) : mag;
+
+    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
-        ( (v.data[I] *= inv_mag), ... );
+        return {
+            static_cast<F>(comp * inv_mag)...
+        };
     }(std::make_index_sequence<N>{});
 }
 
@@ -478,7 +480,8 @@ VecN normalized(const VecN& v) noexcept
     using F = vector_component_t<VecN>;
     constexpr auto N = vector_traits<VecN>::component_count;
 
-    const F inv_mag = static_cast<F>(1) / magnitude(v);
+    const F mag = magnitude(v);
+    const F inv_mag = (mag > 0) ? (static_cast<F>(1) / mag) : mag;
 
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
     {
@@ -496,65 +499,17 @@ RetVecN normalized(const VecN_SInt& v) noexcept
     using ret_comp_t = vector_component_t<RetVecN>;
     constexpr auto N = vector_traits<RetVecN>::component_count;
 
-    const ret_comp_t inv_mag = static_cast<ret_comp_t>(1) / [&]<size_t... I>(std::index_sequence<I...>) constexpr -> ret_comp_t
-    {
-        return static_cast<ret_comp_t>(magnitude(v.data[I]...));
-    }(std::make_index_sequence<N>{});
-
-    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> RetVecN
-    {
-        return {
-            (static_cast<ret_comp_t>(v.data[I]) * inv_mag)...
-        };
-    }(std::make_index_sequence<N>{});
-}
-
-template<is_vector_n_floating_point VecN>
-VecN safe_normalized(const VecN& v, const VecN& fallback) noexcept
-{
-    using F = vector_component_t<VecN>;
-    constexpr auto N = vector_traits<VecN>::component_count;
-
-    const F mag = magnitude(v);
-    if (is_invalid_divisor(mag))
-    {
-        return fallback;
-    }
-
-    const F inv_mag = static_cast<F>(1) / mag;
-
-    return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> VecN
-    {
-        return {
-            static_cast<F>(v.data[I] * inv_mag)...
-        };
-    }(std::make_index_sequence<N>{});
-}
-
-template<is_vector_n_floating_point RetVecN, is_vector_n_sint VecN_SInt>
-RetVecN safe_normalized(const VecN_SInt& v, const RetVecN& fallback) noexcept
-{
-    static_assert(vector_traits<RetVecN>::component_count == vector_traits<VecN_SInt>::component_count, "two vector's component count MUST be equal.");
-
-    using ret_comp_t = vector_component_t<RetVecN>;
-    constexpr auto N = vector_traits<RetVecN>::component_count;
-
     const ret_comp_t mag = [&]<size_t... I>(std::index_sequence<I...>) constexpr -> ret_comp_t
     {
         return static_cast<ret_comp_t>(magnitude(v.data[I]...));
     }(std::make_index_sequence<N>{});
 
-    if (is_invalid_divisor(mag))
-    {
-        return fallback;
-    }
-
-    const ret_comp_t inv_mag = static_cast<ret_comp_t>(1) / mag;
+    const ret_comp_t inv_mag = (mag > 0) ? (static_cast<ret_comp_t>(1) / mag) : mag;
 
     return [&]<size_t... I>(std::index_sequence<I...>) constexpr -> RetVecN
     {
         return {
-            static_cast<ret_comp_t>(v.data[I] * inv_mag)...
+            (static_cast<ret_comp_t>(v.data[I]) * inv_mag)...
         };
     }(std::make_index_sequence<N>{});
 }

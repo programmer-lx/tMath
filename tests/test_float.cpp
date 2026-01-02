@@ -36,6 +36,303 @@ TEST(one_block, float_bits)
     }
 }
 
+TEST(one_block, double_bits)
+{
+    double result = tMath::one_block<double>();
+
+    // 1. 获取浮点数的字节大小
+    size_t byte_size = sizeof(double);
+
+    // 2. 将结果拷贝到容器中
+    std::vector<unsigned char> bytes(byte_size);
+    std::memcpy(bytes.data(), &result, byte_size);
+
+    // 3. 逐字节、逐位验证
+    for (size_t i = 0; i < byte_size; ++i) {
+        unsigned char current_byte = bytes[i];
+
+        // 验证该字节的 8 个位（CHAR_BIT 通常为 8）
+        for (int bit = 0; bit < CHAR_BIT; ++bit) {
+            // 构造掩码检查第 bit 位是否为 1
+            bool is_one = (current_byte >> bit) & 1;
+
+            // 使用 SCOPED_TRACE 可以帮助你在报错时定位是哪个字节、哪一位出了问题
+            SCOPED_TRACE("Testing byte " + std::to_string(i) + ", bit " + std::to_string(bit));
+            EXPECT_TRUE(is_one);
+        }
+
+        // 或者更简单地直接验证整个字节是否为 0xFF
+        // EXPECT_EQ(current_byte, 0xFF);
+    }
+}
+
+TEST(one_block, long_double_bits)
+{
+    long double result = tMath::one_block<long double>();
+
+    // 1. 获取浮点数的字节大小
+    size_t byte_size = sizeof(long double);
+
+    // 2. 将结果拷贝到容器中
+    std::vector<unsigned char> bytes(byte_size);
+    std::memcpy(bytes.data(), &result, byte_size);
+
+    // 3. 逐字节、逐位验证
+    for (size_t i = 0; i < byte_size; ++i) {
+        unsigned char current_byte = bytes[i];
+
+        // 验证该字节的 8 个位（CHAR_BIT 通常为 8）
+        for (int bit = 0; bit < CHAR_BIT; ++bit) {
+            // 构造掩码检查第 bit 位是否为 1
+            bool is_one = (current_byte >> bit) & 1;
+
+            // 使用 SCOPED_TRACE 可以帮助你在报错时定位是哪个字节、哪一位出了问题
+            SCOPED_TRACE("Testing byte " + std::to_string(i) + ", bit " + std::to_string(bit));
+            EXPECT_TRUE(is_one);
+        }
+
+        // 或者更简单地直接验证整个字节是否为 0xFF
+        // EXPECT_EQ(current_byte, 0xFF);
+    }
+}
+
+TEST(float_boundary, inf)
+{
+    volatile float inf = tMath::Infinity<float>;
+    volatile float epsilon = tMath::Epsilon<float>;
+
+    // +
+    {
+        EXPECT_TRUE(inf + 5.0f == inf);
+        EXPECT_TRUE(tMath::is_infinity(inf + 5.0f));
+
+        EXPECT_TRUE(5.0f + inf == inf);
+        EXPECT_TRUE(tMath::is_infinity(5.0f + inf));
+
+        EXPECT_TRUE(-5.0f + inf == inf);
+        EXPECT_TRUE(tMath::is_infinity(-5.0f + inf));
+
+        EXPECT_TRUE(inf + inf == inf);
+        EXPECT_TRUE(tMath::is_infinity(inf + inf));
+    }
+
+    // -
+    {
+        EXPECT_TRUE(inf - 5.0f == inf);
+        EXPECT_TRUE(tMath::is_infinity(inf - 5.0f));
+
+        EXPECT_TRUE(5.0f - inf == -inf);
+        EXPECT_TRUE(tMath::is_infinity(5.0f - inf));
+
+        EXPECT_TRUE(-5.0f - inf == -inf);
+        EXPECT_TRUE(tMath::is_infinity(-5.0f - inf));
+
+        EXPECT_TRUE(tMath::is_nan(inf - inf));
+    }
+
+    // *
+    {
+        // 有限数 * 有限数 溢出测试
+        EXPECT_TRUE(inf == inf);
+        EXPECT_TRUE(tMath::Max<float> * tMath::Max<float> == inf);
+
+        EXPECT_TRUE(inf * 10 == inf);
+        EXPECT_TRUE(tMath::is_infinity(inf * 10));
+
+        EXPECT_TRUE(inf * -10 == -inf);
+        EXPECT_TRUE(tMath::is_infinity(inf * -10));
+
+        EXPECT_TRUE(tMath::is_nan(inf * 0.0f));
+        EXPECT_TRUE(tMath::is_nan(inf * 0));
+
+        EXPECT_TRUE(1e32f * 1e32f == inf);
+        EXPECT_TRUE(1e32f * -1e32f == -inf);
+        EXPECT_TRUE(-1e32f * 1e32f == -inf);
+
+        EXPECT_TRUE(inf * inf == inf);
+        EXPECT_TRUE(tMath::is_infinity(inf * inf));
+    }
+
+    // /
+    {
+        EXPECT_TRUE((1.0f / inf) == 0.0f); // inf符号符合算术规则
+        TMATH_EXPECT_IS_POSITIVE(1.0f / inf);
+        EXPECT_TRUE((0.0f / inf) == 0.0f);
+        TMATH_EXPECT_IS_POSITIVE(0.0f / inf);
+        EXPECT_TRUE((-5.0f / inf) == 0.0f);
+        TMATH_EXPECT_IS_NEGATIVE(-5.0f / inf);
+
+        EXPECT_TRUE((1.0f / -inf) == 0.0f);
+        TMATH_EXPECT_IS_NEGATIVE(1.0f / -inf);
+        EXPECT_TRUE((0.0f / -inf) == 0.0f);
+        TMATH_EXPECT_IS_NEGATIVE(0.0f / -inf);
+        EXPECT_TRUE((-5.0f / -inf) == 0.0f);
+        TMATH_EXPECT_IS_POSITIVE(-5.0f / -inf);
+
+        EXPECT_TRUE(tMath::is_nan(inf / inf));
+        EXPECT_TRUE((inf / 5.0f) == inf);
+        EXPECT_TRUE((inf / -5.0f) == -inf);
+
+        EXPECT_TRUE(std::sqrt(inf) == inf);
+    }
+
+    // >
+    {
+        EXPECT_TRUE((inf > epsilon) == true);
+        EXPECT_TRUE((inf > -epsilon) == true);
+        EXPECT_TRUE((inf > 1) == true);
+        EXPECT_TRUE((inf > -1) == true);
+        EXPECT_TRUE((-inf > -1) == false);
+        EXPECT_TRUE((-inf > 1) == false);
+    }
+}
+
+TEST(float_boundary, nan)
+{
+    volatile float nan = tMath::QuietNaN<float>;
+    volatile float inf = tMath::Infinity<float>;
+    volatile float epsilon = tMath::Epsilon<float>;
+
+    static_assert(std::numeric_limits<float>::is_iec559);
+
+    // +
+    {
+        EXPECT_TRUE(tMath::is_nan(nan + 5));
+        EXPECT_TRUE(tMath::is_nan(5 + nan));
+        EXPECT_TRUE(tMath::is_nan(-5 + nan));
+        EXPECT_TRUE(tMath::is_nan(0.0f + nan));
+        EXPECT_TRUE(tMath::is_nan(-0.0f + nan));
+        EXPECT_TRUE(tMath::is_nan(inf + nan));
+        EXPECT_TRUE(tMath::is_nan(-inf + nan));
+        EXPECT_TRUE(tMath::is_nan(nan + nan));
+    }
+
+    // -
+    {
+        EXPECT_TRUE(tMath::is_nan(nan - 5));
+        EXPECT_TRUE(tMath::is_nan(5 - nan));
+        EXPECT_TRUE(tMath::is_nan(-5 - nan));
+        EXPECT_TRUE(tMath::is_nan(0.0f - nan));
+        EXPECT_TRUE(tMath::is_nan(-0.0f - nan));
+        EXPECT_TRUE(tMath::is_nan(inf - nan));
+        EXPECT_TRUE(tMath::is_nan(-inf - nan));
+        EXPECT_TRUE(tMath::is_nan(nan - nan));
+    }
+
+    // *
+    {
+        EXPECT_TRUE(tMath::is_nan(nan * 5));
+        EXPECT_TRUE(tMath::is_nan(5 * nan));
+        EXPECT_TRUE(tMath::is_nan(-5 * nan));
+        EXPECT_TRUE(tMath::is_nan(0.0f * nan));
+        EXPECT_TRUE(tMath::is_nan(-0.0f * nan));
+        EXPECT_TRUE(tMath::is_nan(inf * nan));
+        EXPECT_TRUE(tMath::is_nan(-inf * nan));
+        EXPECT_TRUE(tMath::is_nan(nan * nan));
+    }
+
+    // /
+    {
+        EXPECT_TRUE(tMath::is_nan(nan / 5));
+        EXPECT_TRUE(tMath::is_nan(5 / nan));
+        EXPECT_TRUE(tMath::is_nan(-5 / nan));
+        EXPECT_TRUE(tMath::is_nan(0.0f / nan));
+        EXPECT_TRUE(tMath::is_nan(-0.0f / nan));
+        EXPECT_TRUE(tMath::is_nan(inf / nan));
+        EXPECT_TRUE(tMath::is_nan(-inf / nan));
+        EXPECT_TRUE(tMath::is_nan(nan / nan));
+    }
+
+    // <
+    {
+        EXPECT_TRUE((nan < 5) == false);
+        EXPECT_TRUE((nan < -5) == false);
+        EXPECT_TRUE((nan < 0.0f) == false);
+        EXPECT_TRUE((nan < -0.0f) == false);
+        EXPECT_TRUE((nan < nan) == false);
+        EXPECT_TRUE((nan < inf) == false);
+        EXPECT_TRUE((nan < -inf) == false);
+        EXPECT_TRUE((nan < epsilon) == false);
+        EXPECT_TRUE((nan < -epsilon) == false);
+
+        EXPECT_TRUE((5 < nan) == false);
+        EXPECT_TRUE((-5 < nan) == false);
+        EXPECT_TRUE((0.0f < nan) == false);
+        EXPECT_TRUE((-0.0f < nan) == false);
+        EXPECT_TRUE((nan < nan) == false);
+        EXPECT_TRUE((inf < nan) == false);
+        EXPECT_TRUE((-inf < nan) == false);
+        EXPECT_TRUE((epsilon < nan) == false);
+        EXPECT_TRUE((-epsilon < nan) == false);
+    }
+
+    // >
+    {
+        EXPECT_TRUE((nan > 5) == false);
+        EXPECT_TRUE((nan > -5) == false);
+        EXPECT_TRUE((nan > 0.0f) == false);
+        EXPECT_TRUE((nan > -0.0f) == false);
+        EXPECT_TRUE((nan > nan) == false);
+        EXPECT_TRUE((nan > inf) == false);
+        EXPECT_TRUE((nan > -inf) == false);
+
+        EXPECT_TRUE((5 > nan) == false);
+        EXPECT_TRUE((-5 > nan) == false);
+        EXPECT_TRUE((0.0f > nan) == false);
+        EXPECT_TRUE((-0.0f > nan) == false);
+        EXPECT_TRUE((nan > nan) == false);
+        EXPECT_TRUE((inf > nan) == false);
+        EXPECT_TRUE((-inf > nan) == false);
+
+        EXPECT_TRUE(std::isgreater(nan, inf) == false);
+    }
+
+    // &&
+    {
+        EXPECT_TRUE((nan && 1) == true);
+        EXPECT_TRUE((nan && 0) == false);
+        EXPECT_TRUE((nan && epsilon) == true);
+    }
+
+    // ==
+    {
+        EXPECT_TRUE((nan == 5) == false);
+        EXPECT_TRUE((nan == -5) == false);
+        EXPECT_TRUE((nan == 0.0f) == false);
+        EXPECT_TRUE((nan == -0.0f) == false);
+        EXPECT_TRUE((nan == nan) == false);
+        EXPECT_TRUE((nan == inf) == false);
+        EXPECT_TRUE((nan == -inf) == false);
+
+        EXPECT_TRUE((5 == nan) == false);
+        EXPECT_TRUE((-5 == nan) == false);
+        EXPECT_TRUE((0.0f == nan) == false);
+        EXPECT_TRUE((-0.0f == nan) == false);
+        EXPECT_TRUE((nan == nan) == false);
+        EXPECT_TRUE((inf == nan) == false);
+        EXPECT_TRUE((-inf == nan) == false);
+    }
+
+    // !=
+    {
+        EXPECT_TRUE((nan != 5) == true);
+        EXPECT_TRUE((nan != -5) == true);
+        EXPECT_TRUE((nan != 0.0f) == true);
+        EXPECT_TRUE((nan != -0.0f) == true);
+        EXPECT_TRUE((nan != nan) == true);
+        EXPECT_TRUE((nan != inf) == true);
+        EXPECT_TRUE((nan != -inf) == true);
+
+        EXPECT_TRUE((5 != nan) == true);
+        EXPECT_TRUE((-5 != nan) == true);
+        EXPECT_TRUE((0.0f != nan) == true);
+        EXPECT_TRUE((-0.0f != nan) == true);
+        EXPECT_TRUE((nan != nan) == true);
+        EXPECT_TRUE((inf != nan) == true);
+        EXPECT_TRUE((-inf != nan) == true);
+    }
+}
+
 TEST(approximately, normal)
 {
     EXPECT_TRUE(tMath::approximately(1.0000005, 1.000001f, 0.000001f));

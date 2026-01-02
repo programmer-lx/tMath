@@ -413,54 +413,82 @@ TEST(simd_approximately_cwise, negative_values) {
     EXPECT_EQ(to_bits(tSimd::get_w(res)), 0xFFFFFFFF);
 }
 
-TEST(simd_approximately_all, normal) {
-    // 1. 测试所有通道均相等的情况
-    float32_4 a1 = tSimd::load(1.0f, 2.0f, 3.0f, 4.0f);
-    float32_4 b1 = tSimd::load(1.0f, 2.0f, 3.0f, 4.0f);
-    EXPECT_TRUE(tSimd::approximately_all(a1, b1, 0.001f));
+TEST(simd_magnitude2, positive) {
+    // 1. 测试标准输入：x=3, y=4, z和w设为干扰值
+    // 模长应仅由 x, y 决定：sqrt(3^2 + 4^2) = 5
+    float32_4 v = tSimd::load(3.0f, 4.0f, 10.0f, 20.0f);
+    float32_4 res = tSimd::magnitude2(v);
 
-    // 2. 测试所有通道均在阈值范围内的情况
-    float32_4 a2 = tSimd::load(10.0f, 20.0f, 30.0f, 40.0f);
-    float32_4 b2 = tSimd::load(10.05f, 19.95f, 30.01f, 40.09f);
-    EXPECT_TRUE(tSimd::approximately_all(a2, b2, 0.1f));
-
-    // 3. 测试只有一个通道超出阈值的情况 (关键测试：All 语义)
-    // X, Y, Z 都接近，但 W 差异为 0.2 > 0.1
-    float32_4 a3 = tSimd::load(1.0f, 1.0f, 1.0f, 1.0f);
-    float32_4 b3 = tSimd::load(1.01f, 0.99f, 1.00f, 1.2f);
-    EXPECT_FALSE(tSimd::approximately_all(a3, b3, 0.1f));
-
-    // 4. 测试负数情况下的全等
-    float32_4 a4 = tSimd::load(-1.0f, -2.0f, -3.0f, -4.0f);
-    float32_4 b4 = tSimd::load(-1.01f, -1.99f, -3.01f, -3.99f);
-    EXPECT_TRUE(tSimd::approximately_all(a4, b4, 0.02f));
+    // 验证所有通道是否都等于 5.0
+    EXPECT_NEAR(tSimd::get_x(res), 5.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_y(res), 5.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_z(res), 5.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_w(res), 5.0f, 1e-6f);
 }
 
-TEST(simd_approximately_all, edge_cases) {
-    // 5. 测试阈值正好相等的情况 (cmple 包含等于)
-    float32_4 a = tSimd::load(0.0f, 0.0f, 0.0f, 0.0f);
-    float32_4 b = tSimd::load(0.1f, 0.1f, 0.1f, 0.1f);
-    EXPECT_TRUE(tSimd::approximately_all(a, b, 0.1f));
+TEST(simd_magnitude2, negative_xy_test) {
+    // 2. 测试负数分量：x=-6, y=-8
+    float32_4 v = tSimd::load(-6.0f, -8.0f, 5.0f, 5.0f);
+    float32_4 res = tSimd::magnitude2(v);
 
-    // 6. 测试零向量与极小值
-    float32_4 zero = tSimd::load(0.0f, 0.0f, 0.0f, 0.0f);
-    float32_4 tiny = tSimd::load(1e-7f, 1e-7f, 1e-7f, 1e-7f);
-    EXPECT_TRUE(tSimd::approximately_all(zero, tiny, 1e-6f));
-
-    // 7. 测试完全不等的情况
-    float32_4 v1 = tSimd::load(1.0f, 2.0f, 3.0f, 4.0f);
-    float32_4 v2 = tSimd::load(10.0f, 20.0f, 30.0f, 40.0f);
-    EXPECT_FALSE(tSimd::approximately_all(v1, v2, 0.1f));
+    // 结果应为 10.0
+    EXPECT_NEAR(tSimd::get_x(res), 10.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_z(res), 10.0f, 1e-6f); // 检查广播是否成功
 }
 
-TEST(simd_approximately_all, precision) {
-    // 8. 浮点数精度偏移测试
-    // 构造一个在 float 精度边缘失效的用例
-    float32_4 a = tSimd::load(100.0f, 100.0f, 100.0f, 100.0f);
-    float eps = 1e-4f;
+TEST(simd_magnitude2, approx_mask_check) {
+    // 3. 按照你要求的格式，验证掩码
+    float32_4 a = tSimd::load(1.0f, 1.0f, 9.9f, 9.9f); // sqrt(1^2+1^2) = 1.414...
+    float32_4 res = tSimd::magnitude2(a);
 
-    // 前三个通道偏移略小于 eps，第四个通道偏移略大于 eps
-    float32_4 b = tSimd::load(100.0f + 0.9e-4f, 100.0f + 0.9e-4f, 100.0f + 0.9e-4f, 100.0f + 1.1e-4f);
+    float val = 1.4142135f;
+    float32_4 b = tSimd::load(val, val, val, val);
 
-    EXPECT_FALSE(tSimd::approximately_all(a, b, eps));
+    // 使用你的 approximately_cwise 检查
+    float32_4 mask = tSimd::approximately_cwise(res, b, 0.0001f);
+
+    EXPECT_EQ(to_bits(tSimd::get_x(mask)), 0xFFFFFFFF);
+    EXPECT_EQ(to_bits(tSimd::get_y(mask)), 0xFFFFFFFF);
+    EXPECT_EQ(to_bits(tSimd::get_z(mask)), 0xFFFFFFFF);
+    EXPECT_EQ(to_bits(tSimd::get_w(mask)), 0xFFFFFFFF);
+}
+
+TEST(simd_magnitude, magnitude3_basic) {
+    // 1. 标准测试：(2, 3, 6) -> sqrt(4 + 9 + 36) = sqrt(49) = 7
+    // 将 w 设为较大干扰值（如 100），验证其不被计入结果
+    float32_4 v = tSimd::load(2.0f, 3.0f, 6.0f, 100.0f);
+    float32_4 res = tSimd::magnitude3(v);
+
+    // 验证所有通道是否都等于 7.0
+    EXPECT_NEAR(tSimd::get_x(res), 7.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_y(res), 7.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_z(res), 7.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_w(res), 7.0f, 1e-6f);
+}
+
+TEST(simd_magnitude, magnitude3_negative) {
+    // 2. 负数测试：(-1, -2, 2) -> sqrt(1 + 4 + 4) = 3
+    float32_4 v = tSimd::load(-1.0f, -2.0f, 2.0f, 0.0f);
+    float32_4 res = tSimd::magnitude3(v);
+
+    EXPECT_NEAR(tSimd::get_x(res), 3.0f, 1e-6f);
+}
+
+TEST(simd_magnitude, magnitude4_basic) {
+    // 1. 标准测试：(1, 1, 1, 1) -> sqrt(4) = 2
+    float32_4 v = tSimd::load(1.0f, 1.0f, 1.0f, 1.0f);
+    float32_4 res = tSimd::magnitude4(v);
+
+    EXPECT_NEAR(tSimd::get_x(res), 2.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_y(res), 2.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_z(res), 2.0f, 1e-6f);
+    EXPECT_NEAR(tSimd::get_w(res), 2.0f, 1e-6f);
+}
+
+TEST(simd_magnitude, magnitude4_special) {
+    // 2. 勾股数扩展测试：(1, 2, 4, 10) -> sqrt(1 + 4 + 16 + 100) = sqrt(121) = 11
+    float32_4 v = tSimd::load(1.0f, 2.0f, 4.0f, 10.0f);
+    float32_4 res = tSimd::magnitude4(v);
+
+    EXPECT_NEAR(tSimd::get_x(res), 11.0f, 1e-6f);
 }

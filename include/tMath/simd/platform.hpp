@@ -196,10 +196,8 @@
 
 
 // 浮点位宽检查
-#if defined(TMATH_USE_AVX)
+#if !defined(TMATH_NO_SIMD)
     static_assert(sizeof(double) == 8, "tSimd requires 8-byte double");
-#endif
-#if defined(TMATH_USE_SSE2)
     static_assert(sizeof(float) == 4, "tSimd requires 4-byte float");
 #endif
 

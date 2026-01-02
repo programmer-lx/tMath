@@ -18,6 +18,15 @@ TMATH_SIMD_NAMESPACE_BEGIN
     #define tmath_fmadd_ps(a, b, c) _mm_add_ps(_mm_mul_ps((a), (b)), (c))
 #endif
 
+// fn: sqrt
+#if defined(TMATH_USE_SVML)
+    #define tmath_sqrt_ps(x) _mm_svml_sqrt_ps((x))
+#else
+    #define tmath_sqrt_ps(x) _mm_sqrt_ps((x))
+#endif
+
+
+// ========================================= load store get set =========================================
 
 template<TMATH_NAMESPACE_NAME::is_vector4_float TVec4f>
 inline float32_4 TMATH_SIMD_CALL_CONV load(const TVec4f& vec) noexcept
@@ -180,6 +189,8 @@ inline float TMATH_SIMD_CALL_CONV get_w(float32_4_arg_in v) noexcept
 #endif
 }
 
+// ========================================= 基本数学运算 =========================================
+
 inline float32_4 TMATH_SIMD_CALL_CONV add(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
 {
 #if defined(TMATH_NO_SIMD)
@@ -195,83 +206,6 @@ inline float32_4 TMATH_SIMD_CALL_CONV sub(float32_4_arg_in lhs, float32_4_arg_in
     return lhs - rhs;
 #else
     return _mm_sub_ps(lhs, rhs);
-#endif
-}
-
-/**
- * 测试a和b的各个分量是否近似相等
- * @return 如果该分量近似相等，则该分量全部bit置为1，否则为0
- */
-inline float32_4 TMATH_SIMD_CALL_CONV approximately_cwise(float32_4_arg_in a, float32_4_arg_in b, float tolerance) noexcept
-{
-    // 对于单个分量: c = ( abs(a - b) <= tolerance ) ? 0xffffffff : 0
-
-#if defined(TMATH_NO_SIMD)
-    return TMATH_NAMESPACE_NAME::approximately_cwise(a, b, tolerance);
-#else
-    float32_4 tolerance_4 = _mm_set1_ps(tolerance);
-    float32_4 diff = _mm_sub_ps(a, b);
-    float32_4 abs_diff = _mm_and_ps(diff, Mask128::Abs4.f32_4);
-    return _mm_cmple_ps(abs_diff, tolerance_4);
-#endif
-}
-
-/**
- * 如果全部分量都近似相等，就返回true，否则返回false
- */
-inline bool TMATH_SIMD_CALL_CONV approximately_all(float32_4_arg_in a, float32_4_arg_in b, float tolerance) noexcept
-{
-#if defined(TMATH_NO_SIMD)
-    return TMATH_NAMESPACE_NAME::approximately_all(a, b, tolerance);
-#else
-    float32_4 tolerance_4 = _mm_set1_ps(tolerance);
-    float32_4 diff = _mm_sub_ps(a, b);
-    float32_4 abs_diff = _mm_and_ps(diff, Mask128::Abs4.f32_4);
-    float32_4 mask = _mm_cmple_ps(abs_diff, tolerance_4);
-
-    // movemask: 提取四个lane的最高位，拼接成一个新的整数，返回的整数只有0-3bit是有效的
-    return _mm_movemask_ps(mask) == 0xf;
-#endif
-}
-
-inline float32_4 TMATH_SIMD_CALL_CONV min(float32_4_arg_in a, float32_4_arg_in b) noexcept
-{
-#if defined(TMATH_NO_SIMD)
-    return TMATH_NAMESPACE_NAME::min(a, b);
-#else
-    return _mm_min_ps(a, b);
-#endif
-}
-
-inline float32_4 TMATH_SIMD_CALL_CONV max(float32_4_arg_in a, float32_4_arg_in b) noexcept
-{
-#if defined(TMATH_NO_SIMD)
-    return TMATH_NAMESPACE_NAME::max(a, b);
-#else
-    return _mm_max_ps(a, b);
-#endif
-}
-
-inline float32_4 TMATH_SIMD_CALL_CONV clamp(float32_4_arg_in v, float32_4_arg_in min, float32_4_arg_in max) noexcept
-{
-#if defined(TMATH_NO_SIMD)
-    return TMATH_NAMESPACE_NAME::clamp(v, min, max);
-#else
-    return _mm_min_ps(_mm_max_ps(v, min), max);
-#endif
-}
-
-inline float32_4 TMATH_SIMD_CALL_CONV lerp(float32_4_arg_in a, float32_4_arg_in b, float t) noexcept
-{
-    // result = a + (b - a) * t
-    // fmadd: t * (b - a) + a
-
-#if defined(TMATH_NO_SIMD)
-    return TMATH_NAMESPACE_NAME::lerp(a, b, t);
-#else
-    float32_4 b_a = _mm_sub_ps(b, a);
-    float32_4 t2 = _mm_set1_ps(t);
-    return tmath_fmadd_ps(t2, b_a, a);
 #endif
 }
 
@@ -325,7 +259,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV abs(float32_4_arg_in v) noexcept
 #if defined(TMATH_NO_SIMD)
     return TMATH_NAMESPACE_NAME::abs(v);
 #else
-    return _mm_and_ps(v, Mask128::Abs4.f32_4);
+    return _mm_and_ps(v, value128::Abs4.f32_4);
 #endif
 }
 
@@ -338,10 +272,8 @@ inline float32_4 TMATH_SIMD_CALL_CONV sqrt(float32_4_arg_in v) noexcept
         std::sqrt(v.data[2]),
         std::sqrt(v.data[3])
     };
-#elif defined(TMATH_USE_SVML)
-    return _mm_svml_sqrt_ps(v);
 #else
-    return _mm_sqrt_ps(v);
+    return tmath_sqrt_ps(v);
 #endif
 }
 
@@ -369,6 +301,163 @@ inline float32_4 TMATH_SIMD_CALL_CONV cos(float32_4_arg_in v) noexcept
 #endif
 }
 
+inline float32_4 TMATH_SIMD_CALL_CONV min(float32_4_arg_in a, float32_4_arg_in b) noexcept
+{
+#if defined(TMATH_NO_SIMD)
+    return TMATH_NAMESPACE_NAME::min(a, b);
+#else
+    return _mm_min_ps(a, b);
+#endif
+}
+
+inline float32_4 TMATH_SIMD_CALL_CONV max(float32_4_arg_in a, float32_4_arg_in b) noexcept
+{
+#if defined(TMATH_NO_SIMD)
+    return TMATH_NAMESPACE_NAME::max(a, b);
+#else
+    return _mm_max_ps(a, b);
+#endif
+}
+
+
+// ========================================= 其他函数 =========================================
+
+/**
+ * 测试a和b的各个分量是否近似相等
+ * @return 如果该分量近似相等，则该分量全部bit置为1，否则为0
+ */
+inline float32_4 TMATH_SIMD_CALL_CONV approximately_cwise(float32_4_arg_in a, float32_4_arg_in b, float tolerance) noexcept
+{
+    // 对于单个分量: c = ( abs(a - b) <= tolerance ) ? 0xffffffff : 0
+
+#if defined(TMATH_NO_SIMD)
+    // tMath::approximately_cwise(a, b, tolerance); 这个函数不能保证近似相等时一定返回0xffffffff，所以该分支需要重新实现
+    // 由于 SIMD float 一定是 32bit，所以可以使用uint32_t来进行类型双关
+    return {
+        TMATH_NAMESPACE_NAME::approximately(a.data[0], b.data[0], tolerance) ? value32::one_block : 0.0f,
+        TMATH_NAMESPACE_NAME::approximately(a.data[1], b.data[1], tolerance) ? value32::one_block : 0.0f,
+        TMATH_NAMESPACE_NAME::approximately(a.data[2], b.data[2], tolerance) ? value32::one_block : 0.0f,
+        TMATH_NAMESPACE_NAME::approximately(a.data[3], b.data[3], tolerance) ? value32::one_block : 0.0f
+    };
+#else
+    float32_4 tolerance_4 = _mm_set1_ps(tolerance);
+    float32_4 diff = _mm_sub_ps(a, b);
+    float32_4 abs_diff = _mm_and_ps(diff, value128::Abs4.f32_4);
+    return _mm_cmple_ps(abs_diff, tolerance_4);
+#endif
+}
+
+/**
+ * 2D向量模长
+ */
+inline float32_4 TMATH_SIMD_CALL_CONV magnitude2(float32_4_arg_in v) noexcept
+{
+    // mag = sqrt(x^2 + y^2)
+
+#if defined(TMATH_NO_SIMD)
+    const float m = TMATH_NAMESPACE_NAME::magnitude(v.data[0], v.data[1]);
+    return {
+        m, m, m, m
+    };
+#else
+    float32_4 t1 = _mm_mul_ps(v, v);                                // [w^2, z^2, y^2, x^2]
+    float32_4 t2 = tmath_permute_ps(t1, _MM_SHUFFLE(0, 1, 0, 1));   // [x^2, y^2, x^2, y^2]
+    float32_4 t3 = _mm_add_ss(t1, t2);                              // [?, ?, ?, x^2 + y^2]
+    float32_4 t4 = tmath_permute_ps(t3, _MM_SHUFFLE(0, 0, 0, 0));   // [x^2 + y^2, ...]
+    return tmath_sqrt_ps(t4);
+#endif
+}
+
+/**
+ * 3D向量模长
+ */
+inline float32_4 TMATH_SIMD_CALL_CONV magnitude3(float32_4_arg_in v) noexcept
+{
+    // mag = sqrt(x^2 + y^2 + z^2)
+
+#if defined(TMATH_NO_SIMD)
+    const float m = TMATH_NAMESPACE_NAME::magnitude(v.data[0], v.data[1], v.data[2]);
+    return {
+        m, m, m, m
+    };
+#else
+    // 先计算 x^2 + y^2
+    // 然后再与 z^2 直接相加求和
+    // 最后开平方
+    float32_4 t1 = _mm_mul_ps(v, v);                                // [w^2, z^2, y^2, x^2]
+    float32_4 t2 = tmath_permute_ps(t1, _MM_SHUFFLE(2, 0, 3, 1));   // [z^2, x^2, z^2, y^2]
+    float32_4 t3 = _mm_add_ss(t1, t2);                              // [?, ?, ?, x^2 + y^2]
+    float32_4 t4 = tmath_permute_ps(t1, _MM_SHUFFLE(2, 2, 2, 2));   // [...................... z^2]
+    float32_4 t5 = _mm_add_ss(t3, t4);                              // [?, ?, ?, x^2 + y^2 + z^2]
+    return tmath_sqrt_ps(tmath_permute_ps(t5, _MM_SHUFFLE(0, 0, 0, 0)));
+#endif
+}
+
+/**
+ * 4D向量模长
+ */
+inline float32_4 TMATH_SIMD_CALL_CONV magnitude4(float32_4_arg_in v) noexcept
+{
+    // mag = sqrt(x^2 + y^2 + z^2 + w^2)
+
+#if defined(TMATH_NO_SIMD)
+    const float m = TMATH_NAMESPACE_NAME::magnitude(v.data[0], v.data[1], v.data[2], v.data[3]);
+    return {
+        m, m, m, m
+    };
+#else
+    // 先计算 x^2 + y^2
+    // 再计算 z^2 + w^2
+    // 然后直接相加求和
+    // 最后开平方
+    float32_4 t1 = _mm_mul_ps(v, v);                                // [w^2, z^2, y^2, x^2]
+    float32_4 t2 = tmath_permute_ps(t1, _MM_SHUFFLE(2, 3, 0, 1));   // [z^2, w^2, x^2, y^2]
+    float32_4 t3 = _mm_add_ps(t1, t2);                              // [z^2 + w^2, z^2 + w^2, x^2 + y^2, x^2 + y^2]
+    float32_4 t4 = tmath_permute_ps(t3, _MM_SHUFFLE(1, 0, 3, 2));   // [x^2 + y^2, x^2 + y^2, z^2 + w^2, z^2 + w^2]
+    float32_4 t5 = _mm_add_ps(t3, t4);                              // [x^2 + y^2 + z^2 + w^2, ...]
+    return tmath_sqrt_ps(t5);
+#endif
+}
+
+/**
+ * 2D向量归一化
+ * 如果向量长度太小，或者值错误，就返回0
+ */
+inline float32_4 TMATH_SIMD_CALL_CONV normalized2(float32_4_arg_in v) noexcept
+{
+    // magnitude = sqrt(x^2 + y^2)
+    // result = v / magnitude
+
+#if defined(TMATH_NO_SIMD)
+    return {};
+#else
+    return _mm_set1_ps(0.0f);
+#endif
+}
+
+inline float32_4 TMATH_SIMD_CALL_CONV clamp(float32_4_arg_in v, float32_4_arg_in min, float32_4_arg_in max) noexcept
+{
+#if defined(TMATH_NO_SIMD)
+    return TMATH_NAMESPACE_NAME::clamp(v, min, max);
+#else
+    return _mm_min_ps(_mm_max_ps(v, min), max);
+#endif
+}
+
+inline float32_4 TMATH_SIMD_CALL_CONV lerp(float32_4_arg_in a, float32_4_arg_in b, float t) noexcept
+{
+    // result = a + (b - a) * t
+    // fmadd: t * (b - a) + a
+
+#if defined(TMATH_NO_SIMD)
+    return TMATH_NAMESPACE_NAME::lerp(a, b, t);
+#else
+    float32_4 b_a = _mm_sub_ps(b, a);
+    float32_4 t2 = _mm_set1_ps(t);
+    return tmath_fmadd_ps(t2, b_a, a);
+#endif
+}
+
 inline float32_4 TMATH_SIMD_CALL_CONV dot2(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
 {
 #if defined(TMATH_NO_SIMD)
@@ -378,12 +467,12 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot2(float32_4_arg_in lhs, float32_4_arg_i
     return _mm_dp_ps(lhs, rhs, 0x3f);                   // imm8: 7-4: compute, 3-0: store
 #elif defined(TMATH_USE_SSE3)
     float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
-    temp = _mm_and_ps(temp, Mask128::Lane01.f32_4);     // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, value128::Lane01.f32_4);     // temp = [                0,             z1z2,             y1y2,             x1x2]
     temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
     return _mm_hadd_ps(temp, temp);                     // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
 #elif defined(TMATH_USE_SSE2)
     float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
-    mul = _mm_and_ps(mul, Mask128::Lane01.f32_4);                           // mul      = [        0,         0, y1y2,                  x1x2]
+    mul = _mm_and_ps(mul, value128::Lane01.f32_4);                           // mul      = [        0,         0, y1y2,                  x1x2]
     float32_4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));     // shuffle  = [     y1y2,      x1x2,    0,                     0]
     mul = _mm_add_ps(mul, shuffle);                                         // mul      = [     y1y2,      x1x2, y1y2,                  x1x2]
     shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,                  y1y2]
@@ -401,12 +490,12 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot3(float32_4_arg_in lhs, float32_4_arg_i
     return _mm_dp_ps(lhs, rhs, 0x7f);                   // imm8: 7-4: compute, 3-0: store
 #elif defined(TMATH_USE_SSE3)
     float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
-    temp = _mm_and_ps(temp, Mask128::Lane012.f32_4);    // temp = [                0,             z1z2,             y1y2,             x1x2]
+    temp = _mm_and_ps(temp, value128::Lane012.f32_4);    // temp = [                0,             z1z2,             y1y2,             x1x2]
     temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
     return _mm_hadd_ps(temp, temp);                     // temp = [ x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2, x1x2+y1y2 + z1z2]
 #elif defined(TMATH_USE_SSE2)
     float32_4 mul = _mm_mul_ps(lhs, rhs);                                   // mul      = [     w1w2,      z1z2, y1y2,                  x1x2]
-    mul = _mm_and_ps(mul, Mask128::Lane012.f32_4);                          // mul      = [        0,      z1z2, y1y2,                  x1x2]
+    mul = _mm_and_ps(mul, value128::Lane012.f32_4);                          // mul      = [        0,      z1z2, y1y2,                  x1x2]
     float32_4 shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(1, 0, 3, 2));     // shuffle  = [     y1y2,      x1x2,    0,                  z1z2]
     mul = _mm_add_ps(mul, shuffle);                                         // mul      = [     y1y2, z1z2+x1x2, y1y2,             x1x2+z1z2]
     shuffle = tmath_permute_ps(mul, _MM_SHUFFLE(3, 3, 3, 3));               // shuffle  = [        N,         N,    N,                  y1y2]

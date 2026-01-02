@@ -359,49 +359,253 @@ TEST(magnitude_vector, normal) {
 }
 
 TEST(magnitude_scalar_pack, normal) {
-    // 2D/3D hypot
     EXPECT_DOUBLE_EQ(tMath::magnitude(3, 4), 5.0);
-    // 4D+ sqrt
     EXPECT_DOUBLE_EQ(tMath::magnitude(1, 1, 1, 1), 2.0);
 }
 
-TEST(normalize_inplace, normal) {
-    Vector2f v = { 3.0f, 0.0f };
+TEST(magnitude_scalar_pack, normal_and_edge_cases) {
+    const float INF = std::numeric_limits<float>::infinity();
+    const float NANV = std::numeric_limits<float>::quiet_NaN();
+    const float MAXF = std::numeric_limits<float>::max();
+
+    // ---------- 正常情况 ----------
+    EXPECT_FLOAT_EQ(tMath::magnitude(3.0, 4.0), 5.0);
+    EXPECT_FLOAT_EQ(tMath::magnitude(1.0, 1.0, 1.0, 1.0), 2.0);
+
+    // ---------- 零向量 ----------
+    EXPECT_FLOAT_EQ(tMath::magnitude(0.0, 0.0), 0.0);
+    EXPECT_FLOAT_EQ(tMath::magnitude(0.0, 0.0, 0.0, 0.0), 0.0);
+
+    // ---------- 大数安全 ----------
+    // auto result = tMath::magnitude(-MAXF, MAXF, MAXF, -MAXF, MAXF, MAXF);
+    // static_assert(std::is_same_v<float, decltype(result)>);
+    // EXPECT_FLOAT_EQ(result, MAXF);
+    // EXPECT_TRUE(tMath::is_finite(result));
+
+    // ---------- 包含无限 ----------
+    EXPECT_EQ(tMath::magnitude(INF, 1.0), INF);
+    EXPECT_EQ(tMath::magnitude(1.0, INF), INF);
+    EXPECT_EQ(tMath::magnitude(INF, INF), INF);
+
+    // ---------- 包含 NaN ----------
+    EXPECT_TRUE(std::isnan(tMath::magnitude(NANV, 1.0)));
+    EXPECT_TRUE(std::isnan(tMath::magnitude(1.0, NANV)));
+    EXPECT_TRUE(std::isnan(tMath::magnitude(NANV, NANV)));
+
+    // ---------- 混合大数 + INF ----------
+    EXPECT_EQ(tMath::magnitude(MAXF, INF), INF);
+
+    // ---------- 混合大数 + NaN ----------
+    EXPECT_TRUE(std::isnan(tMath::magnitude(MAXF, NANV)));
+}
+
+// --- 1. 普通向量 ---
+TEST(normalize_inplace, normal_vector) {
+    Vector2f v = {3.0f, 4.0f};
     tMath::normalize_inplace(v);
-    EXPECT_FLOAT_EQ(v.x, 1.0f);
+    EXPECT_FLOAT_EQ(v.x, 0.6f);
+    EXPECT_FLOAT_EQ(v.y, 0.8f);
+}
+
+// --- 2. 零向量 ---
+TEST(normalize_inplace, zero_vector) {
+    Vector2f v = {0.0f, 0.0f};
+    tMath::normalize_inplace(v);
+    EXPECT_FLOAT_EQ(v.x, 0.0f);
     EXPECT_FLOAT_EQ(v.y, 0.0f);
 }
 
-TEST(safe_normalize_inplace, normal) {
-    Vector2f v = { 0.0f, 0.0f };
-    Vector2f fallback = { 1.0f, 0.0f };
-    tMath::safe_normalize_inplace(v, fallback);
-    EXPECT_FLOAT_EQ(v.x, 1.0f);
+// --- 3. 单个分量非零 ---
+TEST(normalize_inplace, single_nonzero) {
+    Vector2f v = {0.0f, 5.0f};
+    tMath::normalize_inplace(v);
+    EXPECT_FLOAT_EQ(v.x, 0.0f);
+    EXPECT_FLOAT_EQ(v.y, 1.0f);
+}
+
+// --- 4. 负分量 ---
+TEST(normalize_inplace, negative_vector) {
+    Vector3f v = {-1.0f, -2.0f, -2.0f};
+    tMath::normalize_inplace(v);
+    float len = std::sqrt(1.0f + 4.0f + 4.0f);
+    EXPECT_FLOAT_EQ(v.x, -1.0f / len);
+    EXPECT_FLOAT_EQ(v.y, -2.0f / len);
+    EXPECT_FLOAT_EQ(v.z, -2.0f / len);
+}
+
+// --- 5. 四维向量 ---
+TEST(normalize_inplace, four_dim_vector) {
+    Vector4f v = {1.0f, 2.0f, 3.0f, 4.0f};
+    tMath::normalize_inplace(v);
+    float len = std::sqrt(1.0f + 4.0f + 9.0f + 16.0f);
+    EXPECT_FLOAT_EQ(v.x, 1.0f / len);
+    EXPECT_FLOAT_EQ(v.y, 2.0f / len);
+    EXPECT_FLOAT_EQ(v.z, 3.0f / len);
+    EXPECT_FLOAT_EQ(v.w, 4.0f / len);
+}
+
+// --- 6. 含 NaN ---
+TEST(normalize_inplace, contains_nan) {
+    Vector2f v = {1.0f, std::numeric_limits<float>::quiet_NaN()};
+    tMath::normalize_inplace(v);
+    EXPECT_TRUE(std::isnan(v.x));
+    EXPECT_TRUE(std::isnan(v.y));
+}
+
+TEST(normalized_vec, normal_vector) {
+    Vector2f v = {3.0f, 4.0f};
+    Vector2f res = tMath::normalized(v);
+    EXPECT_FLOAT_EQ(res.x, 0.6f);
+    EXPECT_FLOAT_EQ(res.y, 0.8f);
+    EXPECT_FLOAT_EQ(v.x, 3.0f); // 原值不变
+    EXPECT_FLOAT_EQ(v.y, 4.0f);
+}
+
+// --- 2. 零向量 ---
+TEST(normalized_vec, zero_vector) {
+    Vector2f v = {0.0f, 0.0f};
+    Vector2f res = tMath::normalized(v);
+    EXPECT_FLOAT_EQ(res.x, 0.0f);
+    EXPECT_FLOAT_EQ(res.y, 0.0f);
+}
+
+// --- 3. 极小向量 ---
+TEST(normalized_vec, tiny_vector) {
+    Vector2f v = {tMath::Epsilon<float>, tMath::Epsilon<float>};
+    Vector2f res = tMath::normalized(v);
+    EXPECT_NE(res.x, 0.0f);
+    EXPECT_NE(res.y, 0.0f);
+}
+
+// --- 4. 含负分量 ---
+TEST(normalized_vec, negative_vector) {
+    Vector3f v = {-1.0f, -2.0f, -2.0f};
+    Vector3f res = tMath::normalized(v);
+    float len = std::sqrt(1.0f + 4.0f + 4.0f);
+    EXPECT_FLOAT_EQ(res.x, -1.0f / len);
+    EXPECT_FLOAT_EQ(res.y, -2.0f / len);
+    EXPECT_FLOAT_EQ(res.z, -2.0f / len);
+}
+
+// --- 7. 向量含 NaN ---
+TEST(normalized_vec, contains_nan) {
+    Vector3f v = {1.0f, 2.0f, std::numeric_limits<float>::quiet_NaN()};
+    Vector3f res = tMath::normalized(v);
+    EXPECT_TRUE(std::isnan(res.x));
+    EXPECT_TRUE(std::isnan(res.y));
+    EXPECT_TRUE(std::isnan(res.z));
+}
+
+// --- 8. 四维向量 ---
+TEST(normalized_vec, four_dim_vector) {
+    Vector4f v = {1.0f, 2.0f, 3.0f, 4.0f};
+    Vector4f res = tMath::normalized(v);
+    float len = std::sqrt(1.0f + 4.0f + 9.0f + 16.0f);
+    EXPECT_FLOAT_EQ(res.x, 1.0f / len);
+    EXPECT_FLOAT_EQ(res.y, 2.0f / len);
+    EXPECT_FLOAT_EQ(res.z, 3.0f / len);
+    EXPECT_FLOAT_EQ(res.w, 4.0f / len);
 }
 
 TEST(normalized_fp, normal) {
-    Vector2f v = { 0.0f, 5.0f };
-    Vector2f res = tMath::normalized(v);
-    EXPECT_FLOAT_EQ(res.y, 1.0f);
-    EXPECT_FLOAT_EQ(v.y, 5.0f); // 原值不变
+    {
+        Vector2f v = { 0, 5 };
+        Vector2f res = tMath::normalized<Vector2f>(v.x, v.y);
+        EXPECT_FLOAT_EQ(res.x, 0.0f);
+        EXPECT_FLOAT_EQ(res.y, 1.0f);
+    }
+    // 1. 普通向量
+    {
+        Vector2f v = { 3.0f, 4.0f };
+        Vector2f res = tMath::normalized<Vector2f>(v.x, v.y);
+        EXPECT_FLOAT_EQ(res.x, 0.6f);
+        EXPECT_FLOAT_EQ(res.y, 0.8f);
+    }
+    {
+        Vector3f v = { -1.0f, -2.0f, -2.0f };
+        Vector3f res = tMath::normalized<Vector3f>(v.x, v.y, v.z);
+        float len = std::sqrt(1.0f + 4.0f + 4.0f); // sqrt(9)=3
+        EXPECT_FLOAT_EQ(res.x, -1.0f / len);
+        EXPECT_FLOAT_EQ(res.y, -2.0f / len);
+        EXPECT_FLOAT_EQ(res.z, -2.0f / len);
+    }
 }
 
-TEST(normalized_sint, normal) {
-    Vector2i32 vi = { 3, 4 };
+TEST(normalized_fp, zero) {
+    // --- 2. 测试 Zero/Small 情况 ---
+    {
+        Vector2f v_zero = { 0.0f, 0.0f };
+        Vector2f res = tMath::normalized<Vector2f>(v_zero.x, v_zero.y);
+        EXPECT_FLOAT_EQ(res.x, 0.0f);
+        EXPECT_FLOAT_EQ(res.y, 0.0f);
+    }
+    {
+        Vector2f v_zero = { tMath::Epsilon<float>, tMath::Epsilon<float> };
+        Vector2f res = tMath::normalized<Vector2f>(v_zero.x, v_zero.y);
+        EXPECT_NE(res.x, 0);
+        EXPECT_NE(res.y, 0);
+    }
+    // 2. 零向量（部分分量为 0）
+    {
+        Vector2f v = { 0.0f, 0.0f };
+        Vector2f res = tMath::normalized<Vector2f>(v.x, v.y);
+        EXPECT_FLOAT_EQ(res.x, 0.0f);
+        EXPECT_FLOAT_EQ(res.y, 0.0f);
+    }
+
+    // 3. 零向量（单个分量非零）
+    {
+        Vector2f v = { 0.0f, 5.0f };
+        Vector2f res = tMath::normalized<Vector2f>(v.x, v.y);
+        EXPECT_FLOAT_EQ(res.x, 0.0f);
+        EXPECT_FLOAT_EQ(res.y, 1.0f);
+    }
+}
+
+// --- 1. 普通整数向量 ---
+TEST(normalized_sint, normal_vector) {
+    Vector2i32 vi = {3, 4};
     Vector2f res = tMath::normalized<Vector2f>(vi);
+    EXPECT_FLOAT_EQ(tMath::magnitude(res), 1.0f);
+    EXPECT_FLOAT_EQ(res.x, 0.6f);
+    EXPECT_FLOAT_EQ(res.y, 0.8f);
+}
+
+// --- 2. 零向量 ---
+TEST(normalized_sint, zero_vector) {
+    Vector2i32 vi = {0, 0};
+    Vector2f res = tMath::normalized<Vector2f>(vi);
+    EXPECT_FLOAT_EQ(res.x, 0.0f);
+    EXPECT_FLOAT_EQ(res.y, 0.0f);
+    EXPECT_FLOAT_EQ(tMath::magnitude(res), 0.0f);
+}
+
+// --- 3. 单个分量非零 ---
+TEST(normalized_sint, single_nonzero) {
+    Vector2i32 vi = {0, 5};
+    Vector2f res = tMath::normalized<Vector2f>(vi);
+    EXPECT_FLOAT_EQ(res.x, 0.0f);
+    EXPECT_FLOAT_EQ(res.y, 1.0f);
     EXPECT_FLOAT_EQ(tMath::magnitude(res), 1.0f);
 }
 
-TEST(safe_normalized_fp, normal) {
-    Vector2f zero = { 0.0f, 0.0f };
-    Vector2f res = tMath::safe_normalized(zero, Vector2f{ 0, 1 });
-    EXPECT_FLOAT_EQ(res.y, 1.0f);
-}
+// --- 4. 负整数分量 ---
+TEST(normalized_sint, negative_vector) {
+    Vector3i32 vi = {-1, -2, -2};
+    Vector2f res2d = tMath::normalized<Vector2f>(vi.x, vi.y);
+    Vector3f res3d = tMath::normalized<Vector3f>(vi);
 
-TEST(safe_normalized_sint, normal) {
-    Vector2i32 zero = { 0, 0 };
-    Vector2f res = tMath::safe_normalized<Vector2f>(zero, Vector2f{ 0, 1 });
-    EXPECT_FLOAT_EQ(res.y, 1.0f);
+    float len2d = std::sqrt(1.0f + 4.0f);
+    float len3d = std::sqrt(1.0f + 4.0f + 4.0f);
+
+    EXPECT_FLOAT_EQ(res2d.x, -1.0f / len2d);
+    EXPECT_FLOAT_EQ(res2d.y, -2.0f / len2d);
+
+    EXPECT_FLOAT_EQ(res3d.x, -1.0f / len3d);
+    EXPECT_FLOAT_EQ(res3d.y, -2.0f / len3d);
+    EXPECT_FLOAT_EQ(res3d.z, -2.0f / len3d);
+
+    EXPECT_FLOAT_EQ(tMath::magnitude(res3d), 1.0f);
 }
 
 TEST(distance_fp, normal) {

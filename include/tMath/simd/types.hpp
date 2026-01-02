@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include <bit> // std::bit_cast
+
 // #undef TMATH_NO_SIMD // test
 // #define TMATH_USE_SSE2 // test
 // #define TMATH_USE_SSE3 // test
@@ -9,6 +11,7 @@
 // #define TMATH_USE_FMA3 // test
 // #define TMATH_USE_AVX2 // test
 // #define TMATH_DISABLE_SVML // test
+// #define TMATH_USE_SVML // test
 #if defined(TMATH_NO_SIMD)
     #include "../number.hpp"
     #include "../vector.hpp"
@@ -75,7 +78,12 @@ struct alignas(TMATH_SIMD_128_ALIGNMENT) _128bits_mem_block
     }
 };
 
-namespace Mask128
+namespace value32
+{
+    static constexpr float one_block = std::bit_cast<float>(0xffffffff);
+}
+
+namespace value128
 {
     static constexpr _128bits_mem_block ZeroBlock = _128bits_mem_block::make_from_uint32(0x0, 0x0, 0x0, 0x0);
     static constexpr _128bits_mem_block OneBlock = _128bits_mem_block::make_from_uint32(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
