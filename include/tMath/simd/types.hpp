@@ -32,28 +32,25 @@ static constexpr size_t _256_alignment = TMATH_SIMD_256_ALIGNMENT;
 // 128 bits
 #if defined(TMATH_NO_SIMD)
 
-    struct float32_4
-    {
-        TMATH_FULL_VECTOR4(float32_4, float)
-    };
-    using float32_4_arg_in = const float32_4&;
+struct float32_4
+{
+    TMATH_FULL_VECTOR4(float32_4, float)
+};
+using float32_4_arg_in = const float32_4&;
 
-    struct int32_4
-    {
-        TMATH_FULL_VECTOR4(int32_4, int32_t)
-    };
-    using int32_4_arg_in = const int32_4&;
+struct int32_4
+{
+    TMATH_FULL_VECTOR4(int32_4, int32_t)
+};
+using int32_4_arg_in = const int32_4&;
 
 #elif defined(TMATH_USE_SSE2)
 
-    using float32_4 = __m128;
-    using float32_4_arg_in = float32_4;
+using float32_4 = __m128;
+using float32_4_arg_in = float32_4;
 
-    using int32_4 = __m128i;
-    using int32_4_arg_in = int32_4;
-
-#endif
-
+using int32_4 = __m128i;
+using int32_4_arg_in = int32_4;
 
 struct alignas(TMATH_SIMD_128_ALIGNMENT) _128bits_mem_block
 {
@@ -78,11 +75,6 @@ struct alignas(TMATH_SIMD_128_ALIGNMENT) _128bits_mem_block
     }
 };
 
-namespace value32
-{
-    static constexpr float one_block = std::bit_cast<float>(0xffffffff);
-}
-
 namespace value128
 {
     static constexpr _128bits_mem_block ZeroBlock = _128bits_mem_block::make_from_uint32(0x0, 0x0, 0x0, 0x0);
@@ -99,5 +91,6 @@ namespace value128
     static constexpr _128bits_mem_block Lane012 = _128bits_mem_block::make_from_uint32(0xffffffff, 0xffffffff, 0xffffffff, 0x0);
 }
 
+#endif
 
 TMATH_SIMD_NAMESPACE_END

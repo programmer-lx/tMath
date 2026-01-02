@@ -324,21 +324,15 @@ inline float32_4 TMATH_SIMD_CALL_CONV max(float32_4_arg_in a, float32_4_arg_in b
 
 /**
  * 测试a和b的各个分量是否近似相等
- * @return 如果该分量近似相等，则该分量全部bit置为1，否则为0
+ * @return 如果该分量近似相等，则该分量不为0，否则为0
+ * @warning 返回的分量只能保证是否为0，所以只能通过是否为0进行判断
  */
 inline float32_4 TMATH_SIMD_CALL_CONV approximately_cwise(float32_4_arg_in a, float32_4_arg_in b, float tolerance) noexcept
 {
     // 对于单个分量: c = ( abs(a - b) <= tolerance ) ? 0xffffffff : 0
 
 #if defined(TMATH_NO_SIMD)
-    // tMath::approximately_cwise(a, b, tolerance); 这个函数不能保证近似相等时一定返回0xffffffff，所以该分支需要重新实现
-    // 由于 SIMD float 一定是 32bit，所以可以使用uint32_t来进行类型双关
-    return {
-        TMATH_NAMESPACE_NAME::approximately(a.data[0], b.data[0], tolerance) ? value32::one_block : 0.0f,
-        TMATH_NAMESPACE_NAME::approximately(a.data[1], b.data[1], tolerance) ? value32::one_block : 0.0f,
-        TMATH_NAMESPACE_NAME::approximately(a.data[2], b.data[2], tolerance) ? value32::one_block : 0.0f,
-        TMATH_NAMESPACE_NAME::approximately(a.data[3], b.data[3], tolerance) ? value32::one_block : 0.0f
-    };
+    return TMATH_NAMESPACE_NAME::approximately_cwise(a, b, tolerance);
 #else
     float32_4 tolerance_4 = _mm_set1_ps(tolerance);
     float32_4 diff = _mm_sub_ps(a, b);
@@ -421,7 +415,8 @@ inline float32_4 TMATH_SIMD_CALL_CONV magnitude4(float32_4_arg_in v) noexcept
 
 /**
  * 2D向量归一化
- * 如果向量长度太小，或者值错误，就返回0
+ * 0向量返回0向量
+ * 不保证其他无效值的行为
  */
 inline float32_4 TMATH_SIMD_CALL_CONV normalized2(float32_4_arg_in v) noexcept
 {

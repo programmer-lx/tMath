@@ -106,15 +106,6 @@ using std::max;
 // ======================================== functions ========================================
 
 template<is_floating_point F>
-F one_block() noexcept
-{
-    F f;
-    // memset 的第二个参数 value, 只用其低8位
-    std::memset(&f, 0xff, sizeof(F));
-    return f;
-}
-
-template<is_floating_point F>
 constexpr F to_degrees(const F radians) noexcept
 {
     return radians * Rad2Deg<F>;

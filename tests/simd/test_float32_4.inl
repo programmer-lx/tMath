@@ -8,14 +8,6 @@
 #include "../test.hpp"
 
 
-inline uint32_t to_bits(float f)
-{
-    uint32_t ui;
-    std::memcpy(&ui, &f, sizeof(float));
-    return ui;
-}
-
-
 
 using tSimd::float32_4;
 
@@ -349,14 +341,10 @@ TEST(simd_approximately_cwise, normal) {
 
     float32_4 res = tSimd::approximately_cwise(a, b, tolerance);
 
-    // 掩码全 1 对应十六进制 0xFFFFFFFF
-    uint32_t mask_true = 0xFFFFFFFF;
-    uint32_t mask_false = 0x00000000;
-
-    EXPECT_EQ(to_bits(tSimd::get_x(res)), mask_true);
-    EXPECT_EQ(to_bits(tSimd::get_y(res)), mask_true);
-    EXPECT_EQ(to_bits(tSimd::get_z(res)), mask_true);
-    EXPECT_EQ(to_bits(tSimd::get_w(res)), mask_false);
+    EXPECT_NE(tSimd::get_x(res), 0);
+    EXPECT_NE(tSimd::get_y(res), 0);
+    EXPECT_NE(tSimd::get_z(res), 0);
+    EXPECT_EQ(tSimd::get_w(res), 0);
 }
 
 TEST(simd_approximately_cwise, precision_edge) {
@@ -369,8 +357,8 @@ TEST(simd_approximately_cwise, precision_edge) {
 
     float32_4 res = tSimd::approximately_cwise(a, b, eps);
 
-    EXPECT_EQ(to_bits(tSimd::get_x(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_y(res)), 0x00000000);
+    EXPECT_NE(tSimd::get_x(res), 0);
+    EXPECT_EQ(tSimd::get_y(res), 0);
 }
 
 TEST(simd_approximately_cwise, all_true_test) {
@@ -382,10 +370,10 @@ TEST(simd_approximately_cwise, all_true_test) {
 
     // 验证是否所有通道都是全 1
     // 在 SIMD 中这通常对应 _mm_movemask_ps 结果为 0xF
-    EXPECT_EQ(to_bits(tSimd::get_x(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_y(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_z(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_w(res)), 0xFFFFFFFF);
+    EXPECT_NE(tSimd::get_x(res), 0);
+    EXPECT_NE(tSimd::get_y(res), 0);
+    EXPECT_NE(tSimd::get_z(res), 0);
+    EXPECT_NE(tSimd::get_w(res), 0);
 }
 
 TEST(simd_approximately_cwise, zero_tolerance) {
@@ -395,8 +383,8 @@ TEST(simd_approximately_cwise, zero_tolerance) {
 
     float32_4 res = tSimd::approximately_cwise(a, b, 0.0f);
 
-    EXPECT_EQ(to_bits(tSimd::get_z(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_w(res)), 0x00000000);
+    EXPECT_NE(tSimd::get_z(res), 0);
+    EXPECT_EQ(tSimd::get_w(res), 0);
 }
 
 TEST(simd_approximately_cwise, negative_values) {
@@ -407,10 +395,10 @@ TEST(simd_approximately_cwise, negative_values) {
     // 差值的绝对值都是 0.1
     float32_4 res = tSimd::approximately_cwise(a, b, 0.11f);
 
-    EXPECT_EQ(to_bits(tSimd::get_x(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_y(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_z(res)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_w(res)), 0xFFFFFFFF);
+    EXPECT_NE(tSimd::get_x(res), 0);
+    EXPECT_NE(tSimd::get_y(res), 0);
+    EXPECT_NE(tSimd::get_z(res), 0);
+    EXPECT_NE(tSimd::get_w(res), 0);
 }
 
 TEST(simd_magnitude2, positive) {
@@ -447,10 +435,10 @@ TEST(simd_magnitude2, approx_mask_check) {
     // 使用你的 approximately_cwise 检查
     float32_4 mask = tSimd::approximately_cwise(res, b, 0.0001f);
 
-    EXPECT_EQ(to_bits(tSimd::get_x(mask)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_y(mask)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_z(mask)), 0xFFFFFFFF);
-    EXPECT_EQ(to_bits(tSimd::get_w(mask)), 0xFFFFFFFF);
+    EXPECT_NE(tSimd::get_x(mask), 0);
+    EXPECT_NE(tSimd::get_y(mask), 0);
+    EXPECT_NE(tSimd::get_z(mask), 0);
+    EXPECT_NE(tSimd::get_w(mask), 0);
 }
 
 TEST(simd_magnitude, magnitude3_basic) {
