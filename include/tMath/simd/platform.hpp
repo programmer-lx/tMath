@@ -3,13 +3,9 @@
 #include <cstdint>
 #include <initializer_list>
 
-// #ifndef _WIN64
-// #error "The library only support win64 system"
-// #endif
-
 // C++ check
 #ifndef __cplusplus
-    #error tMath requires C++
+    #error "tMath requires C++"
 #endif
 
 // 建议在windows下使用MSVC (测试除外)
@@ -157,9 +153,8 @@
         #define TMATH_USE_SSE2
     #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || defined(_M_ARM64EC) || __arm__ || __aarch64__
         #define TMATH_USE_ARM_NEON
-        #error "TODO: arm is unsupported."
     #elif !defined(TMATH_NO_SIMD)
-        #error "tSimd does not support this target"
+        #define TMATH_NO_SIMD /* no simd */
     #endif
 #endif // !TMATH_USE_ARM_NEON && !TMATH_USE_SSE2 && !TMATH_NO_SIMD
 

@@ -29,20 +29,14 @@ TMATH_SIMD_NAMESPACE_BEGIN
 static constexpr size_t _128_alignment = TMATH_SIMD_128_ALIGNMENT;
 static constexpr size_t _256_alignment = TMATH_SIMD_256_ALIGNMENT;
 
+using float32 = float;
+using float64 = double;
+
 // 128 bits
 #if defined(TMATH_NO_SIMD)
 
-struct float32_4
-{
-    TMATH_FULL_VECTOR4(float32_4, float)
-};
+using float32_4 = TMATH_NAMESPACE_NAME::Vector4<float32>;
 using float32_4_arg_in = const float32_4&;
-
-struct int32_4
-{
-    TMATH_FULL_VECTOR4(int32_4, int32_t)
-};
-using int32_4_arg_in = const int32_4&;
 
 #elif defined(TMATH_USE_SSE2)
 
@@ -62,7 +56,7 @@ struct alignas(TMATH_SIMD_128_ALIGNMENT) _128bits_mem_block
 
     static_assert(sizeof(u32_data) == sizeof(float32_4), "sizeof(u32_data) must equal to sizeof(float32_4)");
 
-    static constexpr _128bits_mem_block make_from_uint32(uint32_t lane0, uint32_t lane1, uint32_t lane2, uint32_t lane3) noexcept
+    static constexpr _128bits_mem_block from_uint32x4(uint32_t lane0, uint32_t lane1, uint32_t lane2, uint32_t lane3) noexcept
     {
         _128bits_mem_block result{};
 
@@ -77,18 +71,18 @@ struct alignas(TMATH_SIMD_128_ALIGNMENT) _128bits_mem_block
 
 namespace detail128
 {
-    static constexpr _128bits_mem_block Lane0 = _128bits_mem_block::make_from_uint32(0xffffffff, 0x0, 0x0, 0x0);
-    static constexpr _128bits_mem_block Lane1 = _128bits_mem_block::make_from_uint32(0x0, 0xffffffff, 0x0, 0x0);
-    static constexpr _128bits_mem_block Lane2 = _128bits_mem_block::make_from_uint32(0x0, 0x0, 0xffffffff, 0x0);
-    static constexpr _128bits_mem_block Lane3 = _128bits_mem_block::make_from_uint32(0x0, 0x0, 0x0, 0xffffffff);
-    static constexpr _128bits_mem_block Lane01 = _128bits_mem_block::make_from_uint32(0xffffffff, 0xffffffff, 0x0, 0x0);
-    static constexpr _128bits_mem_block Lane012 = _128bits_mem_block::make_from_uint32(0xffffffff, 0xffffffff, 0xffffffff, 0x0);
+    static constexpr _128bits_mem_block Lane0 = _128bits_mem_block::from_uint32x4(0xffffffff, 0x0, 0x0, 0x0);
+    static constexpr _128bits_mem_block Lane1 = _128bits_mem_block::from_uint32x4(0x0, 0xffffffff, 0x0, 0x0);
+    static constexpr _128bits_mem_block Lane2 = _128bits_mem_block::from_uint32x4(0x0, 0x0, 0xffffffff, 0x0);
+    static constexpr _128bits_mem_block Lane3 = _128bits_mem_block::from_uint32x4(0x0, 0x0, 0x0, 0xffffffff);
+    static constexpr _128bits_mem_block Lane01 = _128bits_mem_block::from_uint32x4(0xffffffff, 0xffffffff, 0x0, 0x0);
+    static constexpr _128bits_mem_block Lane012 = _128bits_mem_block::from_uint32x4(0xffffffff, 0xffffffff, 0xffffffff, 0x0);
 
     // 四个数，符号位是0，其余位是1
-    static constexpr _128bits_mem_block Abs4 = _128bits_mem_block::make_from_uint32(0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff);
+    static constexpr _128bits_mem_block Abs4 = _128bits_mem_block::from_uint32x4(0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff);
 
-    static constexpr _128bits_mem_block Inf = _128bits_mem_block::make_from_uint32(0x7f800000, 0x7f800000, 0x7f800000, 0x7f800000);
-    static constexpr _128bits_mem_block QuietNaN = _128bits_mem_block::make_from_uint32(0x7fC00000, 0x7fC00000, 0x7fC00000, 0x7fC00000);
+    static constexpr _128bits_mem_block Inf = _128bits_mem_block::from_uint32x4(0x7f800000, 0x7f800000, 0x7f800000, 0x7f800000);
+    static constexpr _128bits_mem_block QuietNaN = _128bits_mem_block::from_uint32x4(0x7fC00000, 0x7fC00000, 0x7fC00000, 0x7fC00000);
 }
 
 #endif
