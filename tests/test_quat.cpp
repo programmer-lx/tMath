@@ -15,13 +15,13 @@ struct Vector4f32
 
 TEST(quat, tag)
 {
-    EXPECT_TRUE(tMath::is_vector4_float<Vector4f32> == true);
-    EXPECT_TRUE(tMath::is_quat<Quatf> == true);
+    EXPECT_TRUE(tmath::is_vector4_float<Vector4f32> == true);
+    EXPECT_TRUE(tmath::is_quat<Quatf> == true);
 }
 
 TEST(quat, identity)
 {
-    constexpr Quatf q = tMath::identity<Quatf>();
+    constexpr Quatf q = tmath::identity<Quatf>();
     EXPECT_EQ(q.x, 0);
     EXPECT_EQ(q.y, 0);
     EXPECT_EQ(q.z, 0);

@@ -40,38 +40,38 @@
 
     // 如果是MSVC，则代表开启了AVX2
     #if defined(TMATH_TEST_FMA3)
-        #define TMATH_USE_FMA3
+        #define TMATH_SIMD_USE_FMA3
         #if defined(_MSC_VER)
-            #define TMATH_USE_AVX2
+            #define TMATH_SIMD_USE_AVX2
         #endif
     #endif
 
     // 如果是MSVC，则代表开启了AVX2
     #if defined(TMATH_TEST_F16C)
-        #define TMATH_USE_F16C
+        #define TMATH_SIMD_USE_F16C
         #if defined(_MSC_VER)
-            #define TMATH_USE_AVX2
+            #define TMATH_SIMD_USE_AVX2
         #endif
     #endif
 
     #if defined(TMATH_TEST_SSE2)
-        #define TMATH_USE_SSE2
+        #define TMATH_SIMD_USE_SSE2
     #endif
 
     #if defined(TMATH_TEST_SSE3)
-        #define TMATH_USE_SSE3
+        #define TMATH_SIMD_USE_SSE3
     #endif
 
     #if defined(TMATH_TEST_SSE4_1)
-        #define TMATH_USE_SSE4_1
+        #define TMATH_SIMD_USE_SSE4_1
     #endif
 
     #if defined(TMATH_TEST_AVX)
-        #define TMATH_USE_AVX
+        #define TMATH_SIMD_USE_AVX
     #endif
 
     #if defined(TMATH_TEST_AVX2)
-        #define TMATH_USE_AVX2
+        #define TMATH_SIMD_USE_AVX2
     #endif
 
 #endif // !TMATH_IS_TESTING
@@ -92,7 +92,7 @@
 
 
 // SIMD support
-// __AVX2__ macro -> AVX2 -> FMA3(非MSVC平台需要主动开启，而且是完全独立的指令开关) -> AVX -> SSE4.1(不一定有SSE4.2) -> SSE3 -> SSE2
+// __AVX512F__ -> AVX512 -> __AVX2__ macro -> AVX2 -> FMA3(非MSVC平台需要主动开启，而且是完全独立的指令开关) -> AVX -> SSE4.1(不一定有SSE4.2) -> SSE3 -> SSE2
 //                        -> F16C(非MSVC平台需要主动开启，而且是完全独立的指令开关) -> AVX
 // SSE4.2 -> SSE4.1 (但是tMath选择不支持SSE4.2)
 // __F16C__ macro -> F16C
@@ -102,90 +102,90 @@
 // arm -> NEON
 
 // AVX2需要依赖编译开关: MSVC: /arch:AVX2, other: -mavx2
-#if !defined(TMATH_USE_AVX2) && defined(__AVX2__) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_AVX2
+#if !defined(TMATH_SIMD_USE_AVX2) && defined(__AVX2__) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_AVX2
 #endif
 
 // 非MSVC平台需要独立开启FMA3
-#if !defined(_MSC_VER) && !defined(TMATH_USE_FMA3) && defined(__FMA__) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_FMA3
+#if !defined(_MSC_VER) && !defined(TMATH_SIMD_USE_FMA3) && defined(__FMA__) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_FMA3
 #endif
 
 // MSVC 平台没有FMA3宏，需要开启AVX2
-#if defined(_MSC_VER) && !defined(TMATH_USE_FMA3) && defined(TMATH_USE_AVX2) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_FMA3
+#if defined(_MSC_VER) && !defined(TMATH_SIMD_USE_FMA3) && defined(TMATH_SIMD_USE_AVX2) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_FMA3
 #endif
 
 // 非MSVC平台需要独立开启F16C
-#if !defined(_MSC_VER) && !defined(TMATH_USE_F16C) && defined(__F16C__) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_F16C
+#if !defined(_MSC_VER) && !defined(TMATH_SIMD_USE_F16C) && defined(__F16C__) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_F16C
 #endif
 
 // MSVC平台没有F16C开关，需要开启AVX2
-#if defined(_MSC_VER) && !defined(TMATH_USE_F16C) && defined(TMATH_USE_AVX2) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_F16C
+#if defined(_MSC_VER) && !defined(TMATH_SIMD_USE_F16C) && defined(TMATH_SIMD_USE_AVX2) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_F16C
 #endif
 
 // AVX也需要依赖编译开关: MSVC: /arch:AVX, other: -mavx
 // 当然，如果开启了AVX2，肯定就支持AVX
-#if !defined(TMATH_USE_AVX) && ( defined(TMATH_USE_AVX2) || defined(__AVX__) ) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_AVX
+#if !defined(TMATH_SIMD_USE_AVX) && ( defined(TMATH_SIMD_USE_AVX2) || defined(__AVX__) ) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_AVX
 #endif
 
 // 非MSVC平台需要手动开启SSE4.1，当然如果支持AVX，也就支持SSE4.1了
-#if !defined(TMATH_USE_SSE4_1) && ( defined(__SSE4_1__) || defined(TMATH_USE_AVX) ) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_SSE4_1
+#if !defined(TMATH_SIMD_USE_SSE4_1) && ( defined(__SSE4_1__) || defined(TMATH_SIMD_USE_AVX) ) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_SSE4_1
 #endif
 
 // 非MSVC平台需要手动开启SSE3，当然如果支持SSE4.1，也就支持SSE3了
-#if !defined(TMATH_USE_SSE3) && ( defined(TMATH_USE_SSE4_1) || defined(__SSE3__) ) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_SSE3
+#if !defined(TMATH_SIMD_USE_SSE3) && ( defined(TMATH_SIMD_USE_SSE4_1) || defined(__SSE3__) ) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_SSE3
 #endif
 
 // 非MSVC平台需要手动开启SSE2，当然如果支持SSE3，也就支持SSE2了
-#if !defined(TMATH_USE_SSE2) && ( defined(TMATH_USE_SSE3) || defined(__SSE2__) ) && !defined(TMATH_NO_SIMD)
-    #define TMATH_USE_SSE2
+#if !defined(TMATH_SIMD_USE_SSE2) && ( defined(TMATH_SIMD_USE_SSE3) || defined(__SSE2__) ) && !defined(TMATH_NO_SIMD)
+    #define TMATH_SIMD_USE_SSE2
 #endif
 
 // X86_64平台默认启用SSE2, ARM平台默认启用NEON
-#if !defined(TMATH_USE_ARM_NEON) && !defined(TMATH_USE_SSE2) && !defined(TMATH_NO_SIMD)
+#if !defined(TMATH_SIMD_USE_ARM_NEON) && !defined(TMATH_SIMD_USE_SSE2) && !defined(TMATH_NO_SIMD)
     #if (defined(_M_IX86) || defined(_M_X64) || __i386__ || __x86_64__) && !defined(_M_HYBRID_X86_ARM64) && !defined(_M_ARM64EC)
-        #define TMATH_USE_SSE2
+        #define TMATH_SIMD_USE_SSE2
     #elif defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || defined(_M_ARM64EC) || __arm__ || __aarch64__
-        #define TMATH_USE_ARM_NEON
+        #define TMATH_SIMD_USE_ARM_NEON
     #elif !defined(TMATH_NO_SIMD)
         #define TMATH_NO_SIMD /* no simd */
     #endif
-#endif // !TMATH_USE_ARM_NEON && !TMATH_USE_SSE2 && !TMATH_NO_SIMD
+#endif // !TMATH_SIMD_USE_ARM_NEON && !TMATH_SIMD_USE_SSE2 && !TMATH_NO_SIMD
 
 // Intel SVML 数学运算指令集
-#if defined(TMATH_USE_SSE2) && defined(_MSC_VER) && (_MSC_VER >= 1920) && !defined(__clang__) && !defined(TMATH_USE_SVML) && !defined(TMATH_DISABLE_SVML)
-    #define TMATH_USE_SVML
+#if defined(TMATH_SIMD_USE_SSE2) && defined(_MSC_VER) && (_MSC_VER >= 1920) && !defined(__clang__) && !defined(TMATH_SIMD_USE_SVML) && !defined(TMATH_DISABLE_SVML)
+    #define TMATH_SIMD_USE_SVML
 #endif
 
 
 // 用于测试是否满足指令集依赖关系
-#if defined(TMATH_USE_AVX2) && !defined(TMATH_USE_AVX)
+#if defined(TMATH_SIMD_USE_AVX2) && !defined(TMATH_SIMD_USE_AVX)
     #error "AVX2 requires AVX"
 #endif
 
-#if defined(TMATH_USE_AVX) && !defined(TMATH_USE_SSE4_1)
+#if defined(TMATH_SIMD_USE_AVX) && !defined(TMATH_SIMD_USE_SSE4_1)
     #error "AVX requires SSE4.1"
 #endif
 
-#if defined(TMATH_USE_SSE4_1) && !defined(TMATH_USE_SSE3)
+#if defined(TMATH_SIMD_USE_SSE4_1) && !defined(TMATH_SIMD_USE_SSE3)
     #error "SSE4.1 requires SSE3"
 #endif
 
-#if defined(TMATH_USE_SSE3) && !defined(TMATH_USE_SSE2)
+#if defined(TMATH_SIMD_USE_SSE3) && !defined(TMATH_SIMD_USE_SSE2)
     #error "SSE3 requires SSE2"
 #endif
 
-#if defined(TMATH_USE_FMA3) && defined(_MSC_VER) && !defined(TMATH_USE_AVX2)
+#if defined(TMATH_SIMD_USE_FMA3) && defined(_MSC_VER) && !defined(TMATH_SIMD_USE_AVX2)
     #error "FMA3 requires AVX2 (MSVC)"
 #endif
 
-#if defined(TMATH_USE_F16C) && defined(_MSC_VER) && !defined(TMATH_USE_AVX2)
+#if defined(TMATH_SIMD_USE_F16C) && defined(_MSC_VER) && !defined(TMATH_SIMD_USE_AVX2)
     #error "F16C requires AVX2 (MSVC)"
 #endif
 
@@ -204,27 +204,27 @@
 #ifndef TMATH_NO_SIMD
 
     // SSE2 headers
-    #ifdef TMATH_USE_SSE2
+    #ifdef TMATH_SIMD_USE_SSE2
         #include <xmmintrin.h>
         #include <emmintrin.h>
 
         // SSE3 header
-        #ifdef TMATH_USE_SSE3
+        #ifdef TMATH_SIMD_USE_SSE3
             #include <pmmintrin.h>
         #endif
 
         // SSE4.1 header
-        #ifdef TMATH_USE_SSE4_1
+        #ifdef TMATH_SIMD_USE_SSE4_1
             #include <smmintrin.h>
         #endif
 
         // AVX header
-        #if defined(TMATH_USE_AVX) || defined(TMATH_USE_FMA3) || defined(TMATH_USE_F16C)
+        #if defined(TMATH_SIMD_USE_AVX) || defined(TMATH_SIMD_USE_FMA3) || defined(TMATH_SIMD_USE_F16C)
             #include <immintrin.h>
         #endif
 
     // ARM NEON header
-    #elif defined(TMATH_USE_ARM_NEON)
+    #elif defined(TMATH_SIMD_USE_ARM_NEON)
         #if defined(_MSC_VER) && !defined(__clang__) && (defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64) || defined(_M_ARM64EC))
             #include <arm64_neon.h>
         #else
@@ -239,49 +239,49 @@
 TMATH_SIMD_NAMESPACE_BEGIN
 #define TMATH_DEFINE_SIMD_CONSTEXPR(name, value) static constexpr bool name = value
 
-#if defined(TMATH_USE_SSE2)
+#if defined(TMATH_SIMD_USE_SSE2)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SSE2, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SSE2, false);
 #endif
 
-#if defined(TMATH_USE_SSE3)
+#if defined(TMATH_SIMD_USE_SSE3)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SSE3, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SSE3, false);
 #endif
 
-#if defined(TMATH_USE_SSE4_1)
+#if defined(TMATH_SIMD_USE_SSE4_1)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SSE4_1, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SSE4_1, false);
 #endif
 
-#if defined(TMATH_USE_AVX)
+#if defined(TMATH_SIMD_USE_AVX)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_AVX, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_AVX, false);
 #endif
 
-#if defined(TMATH_USE_AVX2)
+#if defined(TMATH_SIMD_USE_AVX2)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_AVX2, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_AVX2, false);
 #endif
 
-#if defined(TMATH_USE_FMA3)
+#if defined(TMATH_SIMD_USE_FMA3)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_FMA3, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_FMA3, false);
 #endif
 
-#if defined(TMATH_USE_F16C)
+#if defined(TMATH_SIMD_USE_F16C)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_F16C, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_F16C, false);
 #endif
 
-#if defined(TMATH_USE_SVML)
+#if defined(TMATH_SIMD_USE_SVML)
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SVML, true);
 #else
     TMATH_DEFINE_SIMD_CONSTEXPR(use_SVML, false);
@@ -422,7 +422,7 @@ inline IntrinsicsCheckResult runtime_check_simd_intrinsics() noexcept
     }
 
     // ===== SVML（只能通过编译器判断）=====
-#if defined(TMATH_USE_SVML)
+#if defined(TMATH_SIMD_USE_SVML)
     result.SVML = true;
 #else
     result.SVML = false;

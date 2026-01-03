@@ -8,7 +8,7 @@
 #include <concepts>
 #include <type_traits>
 
-#define TMATH_NAMESPACE_NAME tMath
+#define TMATH_NAMESPACE_NAME tmath
 #define TMATH_NAMESPACE_BEGIN namespace TMATH_NAMESPACE_NAME {
 #define TMATH_NAMESPACE_END }
 

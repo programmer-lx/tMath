@@ -55,23 +55,23 @@ TEST(vector4, constexpr_test)
     }
     {
         // cast
-        constexpr Vector4i32 result = tMath::vector_cast<Vector4i32>(a);
+        constexpr Vector4i32 result = tmath::vector_cast<Vector4i32>(a);
         constexpr Vector4i32 test = { 1, 1, 1, 1 };
         EXPECT_TRUE(result == test);
     }
     {
-        constexpr Vector4f degrees = tMath::to_degrees(Vector4f{ tMath::PI<float>, tMath::PI<float>, tMath::PI<float>, tMath::PI<float> });
+        constexpr Vector4f degrees = tmath::to_degrees(Vector4f{ tmath::PI<float>, tmath::PI<float>, tmath::PI<float>, tmath::PI<float> });
         constexpr Vector4f test = { 180, 180, 180, 180 };
         EXPECT_TRUE(degrees == test);
     }
     {
-        constexpr Vector4f radians = tMath::to_radians(Vector4f{ 180, 180, 180, 180 });
-        constexpr Vector4f test = { tMath::PI<float>, tMath::PI<float>, tMath::PI<float>, tMath::PI<float> };
+        constexpr Vector4f radians = tmath::to_radians(Vector4f{ 180, 180, 180, 180 });
+        constexpr Vector4f test = { tmath::PI<float>, tmath::PI<float>, tmath::PI<float>, tmath::PI<float> };
         EXPECT_TRUE(radians == test);
     }
     {
         // lerp
-         constexpr Vector4f result = tMath::lerp(a, b, 0.5f);
+         constexpr Vector4f result = tmath::lerp(a, b, 0.5f);
         EXPECT_TRUE(result == a);
     }
 }
@@ -108,8 +108,8 @@ TEST(vector4, fields)
         v.a = 8;
 
         Vector4f v2 = { 1, 2, 3, 4 };
-        float result = tMath::dot(v, v2);
-        EXPECT_TRUE(tMath::approximately(result, static_cast<float>(1 * 5 + 2 * 6 + 3 * 7 + 4 * 8)));
+        float result = tmath::dot(v, v2);
+        EXPECT_TRUE(tmath::approximately(result, static_cast<float>(1 * 5 + 2 * 6 + 3 * 7 + 4 * 8)));
     }
     {
         Vector4f v = {
@@ -120,7 +120,7 @@ TEST(vector4, fields)
         };
 
         Vector4f v2 = { 1, 2, 3, 4 };
-        EXPECT_TRUE(tMath::approximately_all(v, v2));
+        EXPECT_TRUE(tmath::approximately_all(v, v2));
         EXPECT_TRUE(v == v2);
     }
 }
@@ -129,8 +129,8 @@ TEST(vector4, fields)
 TEST(vector4, quat_tag)
 {
     // quat tag
-    EXPECT_TRUE(tMath::is_vector4_float<Vector4f>);
-    EXPECT_TRUE(!tMath::is_quat<Vector4f>);
+    EXPECT_TRUE(tmath::is_vector4_float<Vector4f>);
+    EXPECT_TRUE(!tmath::is_quat<Vector4f>);
 }
 
 TEST(vector4, dot)
@@ -139,14 +139,14 @@ TEST(vector4, dot)
     {
         constexpr Vector4f v1 = { 1, 2, 3, 3 };
         constexpr Vector4f v2 = { 2, 3, 4, 4 };
-        constexpr float f = tMath::dot(v1.data[0], v1.data[1], v1.data[2], v1.data[3], v2.data[0], v2.data[1], v2.data[2], v2.data[3]);
-        EXPECT_TRUE(tMath::approximately(f, 32.0f));
+        constexpr float f = tmath::dot(v1.data[0], v1.data[1], v1.data[2], v1.data[3], v2.data[0], v2.data[1], v2.data[2], v2.data[3]);
+        EXPECT_TRUE(tmath::approximately(f, 32.0f));
     }
     {
         Vector4f v1 = { 1, 2, 3, 3 };
         Vector4f v2 = { 2, 3, 4, 4 };
-        float f = tMath::dot(v1, v2);
-        EXPECT_TRUE(tMath::approximately(f, 32.0f));
+        float f = tmath::dot(v1, v2);
+        EXPECT_TRUE(tmath::approximately(f, 32.0f));
     }
 }
 
@@ -155,6 +155,6 @@ TEST(vector4, cross)
     // cross
     constexpr Vector4f v1 = { -1, 1, 6, 5 };
     constexpr Vector4f v2 = { 1, 1, -10, 10 };
-    constexpr Vector4f result = tMath::cross(v1, v2);
-    EXPECT_TRUE(tMath::approximately_all(result, { -16, -4, -2, 0 }));
+    constexpr Vector4f result = tmath::cross(v1, v2);
+    EXPECT_TRUE(tmath::approximately_all(result, { -16, -4, -2, 0 }));
 }

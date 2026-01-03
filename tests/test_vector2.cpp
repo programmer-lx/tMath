@@ -43,14 +43,14 @@ TEST(vector2, dot)
     {
         constexpr Vector2f v1 = { 1, 2 };
         constexpr Vector2f v2 = { 2, 3 };
-        constexpr float f = tMath::dot(v1.data[0], v1.data[1], v2.data[0], v2.data[1]);
-        EXPECT_TRUE(tMath::approximately(f, 8.0f));
+        constexpr float f = tmath::dot(v1.data[0], v1.data[1], v2.data[0], v2.data[1]);
+        EXPECT_TRUE(tmath::approximately(f, 8.0f));
     }
     {
         Vector2f v1 = { 1, 2 };
         Vector2f v2 = { 2, 3 };
-        float f = tMath::dot(v1, v2);
-        EXPECT_TRUE(tMath::approximately(f, 8.0f));
+        float f = tmath::dot(v1, v2);
+        EXPECT_TRUE(tmath::approximately(f, 8.0f));
     }
 }
 
@@ -60,38 +60,38 @@ TEST(vector2, cross)
         // v1 -> v2 是顺时针
         constexpr Vector2f v1 = { -1, 1 };
         constexpr Vector2f v2 = { 1, 1 };
-        constexpr float result = tMath::cross(v1, v2);
+        constexpr float result = tmath::cross(v1, v2);
         EXPECT_TRUE(result < 0);
     }
     {
         // v1 -> v2 是逆时针
         Vector2f v1 = { -1, 1 };
         Vector2f v2 = { 1, 1 };
-        EXPECT_TRUE(tMath::cross(v2, v1) > 0);
+        EXPECT_TRUE(tmath::cross(v2, v1) > 0);
     }
     {
         // v1, v2平行
         Vector2f v1 = { -1, -1 };
         Vector2f v2 = { 1, 1 };
-        EXPECT_TRUE(tMath::cross(v1, v2) == 0);
+        EXPECT_TRUE(tmath::cross(v1, v2) == 0);
     }
 
     {
         // v1 -> v2 是顺时针
         Vector2f v1 = { -1, 1 };
         Vector2f v2 = { 1, 1 };
-        EXPECT_TRUE(tMath::cross(v1.x, v1.y, v2.x, v2.y) < 0);
+        EXPECT_TRUE(tmath::cross(v1.x, v1.y, v2.x, v2.y) < 0);
     }
     {
         // v1 -> v2 是逆时针
         Vector2f v1 = { -1, 1 };
         Vector2f v2 = { 1, 1 };
-        EXPECT_TRUE(tMath::cross(v2.x, v2.y, v1.x, v1.y) > 0);
+        EXPECT_TRUE(tmath::cross(v2.x, v2.y, v1.x, v1.y) > 0);
     }
     {
         // v1, v2平行
         Vector2f v1 = { -1, -1 };
         Vector2f v2 = { 1, 1 };
-        EXPECT_TRUE(tMath::cross(v1.x, v1.y, v2.x, v2.y) == 0);
+        EXPECT_TRUE(tmath::cross(v1.x, v1.y, v2.x, v2.y) == 0);
     }
 }

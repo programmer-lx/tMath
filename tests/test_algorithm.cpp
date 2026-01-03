@@ -9,9 +9,9 @@ static float cos_taylor_10(float x);
 static float sin_taylor_9(float x)
 {
     // 先把x映射到 [-PI, PI]
-    double val = std::fmod(x, tMath::TwoPI<double>);
-    if (val >  tMath::PI<double>) val -= tMath::TwoPI<double>;
-    if (val < -tMath::PI<double>) val += tMath::TwoPI<double>;
+    double val = std::fmod(x, tmath::TwoPI<double>);
+    if (val >  tmath::PI<double>) val -= tmath::TwoPI<double>;
+    if (val < -tmath::PI<double>) val += tmath::TwoPI<double>;
 
     // 奇函数，映射到 [0, PI]
     double sign = 1.0;
@@ -22,12 +22,12 @@ static float sin_taylor_9(float x)
     }
 
     // sin(a) == sin(PI-a)，映射到 [0, PI/2]
-    if (val > tMath::HalfPI<double>) val = tMath::PI<double> - val;
+    if (val > tmath::HalfPI<double>) val = tmath::PI<double> - val;
 
     // sin(a) == cos(PI/2 - a)，压缩到 [0, PI/4]
-    if (val > tMath::QuarterPI<double>)
+    if (val > tmath::QuarterPI<double>)
     {
-        return static_cast<float>(sign * cos_taylor_10(static_cast<float>(tMath::HalfPI<double> - val)));
+        return static_cast<float>(sign * cos_taylor_10(static_cast<float>(tmath::HalfPI<double> - val)));
     }
 
     constexpr double c3 = -1.0 / 6.0;
@@ -53,7 +53,7 @@ TEST(algorithm, sin_taylor_9)
         float v = random_f(-100.0f, 100.0f);
         float result = sin_taylor_9(v);
         float test = std::sin(v);
-        EXPECT_TRUE(tMath::approximately(result, test, tMath::Epsilon<float> * 1.0f)) << std::format("result: {}, test: {}", result, test);
+        EXPECT_TRUE(tmath::approximately(result, test, tmath::Epsilon<float> * 1.0f)) << std::format("result: {}, test: {}", result, test);
     }
 }
 
@@ -61,25 +61,25 @@ TEST(algorithm, sin_taylor_9)
 static float cos_taylor_10(float x)
 {
     // 映射到 [-PI, PI]
-    double val = std::fmod(x, tMath::TwoPI<double>);
-    if (val >  tMath::PI<double>) val -= tMath::TwoPI<double>;
-    if (val < -tMath::PI<double>) val += tMath::TwoPI<double>;
+    double val = std::fmod(x, tmath::TwoPI<double>);
+    if (val >  tmath::PI<double>) val -= tmath::TwoPI<double>;
+    if (val < -tmath::PI<double>) val += tmath::TwoPI<double>;
 
     // 偶函数，映射到 [0, PI]
     if (val < 0.0) val *= -1.0;
 
     // cos(a) == -cos(PI-a)，映射到 [0, PI/2]
     double sign = 1.0;
-    if (val > tMath::HalfPI<double>)
+    if (val > tmath::HalfPI<double>)
     {
         sign = -1.0;
-        val = tMath::PI<double> - val;
+        val = tmath::PI<double> - val;
     }
 
     // cos(a) == sin(PI/2 - a)，压缩到 [0, PI/4]
-    if (val > tMath::QuarterPI<double>)
+    if (val > tmath::QuarterPI<double>)
     {
-        return static_cast<float>(sign * sin_taylor_9(static_cast<float>(tMath::HalfPI<double> - val)));
+        return static_cast<float>(sign * sin_taylor_9(static_cast<float>(tmath::HalfPI<double> - val)));
     }
 
     constexpr double c2 = -1.0 / 2.0;
@@ -105,6 +105,6 @@ TEST(algorithm, cos_taylor_10)
         float v = random_f(-100.0f, 100.0f);
         float result = cos_taylor_10(v);
         float test = std::cos(v);
-        EXPECT_TRUE(tMath::approximately(result, test, tMath::Epsilon<float> * 1.0f)) << std::format("result: {}, test: {}", result, test);
+        EXPECT_TRUE(tmath::approximately(result, test, tmath::Epsilon<float> * 1.0f)) << std::format("result: {}, test: {}", result, test);
     }
 }

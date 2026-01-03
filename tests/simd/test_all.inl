@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tMath/simd/float32_4.hpp>
+#include <tSimd/types/float32_4.hpp>
 
 #ifndef TMATH_CHECK_TSIMD_INCLUDE
 #error "testing header MUST be included after tSimd library"

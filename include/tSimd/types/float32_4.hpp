@@ -5,14 +5,14 @@
 TMATH_SIMD_NAMESPACE_BEGIN
 
 // fn: permute
-#if defined(TMATH_USE_AVX)
+#if defined(TMATH_SIMD_USE_AVX)
     #define tmath_permute_ps(v, imm8) _mm_permute_ps((v), (imm8))
 #else
     #define tmath_permute_ps(v, imm8) _mm_shuffle_ps((v), (v), (imm8))
 #endif
 
 // fn: fmadd
-#if defined(TMATH_USE_FMA3)
+#if defined(TMATH_SIMD_USE_FMA3)
     #define tmath_fmadd_ps(a, b, c) _mm_fmadd_ps((a), (b), (c))
 #else
     #define tmath_fmadd_ps(a, b, c) _mm_add_ps(_mm_mul_ps((a), (b)), (c))
@@ -245,7 +245,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV mul(float32_4_arg_in lhs, float32 scalar) 
 inline float32_4 TMATH_SIMD_CALL_CONV cwise_div(float32_4_arg_in lhs, float32_4_arg_in rhs) noexcept
 {
 #if defined(TMATH_NO_SIMD)
-    return tMath::cwise_div(lhs, rhs);
+    return tmath::cwise_div(lhs, rhs);
 #else
     return _mm_div_ps(lhs, rhs);
 #endif
@@ -263,7 +263,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV div(float32_4_arg_in lhs, float32 scalar) 
 inline float32_4 TMATH_SIMD_CALL_CONV mul_add(float32_4_arg_in a, float32_4_arg_in b, float32_4_arg_in c) noexcept
 {
 #if defined(TMATH_NO_SIMD)
-    return tMath::cwise_mul(a, b) + c;
+    return tmath::cwise_mul(a, b) + c;
 #else
     return tmath_fmadd_ps(a, b, c);
 #endif
@@ -296,7 +296,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV sin(float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return TMATH_NAMESPACE_NAME::sin(v);
-#elif defined(TMATH_USE_SVML)
+#elif defined(TMATH_SIMD_USE_SVML)
     return _mm_sin_ps(v);
 #else
     // TODO sin
@@ -308,7 +308,7 @@ inline float32_4 TMATH_SIMD_CALL_CONV cos(float32_4_arg_in v) noexcept
 {
 #if defined(TMATH_NO_SIMD)
     return TMATH_NAMESPACE_NAME::cos(v);
-#elif defined(TMATH_USE_SVML)
+#elif defined(TMATH_SIMD_USE_SVML)
     return _mm_cos_ps(v);
 #else
     // TODO cos
@@ -384,9 +384,9 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot2(float32_4_arg_in lhs, float32_4_arg_i
 #if defined(TMATH_NO_SIMD)
     float32 value = TMATH_NAMESPACE_NAME::dot(lhs.data[0], lhs.data[1], rhs.data[0], rhs.data[1]);
     return { value, value, value, value };
-#elif defined(TMATH_USE_SSE4_1)
+#elif defined(TMATH_SIMD_USE_SSE4_1)
     return _mm_dp_ps(lhs, rhs, 0x3f);                   // imm8: 7-4: compute, 3-0: store
-#elif defined(TMATH_USE_SSE3)
+#elif defined(TMATH_SIMD_USE_SSE3)
     float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
     temp = _mm_and_ps(temp, detail128::Lane01.f32_4);   // temp = [                0,             z1z2,             y1y2,             x1x2]
     temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
@@ -407,9 +407,9 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot3(float32_4_arg_in lhs, float32_4_arg_i
 #if defined(TMATH_NO_SIMD)
     float32 value = TMATH_NAMESPACE_NAME::dot(lhs.data[0], lhs.data[1], lhs.data[2], rhs.data[0], rhs.data[1], rhs.data[2]);
     return { value, value, value, value };
-#elif defined(TMATH_USE_SSE4_1)
+#elif defined(TMATH_SIMD_USE_SSE4_1)
     return _mm_dp_ps(lhs, rhs, 0x7f);                   // imm8: 7-4: compute, 3-0: store
-#elif defined(TMATH_USE_SSE3)
+#elif defined(TMATH_SIMD_USE_SSE3)
     float32_4 temp = _mm_mul_ps(lhs, rhs);              // temp = [             w1w2,             z1z2,             y1y2,             x1x2]
     temp = _mm_and_ps(temp, detail128::Lane012.f32_4);  // temp = [                0,             z1z2,             y1y2,             x1x2]
     temp = _mm_hadd_ps(temp, temp);                     // temp = [             z1z2,        x1x2+y1y2,             z1z2,        x1x2+y1y2]
@@ -430,9 +430,9 @@ inline float32_4 TMATH_SIMD_CALL_CONV dot4(float32_4_arg_in lhs, float32_4_arg_i
 #if defined(TMATH_NO_SIMD)
     float32 value = TMATH_NAMESPACE_NAME::dot(lhs, rhs);
     return { value, value, value, value };
-#elif defined(TMATH_USE_SSE4_1)
+#elif defined(TMATH_SIMD_USE_SSE4_1)
     return _mm_dp_ps(lhs, rhs, 0xff);
-#elif defined(TMATH_USE_SSE3)
+#elif defined(TMATH_SIMD_USE_SSE3)
     float32_4 t1 = _mm_mul_ps(lhs, rhs);  // t1 = [                 w1w2,                  z1z2,                  y1y2,                  x1x2]
     float32_4 t2 = _mm_hadd_ps(t1, t1);   // t2 = [            z1z2+w1w2,             x1x2+y1y2,             z1z2+w1w2,             x1x2+y1y2]
     return _mm_hadd_ps(t2, t2);           // re = [x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2, x1x2+y1y2 + z1z2+w1w2]

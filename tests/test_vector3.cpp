@@ -46,14 +46,14 @@ TEST(vector3, dot)
     {
         constexpr Vector3f v1 = { 1, 2, 3 };
         constexpr Vector3f v2 = { 2, 3, 4 };
-        constexpr float f = tMath::dot(v1.data[0], v1.data[1], v1.data[2], v2.data[0], v2.data[1], v2.data[2]);
-        EXPECT_TRUE(tMath::approximately(f, 20.0f));
+        constexpr float f = tmath::dot(v1.data[0], v1.data[1], v1.data[2], v2.data[0], v2.data[1], v2.data[2]);
+        EXPECT_TRUE(tmath::approximately(f, 20.0f));
     }
     {
         Vector3f v1 = { 1, 2, 3 };
         Vector3f v2 = { 2, 3, 4 };
-        float f = tMath::dot(v1, v2);
-        EXPECT_TRUE(tMath::approximately(f, 20.0f));
+        float f = tmath::dot(v1, v2);
+        EXPECT_TRUE(tmath::approximately(f, 20.0f));
     }
 }
 
@@ -62,6 +62,6 @@ TEST(vector3, cross)
     // cross
     constexpr Vector3f v1 = { -1, 1, 6 };
     constexpr Vector3f v2 = { 1, 1, -10 };
-    constexpr Vector3f result = tMath::cross(v1, v2);
-    EXPECT_TRUE(tMath::approximately_all(result, { -16, -4, -2 }));
+    constexpr Vector3f result = tmath::cross(v1, v2);
+    EXPECT_TRUE(tmath::approximately_all(result, { -16, -4, -2 }));
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tMath/simd/float32_4.hpp>
+#include <tSimd/types/float32_4.hpp>
 #include <tMath/vector.hpp>
 
 struct Vector4f

@@ -46,7 +46,7 @@ struct Mat3x3f_RM
     TMATH_MATRIX_OPERATORS(Mat3x3f_RM)
 };
 
-template<tMath::is_matrix_any_major Mat>
+template<tmath::is_matrix_any_major Mat>
 constexpr void concept_test(const Mat& m) noexcept
 {
     (void)m;
@@ -258,7 +258,7 @@ TEST(mat4_RM, transpose_basic)
         13.0f, 14.0f, 15.0f, 16.0f
     };
 
-    constexpr Mat4x4f_RM t = tMath::transpose(m);
+    constexpr Mat4x4f_RM t = tmath::transpose(m);
 
     // 验证对角线元素（i == j）保持不变
     EXPECT_FLOAT_EQ(t.data[0].data[0], 1.0f);
@@ -283,7 +283,7 @@ TEST(mat4_RM, transpose_constexpr)
         0, 0, 0, 0
     };
     
-    constexpr Mat4x4f_RM t = tMath::transpose(m);
+    constexpr Mat4x4f_RM t = tmath::transpose(m);
     
     static_assert(t.data[1].data[0] == 1.0f, "Transpose compile-time error: element mismatch");
     static_assert(t.data[0].data[1] == 0.0f, "Transpose compile-time error: element mismatch");
@@ -301,8 +301,8 @@ TEST(mat4_RM, transpose_involution)
         3.3f, 4.4f, 5.5f, 6.6f
     };
 
-    auto t = tMath::transpose(m);
-    auto tt = tMath::transpose(t);
+    auto t = tmath::transpose(m);
+    auto tt = tmath::transpose(t);
 
     for (size_t i = 0; i < 4; ++i) {
         for (size_t j = 0; j < 4; ++j) {
@@ -321,7 +321,7 @@ TEST(mat4_RM, transpose_special_matrices)
         0, 0, 1, 0,
         0, 0, 0, 1
     };
-    auto t_id = tMath::transpose(identity);
+    auto t_id = tmath::transpose(identity);
     EXPECT_TRUE(t_id == identity); // 假设你重载了 ==
 
     // 对称矩阵转置仍为自身
@@ -331,7 +331,7 @@ TEST(mat4_RM, transpose_special_matrices)
         3, -5, 6, 1,
         0, 2, 1, 9
     };
-    auto t_sym = tMath::transpose(symmetric);
+    auto t_sym = tmath::transpose(symmetric);
     
     for (size_t i = 0; i < 4; ++i) {
         for (size_t j = 0; j < 4; ++j) {
@@ -352,7 +352,7 @@ TEST(matrix_cast, double_to_float_same_layout)
     };
 
     // 转换为单精度矩阵
-    auto m_float = tMath::matrix_cast<Mat4x4f_RM>(m_double);
+    auto m_float = tmath::matrix_cast<Mat4x4f_RM>(m_double);
 
     // 验证数据
     for (size_t i = 0; i < 4; ++i) {
@@ -371,7 +371,7 @@ TEST(matrix_cast, constexpr_validation)
     };
 
     // 在编译期进行转换
-    constexpr Mat4x4f_RM m2 = tMath::matrix_cast<Mat4x4f_RM>(m1);
+    constexpr Mat4x4f_RM m2 = tmath::matrix_cast<Mat4x4f_RM>(m1);
 
     static_assert(m2.data[0].data[0] == 2.0f, "matrix_cast constexpr failed");
     static_assert(m2.data[3].data[3] == 2.0f, "matrix_cast constexpr failed");
@@ -383,7 +383,7 @@ TEST(matrix_cast, constexpr_validation)
 // {
 //     Mat4x4f_RM m4x4;
 //     // 假设你有 Mat3x3f_RM 类型
-//     auto m3x3 = tMath::matrix_cast<Mat3x3f_RM>(m4x4);
+//     auto m3x3 = tmath::matrix_cast<Mat3x3f_RM>(m4x4);
 // }
 
 TEST(matrix_cast, zero_and_negative)
@@ -396,7 +396,7 @@ TEST(matrix_cast, zero_and_negative)
     };
 
     // 即使是相同类型也可以 cast
-    auto m_dst = tMath::matrix_cast<Mat4x4f_RM>(m_src);
+    auto m_dst = tmath::matrix_cast<Mat4x4f_RM>(m_src);
 
     for (size_t i = 0; i < 4; ++i) {
         for (size_t j = 0; j < 4; ++j) {
@@ -412,7 +412,7 @@ TEST(matrix_cast, zero_and_negative)
 TEST(matrix_gen, identity_standard)
 {
     // 显式指定类型为 Mat4x4f_RM
-    constexpr auto id = tMath::identity<Mat4x4f_RM>();
+    constexpr auto id = tmath::identity<Mat4x4f_RM>();
 
     for (size_t i = 0; i < 4; ++i) {
         for (size_t j = 0; j < 4; ++j) {
@@ -429,7 +429,7 @@ TEST(matrix_gen, identity_standard)
 TEST(matrix_gen, scale_diagonal)
 {
     constexpr float s = 3.14f;
-    constexpr auto m = tMath::scale<Mat4x4f_RM>(s);
+    constexpr auto m = tmath::scale<Mat4x4f_RM>(s);
 
     for (size_t i = 0; i < 4; ++i) {
         for (size_t j = 0; j < 4; ++j) {
@@ -448,8 +448,8 @@ TEST(matrix_gen, scale_diagonal)
 TEST(matrix_gen, compile_time_const)
 {
     // 如果这些函数不是真正的 constexpr，编译会报错
-    constexpr auto id = tMath::identity<Mat4x4f_RM>();
-    constexpr auto s_mat = tMath::scale<Mat4x4f_RM>(5);
+    constexpr auto id = tmath::identity<Mat4x4f_RM>();
+    constexpr auto s_mat = tmath::scale<Mat4x4f_RM>(5);
 
     // 使用 static_assert 进行双重保障
     static_assert(id.data[0].data[0] == 1.0f, "Identity [0][0] should be 1.0");
@@ -464,7 +464,7 @@ TEST(matrix_gen, compile_time_const)
 TEST(matrix_gen, type_consistency)
 {
     constexpr double s_val = 2.5;
-    auto m_double = tMath::scale<Mat4x4d_RM>(s_val);
+    auto m_double = tmath::scale<Mat4x4d_RM>(s_val);
 
     EXPECT_DOUBLE_EQ(m_double.data[0].data[0], 2.5);
     EXPECT_DOUBLE_EQ(m_double.data[1].data[0], 0.0);

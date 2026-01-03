@@ -5,21 +5,21 @@
 #include <bit> // std::bit_cast
 
 // #undef TMATH_NO_SIMD // test
-// #define TMATH_USE_SSE2 // test
-// #define TMATH_USE_SSE3 // test
+// #define TMATH_SIMD_USE_SSE2 // test
+// #define TMATH_SIMD_USE_SSE3 // test
 // #define TMATH_NO_SIMD // test
-// #define TMATH_USE_FMA3 // test
-// #define TMATH_USE_AVX2 // test
+// #define TMATH_SIMD_USE_FMA3 // test
+// #define TMATH_SIMD_USE_AVX2 // test
 // #define TMATH_DISABLE_SVML // test
-// #define TMATH_USE_SVML // test
+// #define TMATH_SIMD_USE_SVML // test
 #if defined(TMATH_NO_SIMD)
-    #include "../number.hpp"
-    #include "../vector.hpp"
-    #include "../matrix.hpp"
+    #include <tMath/number.hpp>
+    #include <tMath/vector.hpp>
+    #include <tMath/matrix.hpp>
 #endif
 
-#include "math_defs_simd.hpp"
-#include "platform.hpp"
+#include "../math_defs_simd.hpp"
+#include "../platform.hpp"
 
 TMATH_SIMD_NAMESPACE_BEGIN
 
@@ -38,13 +38,10 @@ using float64 = double;
 using float32_4 = TMATH_NAMESPACE_NAME::Vector4<float32>;
 using float32_4_arg_in = const float32_4&;
 
-#elif defined(TMATH_USE_SSE2)
+#elif defined(TMATH_SIMD_USE_SSE2)
 
 using float32_4 = __m128;
 using float32_4_arg_in = float32_4;
-
-using int32_4 = __m128i;
-using int32_4_arg_in = int32_4;
 
 struct alignas(TMATH_SIMD_128_ALIGNMENT) _128bits_mem_block
 {

@@ -1,0 +1,9 @@
+#pragma once
+
+#include "defs.hpp"
+
+TMATH_SIMD_BATCH_NAMESPACE_BEGIN
+
+
+
+TMATH_SIMD_BATCH_NAMESPACE_END

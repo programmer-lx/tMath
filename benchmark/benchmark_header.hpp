@@ -1,10 +1,8 @@
 #pragma once
 
-#include <../include/tMath/impl/vector2.hpp>
-#include <../include/tMath/impl/vector4.hpp>
+#include <tMath/vector.hpp>
+#include <tMath/simd/types/float32_4.hpp>
 #include <tMath/number.hpp>
-#include <tMath/simd/float32_4.hpp>
-#include <tMath/vector3.hpp>
 
 #include "benchmark_utils.hpp"
 #include "bm_counters.hpp"

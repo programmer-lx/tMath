@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <numbers>
 #include <limits>
-#include <cstring>
 
 #include "math_defs.hpp"
 

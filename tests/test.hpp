@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+
 #include <format>
 #include <stdexcept>
 #include <exception>
@@ -8,9 +12,6 @@
 #include <random>
 #include <chrono>
 
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
 #include <gtest/gtest.h>
 
 #if !defined(TMATH_IS_TESTING)
@@ -24,7 +25,7 @@
 template<std::floating_point F>
 F random_f(F min, F max)
 {
-    static std::mt19937_64 rng{ std::random_device{}() };
+    static std::mt19937_64 rng{ static_cast<unsigned long>(std::time(nullptr)) };
     std::uniform_real_distribution<F> dist(min, max);
     return dist(rng);
 }
@@ -34,9 +35,17 @@ class ScopeTimer
 public:
     using Clock = std::chrono::high_resolution_clock;
 
-    ScopeTimer()
-        : m_start(Clock::now())
+    explicit ScopeTimer(std::string name = "ScopeTimer")
+        : m_name(std::move(name)), m_start(Clock::now())
     {
+    }
+
+    // 析构函数：对象生命周期结束时自动触发
+    ~ScopeTimer()
+    {
+        double elapsed = time_millis();
+        std::cout << "[" << m_name << "] Elapsed time: "
+                  << elapsed << " ms" << std::endl;
     }
 
     double time_millis() const
@@ -47,5 +56,29 @@ public:
     }
 
 private:
+    std::string m_name;
     Clock::time_point m_start;
 };
+
+inline void* my_aligned_alloc(size_t size, size_t alignment) {
+    void* ptr = nullptr;
+#if defined(_MSC_VER) || defined(__MINGW32__)
+    // Windows 平台
+    ptr = _aligned_malloc(size, alignment);
+#else
+    // POSIX 平台 (GCC/Clang)
+    if (posix_memalign(&ptr, alignment, size) != 0)
+    {
+        return nullptr;
+    }
+#endif
+    return ptr;
+}
+
+inline void my_aligned_free(void* ptr) {
+#if defined(_MSC_VER) || defined(__MINGW32__)
+    _aligned_free(ptr);
+#else
+    std::free(ptr);
+#endif
+}

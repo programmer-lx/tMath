@@ -37,9 +37,9 @@ static void setup_random_floats(const benchmark::State& state)
 }
 
 constexpr int Random_float32_4_Count = 64;
-static tSimd::float32_4 g_random_float32_4s[Random_float32_4_Count];
+static tsimd::float32_4 g_random_float32_4s[Random_float32_4_Count];
 static int cur_random_float32_4_index = 0;
-static tSimd::float32_4 next_random_float32_4()
+static tsimd::float32_4 next_random_float32_4()
 {
     cur_random_float32_4_index = (cur_random_float32_4_index + 1) % RandomFloatCount;
     return g_random_float32_4s[cur_random_float32_4_index];
@@ -51,7 +51,7 @@ static void setup_random_float32_4s(const benchmark::State& state)
 
     for (size_t i = 0; i < RandomFloatCount; ++i)
     {
-        g_random_float32_4s[i] = tSimd::load(dist(rng), dist(rng), dist(rng), dist(rng));
+        g_random_float32_4s[i] = tsimd::load(dist(rng), dist(rng), dist(rng), dist(rng));
     }
 }
 
