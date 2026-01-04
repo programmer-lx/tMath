@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#if !defined(TMATH_IS_TESTING)
-#error "please define TMATH_IS_TESTING macro to enable testing."
+#if !defined(TMATH_IS_TESTING) && !defined(TSIMD_IS_TESTING)
+#error "please define TMATH_IS_TESTING or TSIMD_IS_TESTING macro to enable testing."
 #endif
 
 #define TMATH_EXPECT_IS_NAN(val) EXPECT_TRUE(std::isnan(val))
@@ -62,7 +62,7 @@ private:
 
 inline void* my_aligned_alloc(size_t size, size_t alignment) {
     void* ptr = nullptr;
-#if defined(_MSC_VER) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
     // Windows 平台
     ptr = _aligned_malloc(size, alignment);
 #else

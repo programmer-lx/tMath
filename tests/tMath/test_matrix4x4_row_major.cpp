@@ -1,7 +1,7 @@
 #include <tMath/matrix.hpp>
 #include <tMath/vector.hpp>
 
-#include "test.hpp"
+#include "../test.hpp"
 
 struct Vec4f
 {

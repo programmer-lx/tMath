@@ -1,7 +1,7 @@
 #include <tMath/quat.hpp>
 #include <tMath/vector.hpp>
 
-#include "test.hpp"
+#include "../test.hpp"
 
 struct Quatf
 {

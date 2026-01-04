@@ -8,14 +8,20 @@ project(
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(tMath INTERFACE)
-target_include_directories(tMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-
 # options
 option(TMATH_BUILD_EXAMPLES "" OFF)
 option(TMATH_BUILD_TESTS "" OFF)
 option(TMATH_BUILD_BENCHMARKS "" OFF)
+
+
+# tMath library
+add_library(tMath INTERFACE)
+target_include_directories(tMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include/tMath)
+
+# tSimd library
+add_library(tSimd INTERFACE)
+target_include_directories(tSimd INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include/tSimd)
+
 
 if(TMATH_BUILD_EXAMPLES)
     add_subdirectory(examples)

@@ -4,7 +4,7 @@
 
 #include <tMath/number.hpp>
 
-#include "test.hpp"
+#include "../test.hpp"
 
 TEST(float_boundary, inf)
 {

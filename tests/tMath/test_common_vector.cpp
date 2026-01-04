@@ -1,6 +1,6 @@
 #include <tMath/vector.hpp>
 
-#include "test.hpp"
+#include "../test.hpp"
 
 
 // 辅助函数：判断向量所有分量是否为 NaN

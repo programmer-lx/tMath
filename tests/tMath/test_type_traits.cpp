@@ -1,6 +1,6 @@
-#include <../include/tMath/impl/math_defs.hpp>
+#include <tMath/impl/math_defs.hpp>
 
-#include "test.hpp"
+#include "../test.hpp"
 
 TEST(NumberToFloatingPoint, IntegerTypes) {
     // 小整数 -> float

@@ -1,6 +1,6 @@
 #include <format>
 
-#include "test.hpp"
+#include "../test.hpp"
 
 #include <tMath/number.hpp>
 

@@ -1,6 +1,6 @@
 #include <tMath/vector.hpp>
 
-#include "test.hpp"
+#include "../test.hpp"
 
 struct Vector2f
 {

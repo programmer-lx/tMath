@@ -1,23 +1,23 @@
-#define TMATH_TEST_AVX2
-
 #include <cstring>
 #include <cstdlib>
 #include <type_traits>
 #include <format>
+#include <array>
+
+#define TSIMD_TEST_AVX
 
 #include <tSimd/impl/platform.hpp>
 
-#include "../test.hpp"
+#include "../../test.hpp"
 
-#if defined(TSIMD_USE_AVX)
 
 TEST(basic, sum_speed_test)
 {
     static constexpr size_t SumSize = 16 * 10000;
     static constexpr size_t SumByteSize = SumSize * sizeof(float);
 
-    // 建议用 32 或 64 字节对齐，以支持 AVX
-    float* numbers = static_cast<float*>(my_aligned_alloc(SumByteSize, 32));
+    // float* numbers = static_cast<float*>(my_aligned_alloc(SumByteSize, 32));
+    float* numbers = static_cast<float*>(my_aligned_alloc(SumByteSize, 4));
 
     // 1. 先准备好数据，全局只生成这一次
     for (int i = 0; i < SumSize; ++i) {
@@ -42,7 +42,7 @@ TEST(basic, sum_speed_test)
         ScopeTimer timer("sse sum");
         __m128 sum4 = _mm_setzero_ps();
         for (int i = 0; i < SumSize; i += 4) {
-            sum4 = _mm_add_ps(sum4, _mm_load_ps(&numbers[i]));
+            sum4 = _mm_add_ps(sum4, _mm_loadu_ps(&numbers[i]));
         }
         alignas(16) float res[4];
         _mm_store_ps(res, sum4);
@@ -56,7 +56,7 @@ TEST(basic, sum_speed_test)
         ScopeTimer timer("sse3 sum (hadd)");
         __m128 sum4 = _mm_setzero_ps();
         for (int i = 0; i < SumSize; i += 4) {
-            sum4 = _mm_add_ps(sum4, _mm_load_ps(&numbers[i]));
+            sum4 = _mm_add_ps(sum4, _mm_loadu_ps(&numbers[i]));
         }
 
         // sum4 = [d, c, b, a]
@@ -73,7 +73,7 @@ TEST(basic, sum_speed_test)
         __m256 sum8 = _mm256_setzero_ps();
         for (int i = 0; i < SumSize; i += 8) {
             // 注意：_mm256_load_ps 要求 32 字节对齐
-            sum8 = _mm256_add_ps(sum8, _mm256_load_ps(&numbers[i]));
+            sum8 = _mm256_add_ps(sum8, _mm256_loadu_ps(&numbers[i]));
         }
 
         // 水平加法求和
@@ -94,40 +94,45 @@ TEST(basic, sum_speed_test)
 
 enum class backend
 {
-    sse,
-    avx
+    sse = 0,
+    avx = 1,
+    num
 };
 
-template<backend simd_backend>
-struct simd_ops;
+template<backend simd_backend = backend::num>
+struct simd_ops
+{
+    static_assert(simd_backend != backend::num, "Please set a backend when using simd_ops<...>, for example: simd_ops<sse>, simd_ops<avx>, ...");
+};
 
 template<>
 struct simd_ops<backend::sse>
 {
+    static constexpr backend current_backend = backend::sse; // 用于判断当前正在使用什么SIMD指令
     using f32 = __m128;
     static constexpr size_t lanes = 4;
 
-    static inline f32 load(float* x) noexcept
+    static inline f32 TSIMD_CALL_CONV load(float* x) noexcept
     {
-        return _mm_load_ps(x);
+        return _mm_loadu_ps(x);
     }
 
-    static inline void store(float* x, f32 v) noexcept
+    static inline void TSIMD_CALL_CONV store(float* x, f32 v) noexcept
     {
-        _mm_store_ps(x, v);
+        _mm_storeu_ps(x, v);
     }
 
-    static inline f32 zero() noexcept
+    static inline f32 TSIMD_CALL_CONV zero() noexcept
     {
         return _mm_setzero_ps();
     }
 
-    static inline f32 add(f32 lhs, f32 rhs) noexcept
+    static inline f32 TSIMD_CALL_CONV add(f32 lhs, f32 rhs) noexcept
     {
         return _mm_add_ps(lhs, rhs);
     }
 
-    static inline float reduce_sum(f32 v) noexcept
+    static inline float TSIMD_CALL_CONV reduce_sum(f32 v) noexcept
     {
         f32 v1 = _mm_hadd_ps(v, v);
         v1 = _mm_hadd_ps(v1, v1);
@@ -138,30 +143,31 @@ struct simd_ops<backend::sse>
 template<>
 struct simd_ops<backend::avx>
 {
+    static constexpr backend current_backend = backend::avx;
     using f32 = __m256;
     static constexpr size_t lanes = 8;
 
-    static inline f32 load(float* x) noexcept
+    static inline f32 TSIMD_CALL_CONV load(float* x) noexcept
     {
-        return _mm256_load_ps(x);
+        return _mm256_loadu_ps(x);
     }
 
-    static inline void store(float* x, f32 v) noexcept
+    static inline void TSIMD_CALL_CONV store(float* x, f32 v) noexcept
     {
-        _mm256_store_ps(x, v);
+        _mm256_storeu_ps(x, v);
     }
 
-    static inline f32 zero() noexcept
+    static inline f32 TSIMD_CALL_CONV zero() noexcept
     {
         return _mm256_setzero_ps();
     }
 
-    static inline f32 add(f32 lhs, f32 rhs) noexcept
+    static inline f32 TSIMD_CALL_CONV add(f32 lhs, f32 rhs) noexcept
     {
         return _mm256_add_ps(lhs, rhs);
     }
 
-    static inline float reduce_sum(f32 v) noexcept
+    static inline float TSIMD_CALL_CONV reduce_sum(f32 v) noexcept
     {
         // [1, 2, 3, 4, 5, 6, 7, 8]
         // [12, 34, 12, 34, 56, 78, 56, 78]
@@ -198,76 +204,10 @@ TEST(basic, isa_fn_correct)
     }
 }
 
-static backend current_backend = backend::sse;
 
-// 用8个数进行测试
-template<backend simd_backend>
-void kernel_impl(float* data, size_t size, float& out_sum) noexcept
+int main(int argc, char **argv)
 {
-    using ops = simd_ops<simd_backend>;
-
-    using f32 = ops::f32;
-    constexpr size_t N = ops::lanes;
-
-    f32 sum_n = ops::zero();
-    for (size_t i = 0; i < size; i += N)
-    {
-        f32 d1 = ops::load(data + i);
-        sum_n = ops::add(sum_n, d1);
-    }
-
-    float sum = ops::reduce_sum(sum_n);
-    float correct_sum = 0.0f;
-    for (size_t i = 0; i < size; ++i)
-    {
-        correct_sum += data[i];
-    }
-
-    out_sum = sum;
-
-    EXPECT_NEAR(sum, correct_sum, 1e-5f);
+    printf("Running main() from %s\n", __FILE__);
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
-
-// in_expect_out_real: 外部传入一个期望值，该函数返回一个实际值，然后在测试的时候进行比较两个值是否相等
-void kernel(float* data, size_t size, float& out_sum, backend& in_expect_out_real) noexcept
-{
-    switch (current_backend)
-    {
-        case backend::sse:
-            kernel_impl<backend::sse>(data, size, out_sum);
-            in_expect_out_real = backend::sse;
-            break;
-
-        case backend::avx:
-            kernel_impl<backend::avx>(data, size, out_sum);
-            in_expect_out_real = backend::avx;
-            break;
-    }
-}
-
-TEST(basic, dispatch_test)
-{
-    alignas(32) float test_data[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-
-    // sse
-    {
-        float sum = -1.0f;
-        current_backend = backend::sse;
-        backend expect_backend = backend::sse;
-        kernel(test_data, 8, sum, current_backend);
-        EXPECT_NEAR(sum, 36, 1e-5f);
-        EXPECT_TRUE(current_backend == expect_backend);
-    }
-
-    // avx
-    {
-        float sum = -1.0f;
-        current_backend = backend::avx;
-        backend expect_backend = backend::avx;
-        kernel(test_data, 8, sum, current_backend);
-        EXPECT_NEAR(sum, 36, 1e-5f);
-        EXPECT_TRUE(current_backend == expect_backend);
-    }
-}
-
-#endif
