@@ -2,9 +2,9 @@
 
 #include <utility>
 
-#include "../math_defs.hpp"
 #include "../number.hpp"
 #include "../vector.hpp"
+#include "math_defs.hpp"
 
 TMATH_NAMESPACE_BEGIN
 

@@ -28,26 +28,6 @@ endif()
 get_target_property(OPTIONS_simd_SSE2 benchmark_simd_SSE2 COMPILE_OPTIONS)
 message(STATUS "benchmark_simd_SSE2 compile options: ${OPTIONS_simd_SSE2}")
 
-# SSE3
-add_executable(benchmark_simd_SSE3 SSE3.cpp)
-action_of_benchmark_test_target(benchmark_simd_SSE3)
-if(MSVC)
-    target_compile_options(benchmark_simd_SSE3 PRIVATE /arch:AVX) # 官方文档说可以使用SSE4.2，但是实测无效
-else()
-    target_compile_options(benchmark_simd_SSE3 PRIVATE -msse3)
-endif()
-get_target_property(OPTIONS_simd_SSE3 benchmark_simd_SSE3 COMPILE_OPTIONS)
-message(STATUS "benchmark_simd_SSE3 compile options: ${OPTIONS_simd_SSE3}")
-
-# SSE4.1
-add_executable(benchmark_simd_SSE4_1 SSE4_1.cpp)
-action_of_benchmark_test_target(benchmark_simd_SSE4_1)
-if(MSVC)
-    target_compile_options(benchmark_simd_SSE4_1 PRIVATE /arch:AVX) # 官方文档说可以使用SSE4.2，但是实测无效
-else()
-    target_compile_options(benchmark_simd_SSE4_1 PRIVATE -msse4.1)
-endif()
-
 # AVX
 add_executable(benchmark_simd_AVX AVX.cpp)
 action_of_benchmark_test_target(benchmark_simd_AVX)
@@ -58,39 +38,6 @@ else()
 endif()
 get_target_property(OPTIONS_simd_AVX benchmark_simd_AVX COMPILE_OPTIONS)
 message(STATUS "benchmark_simd_AVX compile options: ${OPTIONS_simd_AVX}")
-
-# FMA3
-add_executable(benchmark_simd_FMA3 FMA3.cpp)
-action_of_benchmark_test_target(benchmark_simd_FMA3)
-if(MSVC)
-    target_compile_options(benchmark_simd_FMA3 PRIVATE /arch:AVX2)
-else()
-    target_compile_options(benchmark_simd_FMA3 PRIVATE -mfma)
-endif()
-
-# F16C
-add_executable(benchmark_simd_F16C F16C.cpp)
-action_of_benchmark_test_target(benchmark_simd_F16C)
-if(MSVC)
-    target_compile_options(benchmark_simd_F16C PRIVATE /arch:AVX2)
-else()
-    target_compile_options(benchmark_simd_F16C PRIVATE -mf16c)
-endif()
-
-# AVX2
-add_executable(benchmark_simd_AVX2 AVX2.cpp)
-action_of_benchmark_test_target(benchmark_simd_AVX2)
-if(MSVC)
-    target_compile_options(benchmark_simd_AVX2 PRIVATE /arch:AVX2)
-else()
-    target_compile_options(benchmark_simd_AVX2 PRIVATE -mavx2)
-endif()
-
-# SVML
-if(MSVC)
-    add_executable(benchmark_simd_SVML SVML.cpp)
-    action_of_benchmark_test_target(benchmark_simd_SVML)
-endif()
 
 
 set(TMATH_BENCHMARK_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR}/benchmarks/bin)
@@ -143,12 +90,4 @@ endfunction()
 # 使用test工具来输出benchmark结果，并非真的在测试
 add_simd_benchmark_test(NO_SIMD benchmark_NO_SIMD)
 add_simd_benchmark_test(SSE2    benchmark_simd_SSE2)
-add_simd_benchmark_test(SSE3    benchmark_simd_SSE3)
-add_simd_benchmark_test(SSE4_1  benchmark_simd_SSE4_1)
-#add_simd_benchmark_test(AVX     benchmark_simd_AVX)
-add_simd_benchmark_test(FMA3    benchmark_simd_FMA3)
-#add_simd_benchmark_test(F16C    benchmark_simd_F16C)
-#add_simd_benchmark_test(AVX2    benchmark_simd_AVX2)
-if(MSVC)
-    add_simd_benchmark_test(SVML benchmark_simd_SVML)
-endif()
+add_simd_benchmark_test(AVX     benchmark_simd_AVX)

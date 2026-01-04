@@ -1,0 +1,5 @@
+#pragma once
+
+#define TSIMD_NAMESPACE_NAME tsimd
+#define TSIMD_NAMESPACE_BEGIN namespace TSIMD_NAMESPACE_NAME {
+#define TSIMD_NAMESPACE_END }

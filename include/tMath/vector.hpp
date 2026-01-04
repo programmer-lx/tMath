@@ -5,12 +5,12 @@
 #include <array>
 #include <numeric>
 
-#include "math_defs.hpp"
 #include "impl/fwd_vector.hpp"
-#include "number.hpp"
+#include "impl/math_defs.hpp"
 #include "impl/vector2.hpp"
 #include "impl/vector3.hpp"
 #include "impl/vector4.hpp"
+#include "number.hpp"
 
 
 TMATH_NAMESPACE_BEGIN

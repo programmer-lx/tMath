@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math_defs.hpp"
 #include "impl/fwd_vector.hpp"
+#include "impl/math_defs.hpp"
 
 TMATH_NAMESPACE_BEGIN
 

@@ -6,7 +6,7 @@
 #include <numbers>
 #include <limits>
 
-#include "math_defs.hpp"
+#include "impl/math_defs.hpp"
 
 TMATH_NAMESPACE_BEGIN
 
