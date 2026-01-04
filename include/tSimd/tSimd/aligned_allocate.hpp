@@ -15,7 +15,7 @@ inline void* aligned_allocate(size_t bytes, size_t alignment) noexcept
     return _aligned_malloc(bytes, alignment);
 #else
     void* ptr = nullptr;
-    if (posix_memalign(&ptr, alignment, size) != 0)
+    if (posix_memalign(&ptr, alignment, bytes) != 0)
     {
         return nullptr;
     }
