@@ -22,50 +22,53 @@ TEST(aligned_allocate, alignment_test)
 
 TEST(aligned_allocate, std_vector)
 {
-    using Arr = std::vector<float, tsimd::AlignedAllocator<float>>;
-    constexpr size_t size = 88;
-
-    Arr numbers;
-    for (int i = 0; i < size; ++i)
+    []() TSIMD_AVX_INTRINSIC_ATTR
     {
-        numbers.push_back(random_f(-2.0f, 2.0f));
-    }
+        using Arr = std::vector<float, tsimd::AlignedAllocator<float>>;
+        constexpr size_t size = 88;
 
-    float expected = 0.0f;
-    for (int i = 0; i < size; ++i)
-    {
-        expected += numbers[i];
-    }
+        Arr numbers;
+        for (int i = 0; i < size; ++i)
+        {
+            numbers.push_back(random_f(-2.0f, 2.0f));
+        }
 
-    // simd test
-    __m256 sum_8 = _mm256_setzero_ps();
-    for (int i = 0; i < size; i += 8)
-    {
-        __m256 tmp = _mm256_load_ps(numbers.data() + i);
-        sum_8 = _mm256_add_ps(sum_8, tmp);
-    }
+        float expected = 0.0f;
+        for (int i = 0; i < size; ++i)
+        {
+            expected += numbers[i];
+        }
 
-    // reduce sum
-    // [8, 7, 6, 5, 4, 3, 2, 1]
-    // hadd
-    // [78, 56, 78, 56, 34, 12, 34, 12]
-    // hadd
-    // [5678, 5678, 5678, 5678, 1234, 1234, 1234, 1234]
-    __m256 t1 = _mm256_hadd_ps(sum_8, sum_8);
-    t1 = _mm256_hadd_ps(t1, t1);
+        // simd test
+        __m256 sum_8 = _mm256_setzero_ps();
+        for (int i = 0; i < size; i += 8)
+        {
+            __m256 tmp = _mm256_load_ps(numbers.data() + i);
+            sum_8 = _mm256_add_ps(sum_8, tmp);
+        }
 
-    // low = [1234, 1234, 1234, 1234]
-    // high = [5678, 5678, 5678, 5678]
-    __m128 low = _mm256_castps256_ps128(t1);
-    __m128 high = _mm256_extractf128_ps(t1, 0b1);
+        // reduce sum
+        // [8, 7, 6, 5, 4, 3, 2, 1]
+        // hadd
+        // [78, 56, 78, 56, 34, 12, 34, 12]
+        // hadd
+        // [5678, 5678, 5678, 5678, 1234, 1234, 1234, 1234]
+        __m256 t1 = _mm256_hadd_ps(sum_8, sum_8);
+        t1 = _mm256_hadd_ps(t1, t1);
 
-    // add
-    // [12345678, ....]
-    // get lane[0]
-    low = _mm_add_ps(low, high);
-    float result = _mm_cvtss_f32(low);
+        // low = [1234, 1234, 1234, 1234]
+        // high = [5678, 5678, 5678, 5678]
+        __m128 low = _mm256_castps256_ps128(t1);
+        __m128 high = _mm256_extractf128_ps(t1, 0b1);
 
-    EXPECT_NEAR(result, expected, 1e-4f);
+        // add
+        // [12345678, ....]
+        // get lane[0]
+        low = _mm_add_ps(low, high);
+        float result = _mm_cvtss_f32(low);
+
+        EXPECT_NEAR(result, expected, 1e-4f);
+    }();
 }
 
 int main(int argc, char **argv)

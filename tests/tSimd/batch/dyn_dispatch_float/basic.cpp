@@ -31,10 +31,12 @@ namespace tsimd
             EXPECT_TRUE(op::BatchAlignment == 16);
 
             std::string cur_intrinsic = TSIMD_STR("" TSIMD_DYN_FUNC_ATTR);
-#ifdef _MSC_VER
+#if defined(TSIMD_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
-#else
+#elif defined(TSIMD_COMPILER_GCC_CLANG)
             EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"sse2\")))");
+#else
+    #error "Unknown compiler."
 #endif
 
             batch_t sum_n = op::zero();

@@ -22,7 +22,7 @@ namespace tsimd
             constexpr size_t Step = op::Lanes;
 
             std::string cur_intrinsic = TSIMD_STR("" TSIMD_DYN_FUNC_ATTR);
-#ifdef _MSC_VER
+#if defined(TSIMD_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
 #else
             EXPECT_TRUE(cur_intrinsic.contains("__attribute__((target("));

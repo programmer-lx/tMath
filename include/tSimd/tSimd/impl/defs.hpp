@@ -11,8 +11,13 @@
 #define TSIMD_CONCAT_IMPL(a, b) a##b
 #define TSIMD_CONCAT(a, b) TSIMD_CONCAT_IMPL(a, b)
 
+#if defined(_MSC_VER) && !defined(__clang__)
+    #define TSIMD_COMPILER_MSVC
+#elif defined(__GNUC__) || defined(__clang__)
+    #define TSIMD_COMPILER_GCC_CLANG
+#endif
 
-#if defined(_MSC_VER)
+#if defined(TSIMD_COMPILER_MSVC)
     #define TSIMD_FUNCTION __FUNCSIG__  // function name + template args
     #define TSIMD_RESTRICT __restrict
     #define TSIMD_NOINLINE __declspec(noinline)
@@ -32,7 +37,7 @@
     #else
         #define TSIMD_CHECK_RETURN
     #endif
-#else // other
+#elif defined(TSIMD_COMPILER_GCC_CLANG) // other
     #define TSIMD_FUNCTION __PRETTY_FUNCTION__  // function name + template args
     #define TSIMD_RESTRICT __restrict__
     #define TSIMD_NOINLINE __attribute__((noinline))
@@ -46,4 +51,6 @@
     #define TSIMD_DIAGNOSTICS_OFF(msvc, gcc) TSIMD_DIAGNOSTICS(gcc)
     #define TSIMD_FUNC_ATTR_INTRINSIC_TARGETS(...) __attribute__((target(__VA_ARGS__)))
     #define TSIMD_CHECK_RETURN __attribute__((warn_unused_result))
+#else
+    #error "Unknown compiler."
 #endif // MSVC
