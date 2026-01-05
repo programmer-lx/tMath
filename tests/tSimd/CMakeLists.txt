@@ -28,15 +28,16 @@ function(add_tsimd_test_target TARGET_NAME SOURCE_FILE)
     set(FINAL_TARGET_NAME ${TARGET_NAME}_${TMATH_TEST_OPTION})
     add_executable(${FINAL_TARGET_NAME} ${SOURCE_FILE})
     if(MSVC)
-        target_compile_options(${FINAL_TARGET_NAME} PRIVATE /utf-8 /arch:AVX2 /arch:AVX) # /arch:SSE4.2 /arch:SSE2 现在对MSVC无效
+        target_compile_options(${FINAL_TARGET_NAME} PRIVATE /utf-8) # /arch:SSE4.2 /arch:SSE2 现在对MSVC无效 /arch:AVX2 /arch:AVX
         target_compile_definitions(${FINAL_TARGET_NAME} PRIVATE UNICODE _UNICODE)
-    else()
-        target_compile_options(${FINAL_TARGET_NAME} PRIVATE -mavx2 -mavx -mfma -mf16c -msse4.1 -msse3 -msse2)
+#    else()
+#        target_compile_options(${FINAL_TARGET_NAME} PRIVATE -mavx2 -mavx -mfma -mf16c -msse4.1 -msse3 -msse2)
     endif()
     add_extra_test_compile_and_link_options(${FINAL_TARGET_NAME})
 
     target_compile_definitions(${FINAL_TARGET_NAME} PRIVATE TSIMD_IS_TESTING)
     target_link_libraries(${FINAL_TARGET_NAME} PRIVATE gtest tSimd)
+    target_include_directories(${FINAL_TARGET_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
     get_target_property(OPTIONS ${FINAL_TARGET_NAME} COMPILE_OPTIONS)
     message(STATUS "${FINAL_TARGET_NAME} compile options: ${OPTIONS}")

@@ -13,7 +13,6 @@ TEST(cpuid, support)
 
 int main(int argc, char **argv)
 {
-    tsimd::InstructionSelector::init();
     printf("Running main() from %s\n", __FILE__);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

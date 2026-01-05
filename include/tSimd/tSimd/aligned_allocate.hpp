@@ -1,11 +1,12 @@
 #pragma once
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <type_traits>
 #include <new>
 
 #include "impl/platform.hpp"
+#include "impl/ops/simd_instruction_select.hpp"
 
 TSIMD_NAMESPACE_BEGIN
 
@@ -52,9 +53,12 @@ struct AlignedAllocator
     using size_type       = size_t;
     using difference_type = ptrdiff_t;
 
-    static constexpr size_t Alignment = RequiredAlignment;
+    static size_t alignment()
+    {
+        return InstructionSelector::required_alignment();
+    }
 
-    constexpr AlignedAllocator() noexcept {}
+    constexpr AlignedAllocator() noexcept = default;
 
     constexpr AlignedAllocator(const AlignedAllocator&) noexcept = default;
 
@@ -67,8 +71,10 @@ struct AlignedAllocator
 
     [[nodiscard]] constexpr T* allocate(const size_t count)
     {
+        static size_t align = InstructionSelector::required_alignment();
+
         size_t bytes = count * sizeof(T);
-        void* ptr = aligned_allocate(bytes, RequiredAlignment);
+        void* ptr = aligned_allocate(bytes, align);
 
         if (!ptr)
         {

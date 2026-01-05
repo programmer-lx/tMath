@@ -1,5 +1,3 @@
-#define TSIMD_TEST_AVX
-
 #include <vector>
 
 #include <tSimd/aligned_allocate.hpp>
@@ -27,8 +25,6 @@ TEST(aligned_allocate, std_vector)
     using Arr = std::vector<float, tsimd::AlignedAllocator<float>>;
     constexpr size_t size = 88;
 
-    EXPECT_TRUE(tsimd::AlignedAllocator<float>::Alignment == 32);
-
     Arr numbers;
     for (int i = 0; i < size; ++i)
     {
@@ -50,15 +46,30 @@ TEST(aligned_allocate, std_vector)
     }
 
     // reduce sum
-    using op = tsimd::SimdOp<tsimd::SimdInstruction::AVX, float>;
-    float result = op::sum(sum_8);
+    // [8, 7, 6, 5, 4, 3, 2, 1]
+    // hadd
+    // [78, 56, 78, 56, 34, 12, 34, 12]
+    // hadd
+    // [5678, 5678, 5678, 5678, 1234, 1234, 1234, 1234]
+    __m256 t1 = _mm256_hadd_ps(sum_8, sum_8);
+    t1 = _mm256_hadd_ps(t1, t1);
+
+    // low = [1234, 1234, 1234, 1234]
+    // high = [5678, 5678, 5678, 5678]
+    __m128 low = _mm256_castps256_ps128(t1);
+    __m128 high = _mm256_extractf128_ps(t1, 0b1);
+
+    // add
+    // [12345678, ....]
+    // get lane[0]
+    low = _mm_add_ps(low, high);
+    float result = _mm_cvtss_f32(low);
 
     EXPECT_NEAR(result, expected, 1e-4f);
 }
 
 int main(int argc, char **argv)
 {
-    tsimd::InstructionSelector::init();
     printf("Running main() from %s\n", __FILE__);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
