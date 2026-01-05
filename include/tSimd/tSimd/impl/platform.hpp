@@ -3,17 +3,28 @@
 // 建议在windows下使用MSVC (测试除外)
 #ifndef TSIMD_IS_TESTING
     #if defined(_WIN64) || defined(_WIN32)
-        #ifndef _MSC_VER
+        #if !defined(_MSC_VER) || defined(__clang__)
             #warning "It is recommended to use the MSVC compiler on the Windows platform."
         #endif
     #endif
 #endif
 
-// 架构判断 (x86 or arm)
-#if (defined(_M_IX86) || defined(_M_X64) || __i386__ || __x86_64__) && !defined(_M_HYBRID_X86_ARM64) && !defined(_M_ARM64EC)
-    #define TSIMD_PLATFORM_X86_64
-#elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
-    #define TSIMD_PLATFORM_ARM
+// --- X86 系列 ---
+#if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
+    #define TSIMD_X86_64
+    #define TSIMD_X86_ANY
+#elif defined(_M_IX86) || defined(__i386__) || defined(__i386)
+    #define TSIMD_X86_32
+    #define TSIMD_X86_ANY
+#endif
+
+// --- ARM 系列 ---
+#if defined(__aarch64__) || defined(_M_ARM64)
+    #define TSIMD_ARM_64
+    #define TSIMD_ARM_ANY
+#elif defined(__arm__) || defined(_M_ARM)
+    #define TSIMD_ARM_32
+    #define TSIMD_ARM_ANY
 #endif
 
 
@@ -41,14 +52,6 @@
 #endif
 #define TSIMD_SCALAR_CALL_CONV // 统一接口表示方式
 
-
-
-// SIMD headers
-#if defined(TSIMD_PLATFORM_X86_64)
-    #include <xmmintrin.h>
-    #include <emmintrin.h>
-    #include <immintrin.h>
-#endif
 
 // tsimd headers
 

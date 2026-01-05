@@ -139,12 +139,17 @@ inline InstructionSetSupports check_instruction_supports()
 }
 
 
-
+// 这个枚举的值就是函数指针表的索引，所以需要进行平台判断
 enum class SimdInstruction : int
 {
     Scalar = 0,
+
+    // x86 指令集
+#if defined(TSIMD_X86_ANY)
     SSE2,
     AVX,
+#endif
+
     Num
 };
 

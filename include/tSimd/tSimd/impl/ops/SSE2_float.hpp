@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xmmintrin.h>
+
 #include "simd_instruction_select.hpp"
 #include "func_attr.hpp"
 

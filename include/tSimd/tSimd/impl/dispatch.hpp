@@ -18,9 +18,15 @@ TSIMD_NAMESPACE_END
 
 #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, Scalar)
 
-#define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
-
-#define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
+// ---------------------------------------------- 平台判断 ----------------------------------------------
+// x86 指令集
+#if defined(TSIMD_X86_ANY)
+    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
+    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
+#else
+    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name)
+    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name)
+#endif
 
 // 不同后端的函数指针表
 #define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
