@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#if defined(TSIMD_IS_TESTING)
+#if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
     #include <cstdlib> // std::abort
 #endif
 
@@ -207,7 +207,7 @@ private:
         const auto& supports = get_support_info();
         
         // 如果正在测试，则强制选择那个指令，如果那个指令不支持，则直接报错退出即可
-#if defined(TSIMD_TEST_INTRINSIC)
+#if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
         int fn_idx = static_cast<int>(SimdInstruction::TSIMD_TEST_INTRINSIC);
         if (!supports.TSIMD_TEST_INTRINSIC)
         {
