@@ -22,6 +22,8 @@ namespace tsimd
             constexpr size_t Step = op::Lanes;
 
             // 测试SimdOp后端
+            bool test = std::is_same_v<op, SimdOp<SimdInstruction::AVX, float>>;
+            EXPECT_TRUE(test);
             EXPECT_TRUE(op::CurrentInstruction == SimdInstruction::AVX);
             EXPECT_TRUE(op::BatchSize == 32);
             EXPECT_TRUE(op::ElementSize == 4);

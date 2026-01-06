@@ -10,7 +10,7 @@ TSIMD_NAMESPACE_BEGIN
 template<>
 struct SimdOp<SimdInstruction::SSE2, float>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE2, float, __m128)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE2, float, __m128, 16)
 
     TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV load(const float* mem) noexcept
     {

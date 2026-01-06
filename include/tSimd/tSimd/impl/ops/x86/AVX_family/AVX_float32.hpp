@@ -9,7 +9,7 @@ TSIMD_NAMESPACE_BEGIN
 template<>
 struct SimdOp<SimdInstruction::AVX, float>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX, float, __m256)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX, float, __m256, 32)
 
     TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV load(const float* mem) noexcept
     {

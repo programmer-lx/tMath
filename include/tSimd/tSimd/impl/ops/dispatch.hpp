@@ -382,7 +382,7 @@ struct SimdOp
 #define TSIMD_DETAIL_SIMD_OP_STRUCT_NAME(instruction, scalar_elem_type) \
     SimdOp_##instruction##_##scalar_elem_type
 
-#define TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(instruction_type, elem_type, batch_type) \
+#define TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(instruction_type, elem_type, batch_type, batch_alignment) \
     /* 类型萃取 */ \
     using batch_t = batch_type; \
     using scalar_t = elem_type; \
@@ -392,7 +392,7 @@ struct SimdOp
     static constexpr size_t BatchSize = sizeof(batch_t); \
     static constexpr size_t ElementSize = sizeof(elem_type); \
     static constexpr size_t Lanes = (BatchSize / ElementSize); \
-    static constexpr size_t BatchAlignment = alignof(batch_type); \
+    static constexpr size_t BatchAlignment = batch_alignment; \
     \
     /* static check */ \
     static_assert(Lanes % 2 == 0, "Lanes must be 2 * N");
