@@ -11,12 +11,12 @@ struct SimdOp<SimdInstruction::AVX, float>
 {
     TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX, float, __m256)
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV load(float const* mem) noexcept
+    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV load(const float* mem) noexcept
     {
         return _mm256_load_ps(mem);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV loadu(float const* mem) noexcept
+    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV loadu(const float* mem) noexcept
     {
         return _mm256_loadu_ps(mem);
     }

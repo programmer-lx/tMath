@@ -12,12 +12,12 @@ struct SimdOp<SimdInstruction::SSE2, float>
 {
     TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE2, float, __m128)
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV load(float const* mem) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV load(const float* mem) noexcept
     {
         return _mm_load_ps(mem);
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV loadu(float const* mem) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV loadu(const float* mem) noexcept
     {
         return _mm_loadu_ps(mem);
     }
