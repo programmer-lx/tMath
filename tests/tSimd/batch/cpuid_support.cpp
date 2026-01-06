@@ -4,11 +4,18 @@
 
 TEST(cpuid, support)
 {
+    const auto& result = tsimd::InstructionSelector::get_support_info();
 
-    auto result = tsimd::InstructionSelector::get_support_info();
-
+    EXPECT_TRUE(result.SSE == true);
     EXPECT_TRUE(result.SSE2 == true);
+    EXPECT_TRUE(result.SSE3 == true);
+    EXPECT_TRUE(result.SSSE3 == true);
+    EXPECT_TRUE(result.SSE4_1 == true);
+    EXPECT_TRUE(result.SSE4_2 == true);
     EXPECT_TRUE(result.AVX == true);
+    EXPECT_TRUE(result.F16C == true);
+    EXPECT_TRUE(result.FMA3 == true);
+    EXPECT_TRUE(result.AVX2 == true);
 }
 
 int main(int argc, char **argv)

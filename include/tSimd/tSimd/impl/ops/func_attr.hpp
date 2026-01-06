@@ -2,12 +2,6 @@
 
 #include "../defs.hpp"
 
-// scalar
-#define TSIMD_OP_SCALAR_API \
-    TSIMD_FORCE_INLINE \
-    TSIMD_FLATTEN
-
-
 
 // sse2
 #define TSIMD_SSE2_INTRINSIC_ATTR TSIMD_FUNC_ATTR_INTRINSIC_TARGETS("sse2")

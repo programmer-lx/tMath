@@ -6,7 +6,8 @@
 #include <new>
 
 #include "impl/platform.hpp"
-#include "impl/ops/simd_instruction_select.hpp"
+#include "impl/ops/dispatch.hpp"
+
 
 TSIMD_NAMESPACE_BEGIN
 

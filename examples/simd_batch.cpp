@@ -51,7 +51,7 @@ namespace tsimd
 #if TSIMD_ONCE
 
 // export impl function
-TSIMD_DYN_EXPORT(kernel_dyn_impl);
+TSIMD_DYN_DISPATCH_FUNC(kernel_dyn_impl);
 
 void kernel(const float* arr, const size_t N, float* out_result) noexcept
 {

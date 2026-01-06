@@ -1,30 +1,11 @@
 #pragma once
 
-// 建议在windows下使用MSVC (测试除外)
-#ifndef TSIMD_IS_TESTING
-    #if defined(_WIN64) || defined(_WIN32)
-        #if !defined(_MSC_VER) || defined(__clang__)
-            #warning "It is recommended to use the MSVC compiler on the Windows platform."
-        #endif
-    #endif
-#endif
-
 // --- X86 系列 ---
 #if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
     #define TSIMD_X86_64
     #define TSIMD_X86_ANY
-#elif defined(_M_IX86) || defined(__i386__) || defined(__i386)
-    #define TSIMD_X86_32
-    #define TSIMD_X86_ANY
-#endif
-
-// --- ARM 系列 ---
-#if defined(__aarch64__) || defined(_M_ARM64)
-    #define TSIMD_ARM_64
-    #define TSIMD_ARM_ANY
-#elif defined(__arm__) || defined(_M_ARM)
-    #define TSIMD_ARM_32
-    #define TSIMD_ARM_ANY
+#else
+    #error "Now tSimd library only support x86-64."
 #endif
 
 
@@ -36,7 +17,7 @@
 // __F16C__ macro -> F16C
 // __FMA__  macro -> FMA3
 // __AVX__ macro -> AVX
-// Win64 -> SSE2
+// x86 64 -> SSE2
 // arm -> NEON
 
 
