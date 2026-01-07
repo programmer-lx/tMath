@@ -52,9 +52,16 @@ def main():
             default="min",
             help="Build mode: 'min' for single compiler & Debug only, 'max' for all compilers & Debug/Release."
         )
+        parser.add_argument(
+            "--github_ci",
+            choices=["true", "false"],
+            default="false",
+            help="When testing in github CI, input --github_ci=true, or false."
+        )
         args = parser.parse_args()
 
         test_mode = args.test_mode
+        is_in_github_ci = args.github_ci;
 
         """
         编译选项: 格式 (build config, -DTMATH_TEST_OPTION[od, o2, gl])
@@ -76,6 +83,8 @@ def main():
             for name, c_compiler, cxx_compiler, build_subdir in configs:
                 current_build_dir = build_base / (build_subdir + '_' + OS_NAME + '_' + build_cfg + '_' + test_option)
 
+                cmake_test_config_github_ci = "-DTSIMD_TEST_GITHUB_CI" if is_in_github_ci else ""
+
                 # 1. 配置
                 run_command([
                     "cmake",
@@ -85,7 +94,8 @@ def main():
                     f"-DCMAKE_C_COMPILER={c_compiler}",
                     f"-DCMAKE_CXX_COMPILER={cxx_compiler}",
                     "-DTMATH_BUILD_TESTS=ON",
-                    f"-DTMATH_TEST_OPTION={test_option}"
+                    f"-DTMATH_TEST_OPTION={test_option}",
+                    cmake_test_config_github_ci
                 ])
 
                 print("\n" + "=" * 50)

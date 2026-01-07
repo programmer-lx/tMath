@@ -5,6 +5,8 @@
 
 #include "../test.hpp"
 
+#ifndef TSIMD_TEST_GITHUB_CI
+
 #if defined(TSIMD_COMPILER_GCC) || defined(TSIMD_COMPILER_CLANG)
     #define TEST_FUNC_ATTR __attribute__((target("avx512f")))
 #else
@@ -39,12 +41,7 @@ TEST(not_support, avx512_failed)
 {
     const auto& result = tsimd::InstructionSelector::get_support_info();
 
-    // github ci 的 msvc 编译器支持AVX512-f
-#ifdef _MSC_VER
-    EXPECT_TRUE(result.AVX512_F);
-#else
     EXPECT_FALSE(result.AVX512_F); // must be failed
-#endif
 
     int idx = -1;
     // select in runtime
@@ -63,6 +60,8 @@ TEST(not_support, avx512_failed)
 
     fn_arr[idx](); // also test this
 }
+
+#endif // NO_GITHUB_CI
 
 int main(int argc, char **argv)
 {
