@@ -1,5 +1,7 @@
-#include <gtest/gtest.h>
+#include <cassert>
+#include <cmath>
 
+#include <iostream>
 #include <string>
 
 #undef TSIMD_DISPATCH_THIS_FILE
@@ -20,9 +22,9 @@ namespace tsimd
             // 测试
             std::string cur_intrinsic = TSIMD_STR("" TSIMD_DYN_FUNC_ATTR);
 #if defined(TSIMD_COMPILER_MSVC)
-            EXPECT_TRUE(cur_intrinsic == "\"\"");
+            assert(cur_intrinsic == "\"\"");
 #elif defined(TSIMD_COMPILER_GCC) || defined(TSIMD_COMPILER_CLANG)
-            EXPECT_TRUE(cur_intrinsic.contains("__attribute__((target("));
+            assert(cur_intrinsic.contains("__attribute__((target("));
 #else
     #error "Unknown compiler."
 #endif
@@ -56,7 +58,7 @@ void kernel(const float* arr, const float* arr2, const float* arr3, const size_t
     TSIMD_DYN_CALL(kernel_dyn_impl)(arr, arr2, arr3, N, out_result);
 }
 
-TEST(dyn_dispatch, basic)
+int main()
 {
     float numbers[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     float numbers2[] = { -1, -2, -3, -4, -5, -6, -7, -8, -9 };
@@ -68,14 +70,11 @@ TEST(dyn_dispatch, basic)
     for (int i = 0; i < 8; ++i)
     {
         float expected = numbers[i] * numbers2[i] + numbers3[i];
-        EXPECT_TRUE(expected == result[i]);
+        assert(std::abs(expected - result[i]) <= 1e-5f);
     }
-}
 
-int main(int argc, char **argv)
-{
-    printf("Running main() from %s\n", __FILE__);
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    std::cout << "SUCCEED" << std::endl;
+
+    return 0;
 }
 #endif

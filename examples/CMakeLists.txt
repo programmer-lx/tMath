@@ -1,8 +1,8 @@
 function(example_add_o3_optimization TARGET_NAME)
     if(MSVC)
-        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:/Ox /GL>)
+        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:/O2 /Gv>)
     else()
-        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O3>)
+        target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O2>)
     endif()
 endfunction()
 
@@ -12,6 +12,6 @@ if(MSVC)
 endif()
 
 add_executable(example_simd_batch simd_batch.cpp)
-target_link_libraries(example_simd_batch PRIVATE tSimd gtest)
+target_link_libraries(example_simd_batch PRIVATE tSimd)
 target_include_directories(example_simd_batch PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 example_add_o3_optimization(example_simd_batch)
