@@ -63,6 +63,11 @@ struct SimdOp<SimdInstruction::Scalar, float>
     {
         return v;
     }
+
+    TSIMD_OP_SCALAR_API static float TSIMD_SCALAR_CALL_CONV TSIMD_op_mul_add(batch_t a, batch_t b, batch_t c) noexcept
+    {
+        return a * b + c;
+    }
 };
 
 TSIMD_NAMESPACE_END

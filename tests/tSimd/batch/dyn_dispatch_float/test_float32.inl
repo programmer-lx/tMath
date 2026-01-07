@@ -411,3 +411,67 @@ TEST(dyn_dispatch_x86_float32, sum)
     EXPECT_FLOAT_EQ(r, expected);
 }
 #endif
+
+// ------------------------------------------ mul_add ------------------------------------------
+namespace tsimd::TSIMD_DYN_INSTRUCTION
+{
+    TSIMD_DYN_FUNC_ATTR
+    void kernel_mul_add_impl(
+        const float* TSIMD_RESTRICT a,
+        const float* TSIMD_RESTRICT b,
+        const float* TSIMD_RESTRICT c,
+        float* TSIMD_RESTRICT out) noexcept
+    {
+        constexpr size_t TOTAL = 16;
+
+        using op = TSIMD_CURRENT_OP(float);
+        constexpr size_t Step = op::Lanes;
+
+        float sum = 0.0f;
+        for (size_t i = 0; i < TOTAL; i += Step)
+        {
+            sum += op::sum(op::mul_add(
+                op::loadu(a + i),
+                op::loadu(b + i),
+                op::loadu(c + i)
+            ));
+        }
+        *out = sum;
+    }
+}
+
+#if TSIMD_ONCE
+TSIMD_DYN_DISPATCH_FUNC(kernel_mul_add_impl);
+
+static float kernel_mul_add(const float* a, const float* b, const float* c) noexcept
+{
+    float out;
+    TSIMD_DYN_CALL(kernel_mul_add_impl)(a, b, c, &out);
+    return out;
+}
+
+TEST(dyn_dispatch_x86_float32, mul_add)
+{
+    constexpr size_t TOTAL = 16;
+    constexpr size_t ALIGNMENT = 32;
+
+    alignas(ALIGNMENT) float a[TOTAL];
+    alignas(ALIGNMENT) float b[TOTAL];
+    alignas(ALIGNMENT) float c[TOTAL];
+
+    for (size_t i = 0; i < TOTAL; ++i)
+    {
+        a[i] = float(i + 1);        // 1,2,3,...
+        b[i] = float(i + 2);        // 2,3,4,...
+        c[i] = float(i + 3);        // 3,4,5,...
+    }
+
+    float r = kernel_mul_add(a, b, c);
+
+    float expected = 0.0f;
+    for (size_t i = 0; i < TOTAL; ++i)
+        expected += a[i] * b[i] + c[i];
+
+    EXPECT_FLOAT_EQ(r, expected);
+}
+#endif

@@ -79,6 +79,11 @@ struct SimdOp<SimdInstruction::SSE, float>
         t1 = _mm_add_ps(t1, v);
         return _mm_cvtss_f32(t1);
     }
+
+    TSIMD_OP_SSE_API static batch_t TSIMD_CALL_CONV TSIMD_op_mul_add(batch_t a, batch_t b, batch_t c) noexcept
+    {
+        return _mm_add_ps(_mm_mul_ps(a, b), c);
+    }
 };
 
 TSIMD_NAMESPACE_END

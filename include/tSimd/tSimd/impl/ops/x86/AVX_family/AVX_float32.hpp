@@ -82,6 +82,11 @@ struct SimdOp<SimdInstruction::AVX, float>
         low = _mm_add_ps(low, high);
         return _mm_cvtss_f32(low);
     }
+
+    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_mul_add(batch_t a, batch_t b, batch_t c) noexcept
+    {
+        return _mm256_add_ps(_mm256_mul_ps(a, b), c);
+    }
 };
 
 TSIMD_NAMESPACE_END
