@@ -83,7 +83,7 @@ def main():
             for name, c_compiler, cxx_compiler, build_subdir in configs:
                 current_build_dir = build_base / (build_subdir + '_' + OS_NAME + '_' + build_cfg + '_' + test_option)
 
-                cmake_test_config_github_ci = "-DTSIMD_TEST_GITHUB_CI" if is_in_github_ci else ""
+                cmake_test_config_github_ci = "-DTSIMD_TEST_GITHUB_CI" if is_in_github_ci == "true" else ""
 
                 # 1. 配置
                 run_command([
@@ -95,7 +95,7 @@ def main():
                     f"-DCMAKE_CXX_COMPILER={cxx_compiler}",
                     "-DTMATH_BUILD_TESTS=ON",
                     f"-DTMATH_TEST_OPTION={test_option}",
-                    cmake_test_config_github_ci
+                    str(cmake_test_config_github_ci)
                 ])
 
                 print("\n" + "=" * 50)
