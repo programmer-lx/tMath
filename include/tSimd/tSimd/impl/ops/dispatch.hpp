@@ -1,12 +1,14 @@
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
-#include <type_traits>
+
 
 #if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
     #include <cstdlib> // std::abort
 #endif
+
+#include <type_traits>
+#include <concepts>
 
 #if defined(_MSC_VER)
     #include <intrin.h>
@@ -16,6 +18,7 @@
 
 #include "../platform.hpp"
 #include "func_attr.hpp"
+#include "op_names.hpp"
 
 TSIMD_NAMESPACE_BEGIN
 
@@ -61,8 +64,8 @@ namespace detail
         // see https://en.wikipedia.org/wiki/CPUID
 
         // ECX 寄存器的 feature
-        SSE3        = 0 , // EAX 1, ECX 0
-        SSSE3       = 9 , // EAX 1, ECX 9
+        SSE3        = 0 , // EAX 1, ECX  0
+        SSSE3       = 9 , // EAX 1, ECX  9
         FMA3        = 12, // EAX 1, ECX 12
         SSE4_1      = 19, // EAX 1, ECX 19
         SSE4_2      = 20, // EAX 1, ECX 20
@@ -78,11 +81,11 @@ namespace detail
 
     enum class CpuFeatureIndex_EAX7 : uint32_t
     {
-        AVX2        = 5 , // EAX 7, EBX 5
+        AVX2        = 5 , // EAX 7, EBX  5
         AVX_512_F   = 16, // EAX 7, EBX 16
     };
 
-    enum class CpuXSaveStateIndex : uint32_t
+    enum class CpuXSaveStateIndex : uint64_t
     {
         // see https://en.wikipedia.org/wiki/CPUID XSAVE State-components
 
@@ -100,27 +103,27 @@ namespace detail
     };
 
     template<typename T>
-    constexpr uint32_t to_u32(T val) noexcept
+    using underlying_t =
+        std::conditional_t<
+            std::is_enum_v<T>,
+            std::underlying_type_t<T>,
+            T
+        >;
+
+    template<typename T>
+        requires (std::is_enum_v<T> || std::is_integral_v<T>)
+    static constexpr underlying_t<T> underlying(const T val) noexcept
     {
-        if constexpr (std::is_enum_v<T>)
-        {
-            return static_cast<std::underlying_type_t<T>>(val);
-        }
-        else
-        {
-            return static_cast<uint32_t>(val);
-        }
+        return static_cast<underlying_t<T>>(val);
     }
 
     template<typename T, typename U>
     static constexpr bool bit_is_open(T data, U bit_pos) noexcept
     {
-        return (to_u32(data) & (static_cast<uint32_t>(1) << to_u32(bit_pos))) != 0;
-    }
+        static_assert(sizeof(T) == sizeof(U));
 
-    inline bool cpu_feature_group_supports(uint32_t reg, uint32_t group_mask) noexcept
-    {
-        return ( (reg & group_mask) == group_mask );
+        using Type = underlying_t<U>;
+        return (static_cast<Type>(data) & (static_cast<Type>(1) << static_cast<Type>(bit_pos))) != 0;
     }
 } // namespace detail
 
@@ -128,6 +131,8 @@ namespace detail
 struct InstructionSetSupports
 {
     // 从低到高排序
+
+    static constexpr bool Scalar = true;
 
     // SSE family
     bool SSE        = false;
@@ -139,7 +144,11 @@ struct InstructionSetSupports
 
     // AVX family
     bool AVX        = false;
-    bool F16C = false, FMA3 = false; // 这两个同级，都依赖于AVX
+
+    // 这两个是独立指令集，在tsimd库中，AVX的op不使用FMA3指令，AVX2的op分成两套:
+    // 1. AVX2, 2. AVX2+FMA3。一套不使用FMA3，另一套使用FMA3
+    bool F16C = false, FMA3 = false;
+
     bool AVX2       = false;
 
     // AVX-512 family
@@ -149,15 +158,19 @@ struct InstructionSetSupports
 // 这个枚举的值就是函数指针表的索引，所以需要进行平台判断
 enum class SimdInstruction : int
 {
+    Scalar = 0,
+
     // x86
 #if defined(TSIMD_X86_ANY)
-    SSE2 = 0,
+    SSE2,
     AVX,
+    // AVX2, // TODO
+    // AVX2_FMA3,
 #endif
 
     Num
 };
-static_assert(static_cast<int>(SimdInstruction::Num) > 0, "Number of Simd Instruction should > 0.");
+static_assert(detail::underlying(SimdInstruction::Num) > 0, "Number of Simd Instruction should > 0.");
 
 class InstructionSelector final
 {
@@ -180,28 +193,17 @@ private:
             return result;
         }
 
-        // 查询 EAX 1
+        // 查询 EAX 1, ECX 0
         cpuid(1, 0, abcd);
         const uint32_t ecx = abcd[2];
         const uint32_t edx = abcd[3];
 
         // ------------------------- SSE family -------------------------
-        // SSE
         result.SSE = bit_is_open(edx, CpuFeatureIndex_EAX1::SSE);
-
-        // SSE2
         result.SSE2 = result.SSE && bit_is_open(edx, CpuFeatureIndex_EAX1::SSE2);
-
-        // SSE3
         result.SSE3 = result.SSE2 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSE3);
-
-        // SSSE3
         result.SSSE3 = result.SSE3 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSSE3);
-
-        // SSE4.1
         result.SSE4_1 = result.SSSE3 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSE4_1);
-
-        // SSE4.2
         result.SSE4_2 = result.SSE4_1 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSE4_2);
 
 
@@ -216,13 +218,8 @@ private:
             const bool os_support_avx = bit_is_open(xcr0, CpuXSaveStateIndex::SSE) &&
                                         bit_is_open(xcr0, CpuXSaveStateIndex::AVX);
 
-            // AVX
             result.AVX = bit_is_open(ecx, CpuFeatureIndex_EAX1::AVX) && os_support_avx;
-
-            // F16C
             result.F16C = result.AVX && bit_is_open(ecx, CpuFeatureIndex_EAX1::F16C);
-
-            // FMA3
             result.FMA3 = result.AVX && bit_is_open(ecx, CpuFeatureIndex_EAX1::FMA3);
 
             // ------------------ EAX 7 ------------------
@@ -231,11 +228,10 @@ private:
                 return result;
             }
 
-            // EAX 7
+            // EAX 7, ECX 0
             cpuid(7, 0, abcd);
             const uint32_t ebx = abcd[1];
 
-            // AVX2
             result.AVX2 = result.AVX && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX2);
 
 
@@ -244,7 +240,7 @@ private:
                                             bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_K0_K7) &&
                                             bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_LOW_256) &&
                                             bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_HIGH_256);
-            // AVX-512-F
+
             result.AVX_512_F = result.AVX2 && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX_512_F) && os_support_avx_512;
         }
 
@@ -261,11 +257,13 @@ public:
 private:
     static inline int select_func_index()
     {
+        using namespace detail;
+
         const auto& supports = get_support_info();
         
         // 如果正在测试，则强制选择那个指令，如果那个指令不支持，则直接报错退出即可
 #if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
-        int fn_idx = static_cast<int>(SimdInstruction::TSIMD_TEST_INTRINSIC);
+        int fn_idx = underlying(SimdInstruction::TSIMD_TEST_INTRINSIC);
         if (!supports.TSIMD_TEST_INTRINSIC)
         {
             std::abort();
@@ -276,34 +274,35 @@ private:
         // 从最高级的指令往下判断
         if (supports.AVX)
         {
-            return static_cast<int>(SimdInstruction::AVX);
+            return underlying(SimdInstruction::AVX);
         }
 
         if (supports.SSE2)
         {
-            return static_cast<int>(SimdInstruction::SSE2);
+            return underlying(SimdInstruction::SSE2);
         }
 
-        // 按理来说，不应该到达这里，但是这里也给出了一个0索引，如果目标CPU不支持最低的SIMD指令，在调用的时候也是会报错的
-        // 这里应该要给出友好的文字提示，提示用户的电脑不支持这个软件
-        // TODO tips
-        return 0;
+        // fallback to scalar
+        return underlying(SimdInstruction::Scalar);
     }
     
     static inline size_t compute_alignment() noexcept
     {
         const auto& supports = get_support_info();
+        if (supports.AVX_512_F)
+        {
+            return Alignment::AVX512_Family;
+        }
         if (supports.AVX)
         {
-            return 32;
+            return Alignment::AVX_Family;
         }
-        if (supports.SSE2)
+        if (supports.SSE)
         {
-            return 16;
+            return Alignment::SSE_Family;
         }
 
-        // scalar = 4
-        return 4;
+        return Alignment::Scalar;
     }
 
 public:
@@ -326,6 +325,9 @@ public:
     &TSIMD_NAMESPACE_NAME::instruction::func_name,
 
 // ---------------------------------------------- 平台判断 ----------------------------------------------
+// Scalar
+#define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, Scalar)
+
 // x86 指令集
 #if defined(TSIMD_X86_ANY)
     #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
@@ -337,6 +339,7 @@ public:
 
 // 不同后端的函数指针表
 #define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
+    TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX_FUNC_IMPL(func_name)
 
@@ -395,7 +398,7 @@ struct SimdOp
     static constexpr size_t BatchAlignment = batch_alignment; \
     \
     /* static check */ \
-    static_assert(Lanes % 2 == 0, "Lanes must be 2 * N");
+    static_assert(Lanes % 2 == 0 || Lanes == 1, "Lanes must be 2 * N or 1");
 
 
 TSIMD_NAMESPACE_END

@@ -1,11 +1,11 @@
 #pragma once
 
+#include <cstddef>
+
 // --- X86 系列 ---
 #if defined(_M_X64) || defined(__x86_64__) || defined(__amd64__)
     #define TSIMD_X86_64
     #define TSIMD_X86_ANY
-#else
-    #error "Now tSimd library only support x86-64."
 #endif
 
 
@@ -37,3 +37,20 @@
 // tsimd headers
 
 #include "defs.hpp"
+
+#define TSIMD_ALIGNMENT_SCALAR 4
+#define TSIMD_ALIGNMENT_SSE_FAMILY 16
+#define TSIMD_ALIGNMENT_AVX_FAMILY 32
+#define TSIMD_ALIGNMENT_AVX512_FAMILY 64
+
+TSIMD_NAMESPACE_BEGIN
+
+namespace Alignment
+{
+    static constexpr size_t Scalar = TSIMD_ALIGNMENT_SCALAR;
+    static constexpr size_t SSE_Family = TSIMD_ALIGNMENT_SSE_FAMILY;
+    static constexpr size_t AVX_Family = TSIMD_ALIGNMENT_AVX_FAMILY;
+    static constexpr size_t AVX512_Family = TSIMD_ALIGNMENT_AVX512_FAMILY;
+}
+
+TSIMD_NAMESPACE_END

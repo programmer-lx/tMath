@@ -2,10 +2,16 @@
 
 #include "../defs.hpp"
 
+// scalar
+#define TSIMD_SCALAR_INTRINSIC_ATTR
+#define TSIMD_OP_SCALAR_API \
+    TSIMD_FORCE_INLINE \
+    TSIMD_FLATTEN \
+    TSIMD_SCALAR_INTRINSIC_ATTR
+
 
 // sse2
 #define TSIMD_SSE2_INTRINSIC_ATTR TSIMD_FUNC_ATTR_INTRINSIC_TARGETS("sse2")
-
 #define TSIMD_OP_SSE2_API \
     TSIMD_FORCE_INLINE \
     TSIMD_FLATTEN \
@@ -19,16 +25,16 @@
 
 
 
-// avx
+// avx(no fma3)
 #define TSIMD_AVX_INTRINSIC_ATTR TSIMD_FUNC_ATTR_INTRINSIC_TARGETS("avx")
-
 #define TSIMD_OP_AVX_API \
     TSIMD_FORCE_INLINE \
     TSIMD_FLATTEN \
     TSIMD_AVX_INTRINSIC_ATTR
 
-// fma
 
 // avx2
+
+// avx2+fma3
 
 // avx512

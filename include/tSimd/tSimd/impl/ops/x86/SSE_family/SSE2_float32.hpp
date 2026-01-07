@@ -10,59 +10,59 @@ TSIMD_NAMESPACE_BEGIN
 template<>
 struct SimdOp<SimdInstruction::SSE2, float>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE2, float, __m128, 16)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE2, float, __m128, Alignment::SSE_Family)
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV load(const float* mem) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_load(const float* mem) noexcept
     {
         return _mm_load_ps(mem);
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV loadu(const float* mem) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_loadu(const float* mem) noexcept
     {
         return _mm_loadu_ps(mem);
     }
 
-    TSIMD_OP_SSE2_API static void TSIMD_CALL_CONV store(float* mem, batch_t v) noexcept
+    TSIMD_OP_SSE2_API static void TSIMD_CALL_CONV TSIMD_op_store(float* mem, batch_t v) noexcept
     {
         _mm_store_ps(mem, v);
     }
 
-    TSIMD_OP_SSE2_API static void TSIMD_CALL_CONV storeu(float* mem, batch_t v) noexcept
+    TSIMD_OP_SSE2_API static void TSIMD_CALL_CONV TSIMD_op_storeu(float* mem, batch_t v) noexcept
     {
         _mm_storeu_ps(mem, v);
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV zero() noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_zero() noexcept
     {
         return _mm_setzero_ps();
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV set(float x) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_set(float x) noexcept
     {
         return _mm_set1_ps(x);
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV add(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_add(batch_t lhs, batch_t rhs) noexcept
     {
         return _mm_add_ps(lhs, rhs);
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV sub(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_sub(batch_t lhs, batch_t rhs) noexcept
     {
         return _mm_sub_ps(lhs, rhs);
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV mul(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_mul(batch_t lhs, batch_t rhs) noexcept
     {
         return _mm_mul_ps(lhs, rhs);
     }
 
-    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV div(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SSE2_API static batch_t TSIMD_CALL_CONV TSIMD_op_div(batch_t lhs, batch_t rhs) noexcept
     {
         return _mm_div_ps(lhs, rhs);
     }
 
-    TSIMD_OP_SSE2_API static float TSIMD_CALL_CONV sum(batch_t v) noexcept
+    TSIMD_OP_SSE2_API static float TSIMD_CALL_CONV TSIMD_op_sum(batch_t v) noexcept
     {
         // [d, c, b, a]
         //       +

@@ -9,7 +9,7 @@
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
 
-#include "test_float32.inl"
+#include "../../test_float32.inl"
 
 namespace tsimd
 {
