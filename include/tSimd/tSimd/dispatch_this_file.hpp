@@ -6,7 +6,6 @@
     #error "has not defined TSIMD_DISPATCH_THIS_FILE"
 #endif
 
-#define TSIMD_DETAIL_LAST_DISPATCH 0
 
 #undef TSIMD_ONCE
 #define TSIMD_ONCE 0
@@ -56,10 +55,8 @@
 
 
 // once
-#if TSIMD_DETAIL_LAST_DISPATCH
-    #undef TSIMD_ONCE
-    #define TSIMD_ONCE 1
-#endif
+#undef TSIMD_ONCE
+#define TSIMD_ONCE 1
 
 
 
