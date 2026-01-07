@@ -1,6 +1,8 @@
+#include <tSimd/impl/platform.hpp>
+#ifdef TSIMD_X86_ANY
+
 #define TSIMD_TEST_INTRINSIC AVX2
 
-#include "../test.hpp"
 
 #include <string>
 
@@ -8,6 +10,10 @@
 #define TSIMD_DISPATCH_THIS_FILE "batch/dyn_dispatch_float/x86/float32/AVX2_float32.cpp" // this file
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
+
+
+
+#include "../test.hpp"
 
 #include "../../test_float32.inl"
 
@@ -79,5 +85,11 @@ int main(int argc, char **argv)
     printf("Running main() from %s\n", __FILE__);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
+}
+#endif
+#else
+int main(int argc, char **argv)
+{
+    return 0;
 }
 #endif

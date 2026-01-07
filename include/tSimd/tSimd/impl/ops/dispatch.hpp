@@ -133,6 +133,7 @@ struct InstructionSetSupports
 
     static constexpr bool Scalar = true;
 
+    // ------------------------- x86 -------------------------
     // SSE family
     bool SSE        = false;
     bool SSE2       = false;
@@ -153,6 +154,9 @@ struct InstructionSetSupports
 
     // AVX-512 family
     bool AVX512_F   = false; // AVX512F支持FMA运算，不需要单独划分FMA3支持
+
+    // ------------------------- ARM -------------------------
+    bool NEON       = false;
 };
 
 // 这个枚举的值就是函数指针表的索引，所以需要进行平台判断
@@ -169,6 +173,11 @@ enum class SimdInstruction : int
     AVX2_FMA3,
 #endif
 
+    // ARM
+#if defined(TSIMD_ARM_ANY)
+    NEON,
+#endif
+
     Num
 };
 static_assert(detail::underlying(SimdInstruction::Num) > 0, "Number of Simd Instruction should > 0.");
@@ -183,21 +192,29 @@ private:
         static InstructionSetSupports result{};
 
         uint32_t abcd[4]; // eax, ebx, ecx, edx
+        bool xsave = false;
+        bool os_xsave = false;
+        uint64_t xcr0 = 0;
+        bool os_support_avx = false;
+        bool os_support_avx_512 = false;
 
         cpuid(0, 0, abcd);
         const uint32_t max_leaf = abcd[0];
+        uint32_t ebx = 0;
+        uint32_t ecx = 0;
+        uint32_t edx = 0;
 
 
         // ------------------ EAX 1 ------------------
         if (max_leaf < 1) // 因为要读取EAX 1，所以 max leaf 必须 >= 1
         {
-            return result;
+            goto quit;
         }
 
         // 查询 EAX 1, ECX 0
         cpuid(1, 0, abcd);
-        const uint32_t ecx = abcd[2];
-        const uint32_t edx = abcd[3];
+        ecx = abcd[2];
+        edx = abcd[3];
 
         // ------------------------- SSE family -------------------------
         result.SSE = bit_is_open(edx, CpuFeatureIndex_EAX1::SSE);
@@ -208,16 +225,16 @@ private:
         result.SSE4_2 = result.SSE4_1 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSE4_2);
 
 
-        const bool xsave = bit_is_open(ecx, CpuFeatureIndex_EAX1::XSAVE);
-        const bool os_xsave = bit_is_open(ecx, CpuFeatureIndex_EAX1::OS_XSAVE);
+        xsave = bit_is_open(ecx, CpuFeatureIndex_EAX1::XSAVE);
+        os_xsave = bit_is_open(ecx, CpuFeatureIndex_EAX1::OS_XSAVE);
         // 只有在 xsave 和 os_xsave 为帧的时候，才能进行 xcr0 检查
         if (xsave && os_xsave)
         {
-            const uint64_t xcr0 = read_xcr0();
+            xcr0 = read_xcr0();
 
             // ------------------------- AVX family -------------------------
-            const bool os_support_avx = bit_is_open(xcr0, CpuXSaveStateIndex::SSE) &&
-                                        bit_is_open(xcr0, CpuXSaveStateIndex::AVX);
+            os_support_avx = bit_is_open(xcr0, CpuXSaveStateIndex::SSE) &&
+                             bit_is_open(xcr0, CpuXSaveStateIndex::AVX);
 
             result.AVX = bit_is_open(ecx, CpuFeatureIndex_EAX1::AVX) && os_support_avx;
             result.F16C = result.AVX && bit_is_open(ecx, CpuFeatureIndex_EAX1::F16C);
@@ -226,26 +243,27 @@ private:
             // ------------------ EAX 7 ------------------
             if (max_leaf < 7) // 因为要读取EAX 7，所以 max leaf 必须 >= 7
             {
-                return result;
+                goto quit;
             }
 
             // EAX 7, ECX 0
             cpuid(7, 0, abcd);
-            const uint32_t ebx = abcd[1];
+            ebx = abcd[1];
 
             result.AVX2 = result.AVX && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX2);
             result.AVX2_FMA3 = result.AVX2 && result.FMA3;
 
 
             // ------------------------- AVX-512 family -------------------------
-            const bool os_support_avx_512 = os_support_avx &&
-                                            bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_K0_K7) &&
-                                            bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_LOW_256) &&
-                                            bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_HIGH_256);
+            os_support_avx_512 = os_support_avx &&
+                                 bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_K0_K7) &&
+                                 bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_LOW_256) &&
+                                 bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_HIGH_256);
 
             result.AVX512_F = result.AVX2 && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX_512_F) && os_support_avx_512;
         }
 
+    quit:
         return result;
     }
 
@@ -360,6 +378,13 @@ public:
     #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(...)
 #endif
 
+// ARM 指令集
+#if defined(TSIMD_ARM_ANY)
+    #define TSIMD_DETAIL_NEON_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, NEON)
+#else
+    #define TSIMD_DETAIL_NEON_FUNC_IMPL(...)
+#endif
+
 // 不同后端的函数指针表
 #define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
     /* ------------------------------------- scalar ------------------------------------- */ \
@@ -369,7 +394,9 @@ public:
     TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name)
+    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) \
+    /* ------------------------------------- ARM ------------------------------------- */ \
+    TSIMD_DETAIL_NEON_FUNC_IMPL(func_name)
 
 #if !defined(TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY)
     #error "have not defined DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY to cache the simd function pointers"

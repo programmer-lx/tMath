@@ -17,10 +17,18 @@
 #elif defined(_M_IX86) || defined(__i386__)
     #define TSIMD_X86_32
     #define TSIMD_X86_ANY
+// --- ARM 系列 ---
+// ----------------------------- ARM 64-bit -----------------------------
+#elif defined(__aarch64__) || defined(_M_ARM64)
+    #define TSIMD_ARM64
+    #define TSIMD_ARM_ANY
+// ----------------------------- ARM 32-bit -----------------------------
+#elif defined(__arm__) || defined(_M_ARM)
+    #define TSIMD_ARM32
+    #define TSIMD_ARM_ANY
 #else
-    #error "Unknown arch, tSimd can only support x86 arch."
+    #error "Unknown arch."
 #endif
-
 
 
 // SIMD support

@@ -62,6 +62,18 @@
 
 #endif // x86
 
+#if defined(TSIMD_ARM_ANY)
+
+    // ARM
+    #undef TSIMD_DYN_INSTRUCTION
+    #define TSIMD_DYN_INSTRUCTION NEON
+    // 此时 TSIMD_DYN_FUNC_ATTR 等于 NEON
+    #undef TSIMD_DYN_FUNC_ATTR
+    #define TSIMD_DYN_FUNC_ATTR TSIMD_NEON_INTRINSIC_ATTR
+    #include TSIMD_DISPATCH_THIS_FILE // dispatch
+
+#endif // ARM
+
 
 // last dispatch
 
