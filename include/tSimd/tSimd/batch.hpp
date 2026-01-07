@@ -19,7 +19,6 @@
     #include "impl/ops/x86/AVX_family/AVX2_FMA3_float32.hpp"
 
     // AVX-512 family
-    #include "impl/ops/x86/AVX512_family/AVX512_float32.hpp"
 #endif
 
 // clang-format on

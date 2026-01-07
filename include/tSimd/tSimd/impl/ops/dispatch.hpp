@@ -168,7 +168,6 @@ enum class SimdInstruction : int
     AVX,
     AVX2,
     AVX2_FMA3,
-    AVX512_F,
 #endif
 
     Num
@@ -276,11 +275,6 @@ private:
 #endif
 
         // 从最高级的指令往下判断
-        if (supports.AVX512_F)
-        {
-            return underlying(SimdInstruction::AVX512_F);
-        }
-
         if (supports.AVX2_FMA3)
         {
             return underlying(SimdInstruction::AVX2_FMA3);
@@ -359,14 +353,12 @@ public:
     #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
     #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
     #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
-    #define TSIMD_DETAIL_AVX512_F_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX512_F)
 #else
     #define TSIMD_DETAIL_SSE_FUNC_IMPL(...)
     #define TSIMD_DETAIL_SSE2_FUNC_IMPL(...)
     #define TSIMD_DETAIL_AVX_FUNC_IMPL(...)
     #define TSIMD_DETAIL_AVX2_FUNC_IMPL(...)
     #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(...)
-    #define TSIMD_DETAIL_AVX512_F_FUNC_IMPL(...)
 #endif
 
 // 不同后端的函数指针表
@@ -378,8 +370,7 @@ public:
     TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX512_F_FUNC_IMPL(func_name)
+    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name)
 
 #if !defined(TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY)
     #error "have not defined DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY to cache the simd function pointers"
