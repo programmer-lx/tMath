@@ -162,6 +162,7 @@ enum class SimdInstruction : int
 
     // x86
 #if defined(TSIMD_X86_ANY)
+    SSE,
     SSE2,
     AVX,
     // AVX2, // TODO
@@ -282,6 +283,11 @@ private:
             return underlying(SimdInstruction::SSE2);
         }
 
+        if (supports.SSE)
+        {
+            return underlying(SimdInstruction::SSE);
+        }
+
         // fallback to scalar
         return underlying(SimdInstruction::Scalar);
     }
@@ -330,6 +336,7 @@ public:
 
 // x86 指令集
 #if defined(TSIMD_X86_ANY)
+    #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE)
     #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
     #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
 #else
@@ -339,7 +346,10 @@ public:
 
 // 不同后端的函数指针表
 #define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
+    /* ------------------------------------- scalar ------------------------------------- */ \
     TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) \
+    /* ------------------------------------- x86 ------------------------------------- */ \
+    TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX_FUNC_IMPL(func_name)
 
