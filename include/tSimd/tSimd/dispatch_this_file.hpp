@@ -48,9 +48,9 @@
 // Scalar
 #undef TSIMD_DYN_INSTRUCTION
 #define TSIMD_DYN_INSTRUCTION Scalar
-// 此时 TSIMD_DYN_FUNC_ATTR 被清空
+// 此时 TSIMD_DYN_FUNC_ATTR 等于 Scalar
 #undef TSIMD_DYN_FUNC_ATTR
-#define TSIMD_DYN_FUNC_ATTR
+#define TSIMD_DYN_FUNC_ATTR TSIMD_SCALAR_INTRINSIC_ATTR
 // #include TSIMD_DISPATCH_THIS_FILE // dispatch (不需要include)
 
 

@@ -31,6 +31,8 @@
 
 // sse4.1
 
+// sse4.2
+
 
 
 // avx(no fma3)
