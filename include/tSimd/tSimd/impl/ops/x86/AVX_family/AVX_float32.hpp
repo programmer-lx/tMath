@@ -61,7 +61,7 @@ struct SimdOp<SimdInstruction::AVX, float>
         return _mm256_div_ps(lhs, rhs);
     }
 
-    TSIMD_OP_AVX_API static float TSIMD_CALL_CONV TSIMD_op_sum(batch_t v) noexcept
+    TSIMD_OP_AVX_API static float TSIMD_CALL_CONV TSIMD_op_reduce_sum(batch_t v) noexcept
     {
         // [8, 7, 6, 5, 4, 3, 2, 1]
         // hadd

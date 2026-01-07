@@ -153,7 +153,7 @@ struct InstructionSetSupports
     bool AVX2_FMA3  = false;
 
     // AVX-512 family
-    bool AVX_512_F  = false;
+    bool AVX512_F   = false; // AVX512F支持FMA运算，不需要单独划分FMA3支持
 };
 
 // 这个枚举的值就是函数指针表的索引，所以需要进行平台判断
@@ -168,6 +168,7 @@ enum class SimdInstruction : int
     AVX,
     AVX2,
     AVX2_FMA3,
+    AVX512_F,
 #endif
 
     Num
@@ -244,7 +245,7 @@ private:
                                             bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_LOW_256) &&
                                             bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_HIGH_256);
 
-            result.AVX_512_F = result.AVX2 && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX_512_F) && os_support_avx_512;
+            result.AVX512_F = result.AVX2 && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX_512_F) && os_support_avx_512;
         }
 
         return result;
@@ -275,6 +276,11 @@ private:
 #endif
 
         // 从最高级的指令往下判断
+        if (supports.AVX512_F)
+        {
+            return underlying(SimdInstruction::AVX512_F);
+        }
+
         if (supports.AVX2_FMA3)
         {
             return underlying(SimdInstruction::AVX2_FMA3);
@@ -307,7 +313,7 @@ private:
     static inline size_t compute_alignment() noexcept
     {
         const auto& supports = get_support_info();
-        if (supports.AVX_512_F)
+        if (supports.AVX512_F)
         {
             return Alignment::AVX512_Family;
         }
@@ -353,12 +359,14 @@ public:
     #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
     #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
     #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
+    #define TSIMD_DETAIL_AVX512_F_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX512_F)
 #else
     #define TSIMD_DETAIL_SSE_FUNC_IMPL(...)
     #define TSIMD_DETAIL_SSE2_FUNC_IMPL(...)
     #define TSIMD_DETAIL_AVX_FUNC_IMPL(...)
     #define TSIMD_DETAIL_AVX2_FUNC_IMPL(...)
     #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(...)
+    #define TSIMD_DETAIL_AVX512_F_FUNC_IMPL(...)
 #endif
 
 // 不同后端的函数指针表
@@ -370,7 +378,8 @@ public:
     TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name)
+    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_AVX512_F_FUNC_IMPL(func_name)
 
 #if !defined(TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY)
     #error "have not defined DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY to cache the simd function pointers"

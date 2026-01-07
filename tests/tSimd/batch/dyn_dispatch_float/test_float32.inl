@@ -376,7 +376,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
         float sum = 0.0f;
         for (size_t i = 0; i < TOTAL; i += Step)
         {
-            sum += op::sum(op::loadu(in + i));
+            sum += op::reduce_sum(op::loadu(in + i));
         }
         *out = sum;
     }
@@ -430,7 +430,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
         float sum = 0.0f;
         for (size_t i = 0; i < TOTAL; i += Step)
         {
-            sum += op::sum(op::mul_add(
+            sum += op::reduce_sum(op::mul_add(
                 op::loadu(a + i),
                 op::loadu(b + i),
                 op::loadu(c + i)

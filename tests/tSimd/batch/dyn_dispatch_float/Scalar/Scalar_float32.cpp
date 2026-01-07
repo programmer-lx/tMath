@@ -39,7 +39,7 @@ namespace tsimd
                 batch_t tmp = op::loadu(arr + i);
                 sum_n = op::add(sum_n, tmp);
             }
-            float sum = op::sum(sum_n);
+            float sum = op::reduce_sum(sum_n);
 
             float expected = 0.0f;
             for (size_t i = 0; i < N; ++i)

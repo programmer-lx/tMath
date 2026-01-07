@@ -13,7 +13,7 @@
 #define TSIMD_op_sub        sub
 #define TSIMD_op_mul        mul
 #define TSIMD_op_div        div
-#define TSIMD_op_sum        sum
+#define TSIMD_op_reduce_sum reduce_sum
 
 // fma operators
 #define TSIMD_op_mul_add    mul_add

@@ -59,7 +59,7 @@ struct SimdOp<SimdInstruction::Scalar, float>
         return lhs / rhs;
     }
 
-    TSIMD_OP_SCALAR_API static float TSIMD_SCALAR_CALL_CONV TSIMD_op_sum(batch_t v) noexcept
+    TSIMD_OP_SCALAR_API static float TSIMD_SCALAR_CALL_CONV TSIMD_op_reduce_sum(batch_t v) noexcept
     {
         return v;
     }

@@ -17,6 +17,9 @@ TEST(cpuid, support)
     EXPECT_TRUE(result.FMA3 == true);
     EXPECT_TRUE(result.AVX2 == true);
     EXPECT_TRUE(result.AVX2_FMA3 == true);
+
+    // test
+    EXPECT_TRUE(result.AVX512_F == true);
 }
 
 int main(int argc, char **argv)

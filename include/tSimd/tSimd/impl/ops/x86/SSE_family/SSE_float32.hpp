@@ -61,7 +61,7 @@ struct SimdOp<SimdInstruction::SSE, float>
         return _mm_div_ps(lhs, rhs);
     }
 
-    TSIMD_OP_SSE_API static float TSIMD_CALL_CONV TSIMD_op_sum(batch_t v) noexcept
+    TSIMD_OP_SSE_API static float TSIMD_CALL_CONV TSIMD_op_reduce_sum(batch_t v) noexcept
     {
         // [d, c, b, a]
         //       +
