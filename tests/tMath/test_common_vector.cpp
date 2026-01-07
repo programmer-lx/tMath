@@ -2,6 +2,12 @@
 
 #include "../test.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 
 // 辅助函数：判断向量所有分量是否为 NaN
 #define ExpectVecNaN(v) \
@@ -598,3 +604,6 @@ TEST(lerp, normal) {
     constexpr Vector2f res = tmath::lerp(a, b, 0.5f);
     static_assert(res[0] == 5.0f && res[1] == 15.0f);
 }
+
+
+TMATH_DIAGNOSTICS_POP

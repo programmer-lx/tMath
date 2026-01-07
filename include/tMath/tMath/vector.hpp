@@ -13,6 +13,12 @@
 #include "number.hpp"
 
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 TMATH_NAMESPACE_BEGIN
 
 // ============================================= operators =============================================
@@ -661,3 +667,5 @@ struct Vector2
 };
 
 TMATH_NAMESPACE_END
+
+TMATH_DIAGNOSTICS_POP

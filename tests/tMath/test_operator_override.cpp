@@ -2,6 +2,12 @@
 
 #include "../test.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 struct Vector2f
 {
     TMATH_FULL_VECTOR2(Vector2f, float)
@@ -17,3 +23,4 @@ TEST(tMath, operator_override)
     EXPECT_TRUE(tmath::approximately_all(c, {3, 3}));
 }
 
+TMATH_DIAGNOSTICS_POP

@@ -3,6 +3,12 @@
 #include "impl/fwd_vector.hpp"
 #include "impl/math_defs.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 TMATH_NAMESPACE_BEGIN
 
 template<is_quat Q, is_vector4 Vec4>
@@ -61,3 +67,5 @@ constexpr Q axis_angle(const Vec3& axis, const F angle)
 
 
 TMATH_NAMESPACE_END
+
+TMATH_DIAGNOSTICS_POP

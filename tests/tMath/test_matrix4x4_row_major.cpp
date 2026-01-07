@@ -3,6 +3,12 @@
 
 #include "../test.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 struct Vec4f
 {
     TMATH_FULL_VECTOR4(Vec4f, float)
@@ -469,3 +475,5 @@ TEST(matrix_gen, type_consistency)
     EXPECT_DOUBLE_EQ(m_double.data[0].data[0], 2.5);
     EXPECT_DOUBLE_EQ(m_double.data[1].data[0], 0.0);
 }
+
+TMATH_DIAGNOSTICS_POP

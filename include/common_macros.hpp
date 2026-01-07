@@ -31,7 +31,7 @@
     #define TMATH_UNLIKELY(expr) (expr)
     #define TMATH_PRAGMA(tokens) __pragma(tokens)
     #define TMATH_DIAGNOSTICS(tokens) TMATH_PRAGMA(warning(tokens))
-    #define TMATH_DIAGNOSTICS_DISABLE(msvc, gcc, clang) TMATH_DIAGNOSTICS(disable : msvc)
+    #define TMATH_IGNORE_WARNING(warnings) TMATH_DIAGNOSTICS(disable : warnings)
     #define TMATH_FUNC_ATTR_INTRINSIC_TARGETS(...)
 
 #elif defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG) // GCC clang
@@ -49,12 +49,15 @@
 
     #if !defined(TMATH_COMPILER_CLANG) // GCC only
         #define TMATH_DIAGNOSTICS(tokens) TMATH_PRAGMA(GCC diagnostic tokens)
-        #define TMATH_DIAGNOSTICS_DISABLE(msvc, gcc, clang) TMATH_DIAGNOSTICS(ignored gcc)
+        #define TMATH_IGNORE_WARNING(warnings) TMATH_DIAGNOSTICS(ignored warnings)
     #endif
 
     #if !defined(TMATH_COMPILER_GCC) // clang only
         #define TMATH_DIAGNOSTICS(tokens) TMATH_PRAGMA(clang diagnostic tokens)
-        #define TMATH_DIAGNOSTICS_DISABLE(msvc, gcc, clang) TMATH_DIAGNOSTICS(ignored clang)
+        #define TMATH_IGNORE_WARNING(warnings) TMATH_DIAGNOSTICS(ignored warnings)
     #endif
 
 #endif // MSVC
+
+#define TMATH_DIAGNOSTICS_PUSH TMATH_DIAGNOSTICS(push)
+#define TMATH_DIAGNOSTICS_POP TMATH_DIAGNOSTICS(pop)

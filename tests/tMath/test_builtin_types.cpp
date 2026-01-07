@@ -2,6 +2,12 @@
 
 #include "../test.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 TEST(builtin_types, vecN)
 {
     constexpr tmath::Vector<float, 4> v1 = { 1, 2, 3, 4 };
@@ -46,3 +52,5 @@ TEST(builtin_types, vec4)
 
     SUCCEED();
 }
+
+TMATH_DIAGNOSTICS_POP

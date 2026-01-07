@@ -4,6 +4,12 @@
 
 #include "math_defs.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 TMATH_NAMESPACE_BEGIN
 
 // ============================================= functions =============================================
@@ -44,3 +50,5 @@ constexpr Vec4 cross(const Vec4& lhs, const Vec4& rhs) noexcept
 }
 
 TMATH_NAMESPACE_END
+
+TMATH_DIAGNOSTICS_POP

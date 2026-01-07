@@ -2,6 +2,12 @@
 
 #include "../test.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 struct Vector2f
 {
     TMATH_FULL_VECTOR2(Vector2f, float)
@@ -95,3 +101,5 @@ TEST(vector2, cross)
         EXPECT_TRUE(tmath::cross(v1.x, v1.y, v2.x, v2.y) == 0);
     }
 }
+
+TMATH_DIAGNOSTICS_POP

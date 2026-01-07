@@ -2,6 +2,12 @@
 
 #include "../test.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 struct Vector3f
 {
     TMATH_FULL_VECTOR3(Vector3f, float)
@@ -65,3 +71,5 @@ TEST(vector3, cross)
     constexpr Vector3f result = tmath::cross(v1, v2);
     EXPECT_TRUE(tmath::approximately_all(result, { -16, -4, -2 }));
 }
+
+TMATH_DIAGNOSTICS_POP

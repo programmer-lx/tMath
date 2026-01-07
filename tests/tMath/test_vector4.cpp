@@ -2,6 +2,12 @@
 
 #include "../test.hpp"
 
+TMATH_DIAGNOSTICS_PUSH
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_IGNORE_WARNING("-Wmissing-braces")
+#endif
+
 struct Vector4f
 {
     TMATH_FULL_VECTOR4(Vector4f, float)
@@ -158,3 +164,5 @@ TEST(vector4, cross)
     constexpr Vector4f result = tmath::cross(v1, v2);
     EXPECT_TRUE(tmath::approximately_all(result, { -16, -4, -2, 0 }));
 }
+
+TMATH_DIAGNOSTICS_POP
