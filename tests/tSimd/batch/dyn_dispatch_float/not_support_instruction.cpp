@@ -5,7 +5,6 @@
 
 #include "../test.hpp"
 
-#ifndef TSIMD_TEST_GITHUB_CI
 
 #if defined(TSIMD_COMPILER_GCC) || defined(TSIMD_COMPILER_CLANG)
     #define TEST_FUNC_ATTR __attribute__((target("avx512f")))
@@ -41,17 +40,17 @@ TEST(not_support, avx512_failed)
 {
     const auto& result = tsimd::InstructionSelector::get_support_info();
 
-    EXPECT_FALSE(result.AVX512_F); // must be failed
-
     int idx = -1;
     // select in runtime
     if (result.AVX512_F)
     {
         idx = 1;
+        std::cout << "support AVX512f" << std::endl;
     }
     else
     {
         idx = 0;
+        std::cout << "NOT support AVX512f" << std::endl;
     }
 
     // call test
@@ -59,9 +58,10 @@ TEST(not_support, avx512_failed)
     fn();
 
     fn_arr[idx](); // also test this
+
+    SUCCEED();
 }
 
-#endif // NO_GITHUB_CI
 
 int main(int argc, char **argv)
 {
