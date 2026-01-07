@@ -11,57 +11,57 @@ struct SimdOp<SimdInstruction::AVX, float>
 {
     TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX, float, __m256, Alignment::AVX_Family)
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_load(const float* mem) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, load, (const float* mem))
     {
         return _mm256_load_ps(mem);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_loadu(const float* mem) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, loadu, (const float* mem))
     {
         return _mm256_loadu_ps(mem);
     }
 
-    TSIMD_OP_AVX_API static void TSIMD_CALL_CONV TSIMD_op_store(float* mem, batch_t v) noexcept
+    TSIMD_OP_SIG_AVX(void, store, (float* mem, batch_t v))
     {
         _mm256_store_ps(mem, v);
     }
 
-    TSIMD_OP_AVX_API static void TSIMD_CALL_CONV TSIMD_op_storeu(float* mem, batch_t v) noexcept
+    TSIMD_OP_SIG_AVX(void, storeu, (float* mem, batch_t v))
     {
         _mm256_storeu_ps(mem, v);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_zero() noexcept
+    TSIMD_OP_SIG_AVX(batch_t, zero, ())
     {
         return _mm256_setzero_ps();
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_set(float x) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, set, (float x))
     {
         return _mm256_set1_ps(x);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_add(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, add, (batch_t lhs, batch_t rhs))
     {
         return _mm256_add_ps(lhs, rhs);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_sub(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, sub, (batch_t lhs, batch_t rhs))
     {
         return _mm256_sub_ps(lhs, rhs);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_mul(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, mul, (batch_t lhs, batch_t rhs))
     {
         return _mm256_mul_ps(lhs, rhs);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_div(batch_t lhs, batch_t rhs) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, div, (batch_t lhs, batch_t rhs))
     {
         return _mm256_div_ps(lhs, rhs);
     }
 
-    TSIMD_OP_AVX_API static float TSIMD_CALL_CONV TSIMD_op_reduce_sum(batch_t v) noexcept
+    TSIMD_OP_SIG_AVX(float, reduce_sum, (batch_t v))
     {
         // [8, 7, 6, 5, 4, 3, 2, 1]
         // hadd
@@ -83,7 +83,7 @@ struct SimdOp<SimdInstruction::AVX, float>
         return _mm_cvtss_f32(low);
     }
 
-    TSIMD_OP_AVX_API static batch_t TSIMD_CALL_CONV TSIMD_op_mul_add(batch_t a, batch_t b, batch_t c) noexcept
+    TSIMD_OP_SIG_AVX(batch_t, mul_add, (batch_t a, batch_t b, batch_t c))
     {
         return _mm256_add_ps(_mm256_mul_ps(a, b), c);
     }

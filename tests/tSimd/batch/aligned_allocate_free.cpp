@@ -28,20 +28,20 @@ TEST(aligned_allocate, std_vector)
         constexpr size_t size = 88;
 
         Arr numbers;
-        for (int i = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
         {
             numbers.push_back(random_f(-2.0f, 2.0f));
         }
 
         float expected = 0.0f;
-        for (int i = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
         {
             expected += numbers[i];
         }
 
         // simd test
         __m256 sum_8 = _mm256_setzero_ps();
-        for (int i = 0; i < size; i += 8)
+        for (size_t i = 0; i < size; i += 8)
         {
             __m256 tmp = _mm256_load_ps(numbers.data() + i);
             sum_8 = _mm256_add_ps(sum_8, tmp);

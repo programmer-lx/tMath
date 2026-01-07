@@ -6,7 +6,7 @@
 #include "../test.hpp"
 
 
-#if defined(TSIMD_COMPILER_GCC) || defined(TSIMD_COMPILER_CLANG)
+#if defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG)
     #define TEST_FUNC_ATTR __attribute__((target("avx512f")))
 #else
     #define TEST_FUNC_ATTR

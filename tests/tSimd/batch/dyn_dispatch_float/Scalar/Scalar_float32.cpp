@@ -15,7 +15,7 @@ namespace tsimd
 {
     namespace TSIMD_DYN_INSTRUCTION
     {
-        TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TSIMD_RESTRICT arr, const size_t N, float* TSIMD_RESTRICT out_result) noexcept
+        TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TMATH_RESTRICT arr, const size_t N, float* TMATH_RESTRICT out_result) noexcept
         {
             using op = TSIMD_CURRENT_OP(float);
             using batch_t = op::batch_t;
@@ -30,7 +30,7 @@ namespace tsimd
             EXPECT_TRUE(op::Lanes == 1);
             EXPECT_TRUE(op::BatchAlignment == 4);
 
-            std::string cur_intrinsic = TSIMD_STR("" TSIMD_DYN_FUNC_ATTR);
+            std::string cur_intrinsic = TMATH_STR("" TSIMD_DYN_FUNC_ATTR);
             EXPECT_TRUE(cur_intrinsic == "\"\"");
 
             batch_t sum_n = op::zero();
@@ -40,12 +40,6 @@ namespace tsimd
                 sum_n = op::add(sum_n, tmp);
             }
             float sum = op::reduce_sum(sum_n);
-
-            float expected = 0.0f;
-            for (size_t i = 0; i < N; ++i)
-            {
-                expected += arr[i];
-            }
 
             *out_result = sum;
         }

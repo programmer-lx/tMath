@@ -1,10 +1,17 @@
 function(example_add_o3_optimization TARGET_NAME)
     if(MSVC)
         target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:/O2 /Gv>)
+        target_compile_options(${TARGET_NAME} PRIVATE /WX)
+        target_link_options(${TARGET_NAME} PRIVATE /WX)
     else()
         target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O2>)
+        target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror)
+        target_link_options(${TARGET_NAME} PRIVATE -Wl --fatal-warnings)
     endif()
 endfunction()
+
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+set(CMAKE_LINK_WARNING_AS_ERROR ON)
 
 if(MSVC)
     add_compile_options(/utf-8)

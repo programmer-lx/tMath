@@ -15,7 +15,7 @@ namespace tsimd
 {
     namespace TSIMD_DYN_INSTRUCTION
     {
-        TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TSIMD_RESTRICT arr, const float* TSIMD_RESTRICT arr2, const float* TSIMD_RESTRICT arr3, const size_t N, float* TSIMD_RESTRICT out_result) noexcept
+        TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TMATH_RESTRICT arr, const float* TMATH_RESTRICT arr2, const float* TMATH_RESTRICT arr3, const size_t N, float* TMATH_RESTRICT out_result) noexcept
         {
             using op = TSIMD_CURRENT_OP(float);
             using batch_t = op::batch_t;
@@ -30,10 +30,10 @@ namespace tsimd
             EXPECT_TRUE(op::Lanes == 8);
             EXPECT_TRUE(op::BatchAlignment == 32);
 
-            std::string cur_intrinsic = TSIMD_STR("" TSIMD_DYN_FUNC_ATTR);
-#if defined(TSIMD_COMPILER_MSVC)
+            std::string cur_intrinsic = TMATH_STR("" TSIMD_DYN_FUNC_ATTR);
+#if defined(TMATH_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
-#elif defined(TSIMD_COMPILER_GCC) || defined(TSIMD_COMPILER_CLANG)
+#elif defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG)
             EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"avx2,fma\")))");
 #else
     #error "Unknown compiler."

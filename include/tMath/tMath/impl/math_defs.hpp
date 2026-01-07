@@ -8,6 +8,16 @@
 #include <concepts>
 #include <type_traits>
 
+#include "../common_macros.hpp"
+
+
+TMATH_DIAGNOSTICS(push) // no pop
+
+#if defined(TMATH_COMPILER_CLANG)
+TMATH_DIAGNOSTICS_DISABLE(, , "-Wmissing-braces")
+#endif
+
+
 #define TMATH_NAMESPACE_NAME tmath
 #define TMATH_NAMESPACE_BEGIN namespace TMATH_NAMESPACE_NAME {
 #define TMATH_NAMESPACE_END }
@@ -17,7 +27,7 @@
 #define TMATH_VERSION_MINOR 0
 #define TMATH_VERSION_PATCH 1
 
-#define TMATH_MAKE_VERSION_COMPONENT(v) (v + 0ULL)
+#define TMATH_MAKE_VERSION_COMPONENT(v) ((v) + 0ULL)
 
 /**
  * @param major 63-48 (16bit)
@@ -46,22 +56,6 @@ namespace Version
 TMATH_NAMESPACE_END
 
 
-// force inline
-#if defined (_MSC_VER)
-    #define TMATH_FORCE_INLINE __forceinline
-#elif defined (__GNUC__) || defined (__clang__)
-    #define TMATH_FORCE_INLINE inline __attribute__((__always_inline__))
-#else
-    #error "TMATH_FORCE_INLINE has not defined!"
-#endif
-
-// std constexpr floating point functions
-#if defined (__GNUC__)
-    #define TMATH_HAS_STD_CONSTEXPR_FLOATING_POINT_FUNCTIONS
-#endif
-
-
-#define TMATH_NODISCARD [[nodiscard]]
 #define TMATH_CALL_CONV
 #define TMATH_API
 

@@ -6,7 +6,7 @@
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_zero_impl(float* TSIMD_RESTRICT out) noexcept
+    void kernel_zero_impl(float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -36,12 +36,12 @@ TEST(dyn_dispatch_x86_float32, zero)
     alignas(ALIGNMENT) float out[TOTAL];
 
     // 先填充非零值
-    for (int i = 0; i < TOTAL; ++i) out[i] = -1.0f;
+    for (size_t i = 0; i < TOTAL; ++i) out[i] = -1.0f;
 
     kernel_zero(out);
 
     // 检查结果是否全为 0
-    for (int i = 0; i < TOTAL; ++i)
+    for (size_t i = 0; i < TOTAL; ++i)
         EXPECT_FLOAT_EQ(out[i], 0.0f);
 }
 #endif
@@ -50,7 +50,7 @@ TEST(dyn_dispatch_x86_float32, zero)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_set_impl(float x, float* TSIMD_RESTRICT out) noexcept
+    void kernel_set_impl(float x, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -79,11 +79,11 @@ TEST(dyn_dispatch_x86_float32, set)
 
     alignas(ALIGNMENT) float out[TOTAL];
 
-    for (int i = 0; i < TOTAL; ++i) out[i] = -1.0f;
+    for (size_t i = 0; i < TOTAL; ++i) out[i] = -1.0f;
 
     kernel_set(3.5f, out);
 
-    for (int i = 0; i < TOTAL; ++i)
+    for (size_t i = 0; i < TOTAL; ++i)
         EXPECT_FLOAT_EQ(out[i], 3.5f);
 }
 #endif
@@ -92,7 +92,7 @@ TEST(dyn_dispatch_x86_float32, set)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_load_store_impl(const float* TSIMD_RESTRICT in, float* TSIMD_RESTRICT out) noexcept
+    void kernel_load_store_impl(const float* TMATH_RESTRICT in, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -135,7 +135,7 @@ TEST(dyn_dispatch_x86_float32, load_store)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_loadu_storeu_impl(const float* TSIMD_RESTRICT in, float* TSIMD_RESTRICT out) noexcept
+    void kernel_loadu_storeu_impl(const float* TMATH_RESTRICT in, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -178,7 +178,7 @@ TEST(dyn_dispatch_x86_float32, loadu_storeu)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_add_impl(const float* TSIMD_RESTRICT a, const float* TSIMD_RESTRICT b, float* TSIMD_RESTRICT out) noexcept
+    void kernel_add_impl(const float* TMATH_RESTRICT a, const float* TMATH_RESTRICT b, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -225,7 +225,7 @@ TEST(dyn_dispatch_x86_float32, add)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_sub_impl(const float* TSIMD_RESTRICT a, const float* TSIMD_RESTRICT b, float* TSIMD_RESTRICT out) noexcept
+    void kernel_sub_impl(const float* TMATH_RESTRICT a, const float* TMATH_RESTRICT b, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -272,7 +272,7 @@ TEST(dyn_dispatch_x86_float32, sub)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_mul_impl(const float* TSIMD_RESTRICT a, const float* TSIMD_RESTRICT b, float* TSIMD_RESTRICT out) noexcept
+    void kernel_mul_impl(const float* TMATH_RESTRICT a, const float* TMATH_RESTRICT b, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -319,7 +319,7 @@ TEST(dyn_dispatch_x86_float32, mul)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_div_impl(const float* TSIMD_RESTRICT a, const float* TSIMD_RESTRICT b, float* TSIMD_RESTRICT out) noexcept
+    void kernel_div_impl(const float* TMATH_RESTRICT a, const float* TMATH_RESTRICT b, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 
@@ -366,7 +366,7 @@ TEST(dyn_dispatch_x86_float32, div)
 namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
-    void kernel_sum_impl(const float* TSIMD_RESTRICT in, float* TSIMD_RESTRICT out) noexcept
+    void kernel_sum_impl(const float* TMATH_RESTRICT in, float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
         
@@ -417,10 +417,10 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
 {
     TSIMD_DYN_FUNC_ATTR
     void kernel_mul_add_impl(
-        const float* TSIMD_RESTRICT a,
-        const float* TSIMD_RESTRICT b,
-        const float* TSIMD_RESTRICT c,
-        float* TSIMD_RESTRICT out) noexcept
+        const float* TMATH_RESTRICT a,
+        const float* TMATH_RESTRICT b,
+        const float* TMATH_RESTRICT c,
+        float* TMATH_RESTRICT out) noexcept
     {
         constexpr size_t TOTAL = 16;
 

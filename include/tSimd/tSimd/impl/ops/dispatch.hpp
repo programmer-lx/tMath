@@ -7,18 +7,17 @@
     #include <cstdlib> // std::abort
 #endif
 
-#include <type_traits>
-#include <concepts>
-
 #if defined(_MSC_VER)
     #include <intrin.h>
 #else
     #include <cpuid.h>
 #endif
 
+#include <type_traits>
+#include <concepts>
+
 #include "../platform.hpp"
 #include "func_attr.hpp"
-#include "op_names.hpp"
 
 TSIMD_NAMESPACE_BEGIN
 

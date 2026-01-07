@@ -562,7 +562,6 @@ TEST(normalized_sint, negative_vector) {
     Vector3i32 vi = {-1, -2, -2};
     Vector3f res3d = tmath::normalized<Vector3f>(vi);
 
-    float len2d = std::sqrt(1.0f + 4.0f);
     float len3d = std::sqrt(1.0f + 4.0f + 4.0f);
 
     EXPECT_FLOAT_EQ(res3d.x, -1.0f / len3d);

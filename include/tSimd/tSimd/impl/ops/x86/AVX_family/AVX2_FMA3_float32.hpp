@@ -13,7 +13,7 @@ struct SimdOp<SimdInstruction::AVX2_FMA3, float> : SimdOp<SimdInstruction::AVX2,
 {
     TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX2_FMA3, float, __m256, Alignment::AVX_Family)
 
-    TSIMD_OP_AVX2_FMA3_API static batch_t TSIMD_CALL_CONV TSIMD_op_mul_add(batch_t a, batch_t b, batch_t c) noexcept
+    TSIMD_OP_SIG_AVX2_FMA3(batch_t, mul_add, (batch_t a, batch_t b, batch_t c))
     {
         return _mm256_fmadd_ps(a, b, c);
     }
