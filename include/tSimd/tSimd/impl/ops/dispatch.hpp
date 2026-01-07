@@ -150,6 +150,7 @@ struct InstructionSetSupports
     bool F16C = false, FMA3 = false;
 
     bool AVX2       = false;
+    bool AVX2_FMA3  = false;
 
     // AVX-512 family
     bool AVX_512_F  = false;
@@ -165,8 +166,8 @@ enum class SimdInstruction : int
     SSE,
     SSE2,
     AVX,
-    // AVX2, // TODO
-    // AVX2_FMA3,
+    AVX2,
+    AVX2_FMA3,
 #endif
 
     Num
@@ -234,6 +235,7 @@ private:
             const uint32_t ebx = abcd[1];
 
             result.AVX2 = result.AVX && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX2);
+            result.AVX2_FMA3 = result.AVX2 && result.FMA3;
 
 
             // ------------------------- AVX-512 family -------------------------
@@ -273,6 +275,16 @@ private:
 #endif
 
         // 从最高级的指令往下判断
+        if (supports.AVX2_FMA3)
+        {
+            return underlying(SimdInstruction::AVX2_FMA3);
+        }
+
+        if (supports.AVX2)
+        {
+            return underlying(SimdInstruction::AVX2);
+        }
+
         if (supports.AVX)
         {
             return underlying(SimdInstruction::AVX);
@@ -339,9 +351,14 @@ public:
     #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE)
     #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
     #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
+    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
+    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
 #else
-    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name)
-    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name)
+    #define TSIMD_DETAIL_SSE_FUNC_IMPL(...)
+    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(...)
+    #define TSIMD_DETAIL_AVX_FUNC_IMPL(...)
+    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(...)
+    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(...)
 #endif
 
 // 不同后端的函数指针表
@@ -351,7 +368,9 @@ public:
     /* ------------------------------------- x86 ------------------------------------- */ \
     TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX_FUNC_IMPL(func_name)
+    TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name)
 
 #if !defined(TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY)
     #error "have not defined DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY to cache the simd function pointers"

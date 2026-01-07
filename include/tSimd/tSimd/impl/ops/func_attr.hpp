@@ -2,6 +2,8 @@
 
 #include "../platform.hpp"
 
+// see https://gcc.gnu.org/onlinedocs/gcc/x86-Function-Attributes.html#x86-Function-Attributes for more intrinsics attributes information
+
 // scalar
 #define TSIMD_SCALAR_INTRINSIC_ATTR
 #define TSIMD_OP_SCALAR_API \
@@ -44,7 +46,19 @@
 
 
 // avx2
+#define TSIMD_AVX2_INTRINSIC_ATTR TSIMD_FUNC_ATTR_INTRINSIC_TARGETS("avx2")
+#define TSIMD_OP_AVX2_API \
+    TSIMD_FORCE_INLINE \
+    TSIMD_FLATTEN \
+    TSIMD_AVX2_INTRINSIC_ATTR
+
 
 // avx2+fma3
+#define TSIMD_AVX2_FMA3_INTRINSIC_ATTR TSIMD_FUNC_ATTR_INTRINSIC_TARGETS("avx2,fma")
+#define TSIMD_OP_AVX2_FMA3_API \
+    TSIMD_FORCE_INLINE \
+    TSIMD_FLATTEN \
+    TSIMD_AVX2_FMA3_INTRINSIC_ATTR
+
 
 // avx512
