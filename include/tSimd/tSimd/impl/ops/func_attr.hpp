@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../defs.hpp"
+#include "../platform.hpp"
 
 // scalar
 #define TSIMD_SCALAR_INTRINSIC_ATTR

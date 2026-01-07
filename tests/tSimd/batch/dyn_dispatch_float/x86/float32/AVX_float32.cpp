@@ -33,7 +33,7 @@ namespace tsimd
             std::string cur_intrinsic = TSIMD_STR("" TSIMD_DYN_FUNC_ATTR);
 #if defined(TSIMD_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
-#elif defined(TSIMD_COMPILER_GCC_CLANG)
+#elif defined(TSIMD_COMPILER_GCC) || defined(TSIMD_COMPILER_CLANG)
             EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"avx\")))");
 #else
     #error "Unknown compiler."
