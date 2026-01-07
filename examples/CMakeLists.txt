@@ -11,10 +11,6 @@ if(MSVC)
     add_compile_definitions(UNICODE _UNICODE)
 endif()
 
-add_executable(example_simd_performance simd_performance.cpp)
-target_link_libraries(example_simd_performance PRIVATE tMath winmm.lib)
-example_add_o3_optimization(example_simd_performance)
-
 add_executable(example_simd_batch simd_batch.cpp)
 target_link_libraries(example_simd_batch PRIVATE tSimd gtest)
 target_include_directories(example_simd_batch PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

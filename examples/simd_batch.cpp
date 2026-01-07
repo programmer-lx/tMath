@@ -5,44 +5,42 @@
 #undef TSIMD_DISPATCH_THIS_FILE
 #define TSIMD_DISPATCH_THIS_FILE "simd_batch.cpp" // this file
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
-
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
-
-#pragma message("dispatch intrinsic: \"" TSIMD_STR("" TSIMD_DYN_FUNC_ATTR) "\"")
-
 
 namespace tsimd
 {
     namespace TSIMD_DYN_INSTRUCTION
     {
-        TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TSIMD_RESTRICT arr, const size_t N, float* TSIMD_RESTRICT out_result) noexcept
+        TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TSIMD_RESTRICT arr, const float* TSIMD_RESTRICT arr2, const float* TSIMD_RESTRICT arr3, const size_t N, float* TSIMD_RESTRICT out_result) noexcept
         {
             using op = TSIMD_CURRENT_OP(float);
             using batch_t = op::batch_t;
             constexpr size_t Step = op::Lanes;
 
+            // 测试
             std::string cur_intrinsic = TSIMD_STR("" TSIMD_DYN_FUNC_ATTR);
 #if defined(TSIMD_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
-#else
+#elif defined(TSIMD_COMPILER_GCC) || defined(TSIMD_COMPILER_CLANG)
             EXPECT_TRUE(cur_intrinsic.contains("__attribute__((target("));
+#else
+    #error "Unknown compiler."
 #endif
 
-            batch_t sum_n = op::zero();
-            for (size_t i = 0; i < N; i += Step)
+            size_t i = 0;
+            for (; i + Step <= N; i += Step)
             {
-                batch_t tmp = op::loadu(arr + i);
-                sum_n = op::add(sum_n, tmp);
-            }
-            float sum = op::reduce_sum(sum_n);
+                batch_t a = op::loadu(arr + i);
+                batch_t b = op::loadu(arr2 + i);
+                batch_t c = op::loadu(arr3 + i);
 
-            float expected = 0.0f;
-            for (size_t i = 0; i < N; ++i)
+                batch_t tmp = op::mul_add(a, b, c);
+                op::storeu(out_result + i, tmp);
+            }
+            for (; i < N; ++i)
             {
-                expected += arr[i];
+                out_result[i] = arr[i] * arr2[i] + arr3[i];
             }
-
-            *out_result = sum;
         }
     }
 }
@@ -53,20 +51,25 @@ namespace tsimd
 // export impl function
 TSIMD_DYN_DISPATCH_FUNC(kernel_dyn_impl);
 
-void kernel(const float* arr, const size_t N, float* out_result) noexcept
+void kernel(const float* arr, const float* arr2, const float* arr3, const size_t N, float* out_result) noexcept
 {
-    TSIMD_DYN_CALL(kernel_dyn_impl)(arr, N, out_result);
+    TSIMD_DYN_CALL(kernel_dyn_impl)(arr, arr2, arr3, N, out_result);
 }
 
 TEST(dyn_dispatch, basic)
 {
-    float numbers[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-    float expected = 36.0f;
+    float numbers[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    float numbers2[] = { -1, -2, -3, -4, -5, -6, -7, -8, -9 };
+    float numbers3[] = { 11, 12, 13, 14, 15, 16, 17, 18, 19 };
 
-    float result = -1.0f;
-    kernel(numbers, 8, &result);
+    float result[8] = {};
+    kernel(numbers, numbers2, numbers3, 8, result);
 
-    EXPECT_NEAR(result, expected, 1e-5f);
+    for (int i = 0; i < 8; ++i)
+    {
+        float expected = numbers[i] * numbers2[i] + numbers3[i];
+        EXPECT_TRUE(expected == result[i]);
+    }
 }
 
 int main(int argc, char **argv)
