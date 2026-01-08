@@ -10,7 +10,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -54,7 +54,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -96,7 +96,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -139,7 +139,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -182,7 +182,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -229,7 +229,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -276,7 +276,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -323,7 +323,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         for (size_t i = 0; i < TOTAL; i += Step)
@@ -370,7 +370,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
         
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         float sum = 0.0f;
@@ -424,7 +424,7 @@ namespace tsimd::TSIMD_DYN_INSTRUCTION
     {
         constexpr size_t TOTAL = 16;
 
-        using op = TSIMD_CURRENT_OP(float);
+        using op = TSIMD_DYN_SIMD_OP(float);
         constexpr size_t Step = op::Lanes;
 
         float sum = 0.0f;

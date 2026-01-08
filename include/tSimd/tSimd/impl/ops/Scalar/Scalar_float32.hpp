@@ -70,4 +70,6 @@ struct SimdOp<SimdInstruction::Scalar, float>
     }
 };
 
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::Scalar, float>)
+
 TSIMD_NAMESPACE_END

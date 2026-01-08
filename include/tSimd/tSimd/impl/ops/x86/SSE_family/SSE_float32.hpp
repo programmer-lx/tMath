@@ -85,5 +85,6 @@ struct SimdOp<SimdInstruction::SSE, float>
         return _mm_add_ps(_mm_mul_ps(a, b), c);
     }
 };
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::SSE, float>)
 
 TSIMD_NAMESPACE_END

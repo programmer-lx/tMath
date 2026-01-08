@@ -14,13 +14,19 @@ option(TMATH_BUILD_TESTS "" OFF)
 option(TMATH_BUILD_BENCHMARKS "" OFF)
 
 
-# tMath library
+# tMath library (header-only)
 add_library(tMath INTERFACE)
 target_include_directories(tMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include/tMath)
 
-# tSimd library
-add_library(tSimd INTERFACE)
-target_include_directories(tSimd INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include/tSimd)
+# tSimd library (static)
+add_library(tSimd STATIC)
+target_include_directories(tSimd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/tSimd)
+target_sources(tSimd PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/tSimd/tSimd/one_cpp.cpp)
+# msvc utf-8
+if(MSVC)
+    target_compile_options(tSimd PRIVATE /utf-8)
+    target_compile_definitions(tSimd PRIVATE UNICODE _UNICODE)
+endif()
 
 
 if(TMATH_BUILD_EXAMPLES)

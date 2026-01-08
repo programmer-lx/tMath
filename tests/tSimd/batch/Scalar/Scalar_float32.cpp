@@ -17,7 +17,7 @@ namespace tsimd
     {
         TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TMATH_RESTRICT arr, const size_t N, float* TMATH_RESTRICT out_result) noexcept
         {
-            using op = TSIMD_CURRENT_OP(float);
+            using op = TSIMD_DYN_SIMD_OP(float);
             using batch_t = op::batch_t;
             constexpr size_t Step = op::Lanes;
 

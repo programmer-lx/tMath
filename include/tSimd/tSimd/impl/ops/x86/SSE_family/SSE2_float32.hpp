@@ -13,5 +13,6 @@ struct SimdOp<SimdInstruction::SSE2, float> : SimdOp<SimdInstruction::SSE, float
 {
     TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE2, float, __m128, Alignment::SSE_Family)
 };
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::SSE2, float>)
 
 TSIMD_NAMESPACE_END

@@ -88,5 +88,6 @@ struct SimdOp<SimdInstruction::AVX, float>
         return _mm256_add_ps(_mm256_mul_ps(a, b), c);
     }
 };
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::AVX, float>)
 
 TSIMD_NAMESPACE_END

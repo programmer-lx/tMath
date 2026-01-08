@@ -2,7 +2,6 @@
 
 #include <cstdint>
 
-
 #if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
     #include <cstdlib> // std::abort
 #endif
@@ -15,6 +14,7 @@
 
 #include <type_traits>
 #include <concepts>
+#include <utility>
 
 #include "../platform.hpp"
 #include "func_attr.hpp"
@@ -155,251 +155,112 @@ struct InstructionSetSupports
     bool AVX512_F   = false; // AVX512F支持FMA运算，不需要单独划分FMA3支持
 };
 
-// 这个枚举的值就是函数指针表的索引，所以需要进行平台判断
-enum class SimdInstruction : int
+namespace detail
 {
-    Scalar = 0,
+    // 这个枚举的值就是函数指针表的索引
+    enum class SimdInstructionIndex : int
+    {
+        Invalid = -1,
 
-    // begin x86
-    SSE = 1,
-    SSE2 = 2,
-    AVX = 3,
-    AVX2 = 4,
-    AVX2_FMA3 = 5,
-    // end x86
+    #if defined(TSIMD_INSTRUCTION_FEATURE_SCALAR)
+        Scalar,
+    #endif
 
-    Num
-};
-static_assert(detail::underlying(SimdInstruction::Num) > 0, "Number of Simd Instruction should > 0.");
+    #if defined(TSIMD_INSTRUCTION_FEATURE_SSE)
+        SSE,
+    #endif
+
+    #if defined(TSIMD_INSTRUCTION_FEATURE_SSE2)
+        SSE2,
+    #endif
+
+    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
+        AVX,
+    #endif
+
+    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2)
+        AVX2,
+    #endif
+
+    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2) && defined(TSIMD_INSTRUCTION_FEATURE_FMA3)
+        AVX2_FMA3,
+    #endif
+
+        Num
+    };
+    static_assert(detail::underlying(SimdInstructionIndex::Num) > 0);
+}
 
 class InstructionSelector final
 {
-private:
-    static inline const InstructionSetSupports& get_support_info_impl() noexcept
-    {
-        using namespace detail;
-
-        static InstructionSetSupports result{};
-
-        uint32_t abcd[4]; // eax, ebx, ecx, edx
-
-        cpuid(0, 0, abcd);
-        const uint32_t max_leaf = abcd[0];
-
-
-        // ------------------ EAX 1 ------------------
-        if (max_leaf < 1) // 因为要读取EAX 1，所以 max leaf 必须 >= 1
-        {
-            return result;
-        }
-
-        // 查询 EAX 1, ECX 0
-        cpuid(1, 0, abcd);
-        const uint32_t ecx = abcd[2];
-        const uint32_t edx = abcd[3];
-
-        // ------------------------- SSE family -------------------------
-        result.SSE = bit_is_open(edx, CpuFeatureIndex_EAX1::SSE);
-        result.SSE2 = result.SSE && bit_is_open(edx, CpuFeatureIndex_EAX1::SSE2);
-        result.SSE3 = result.SSE2 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSE3);
-        result.SSSE3 = result.SSE3 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSSE3);
-        result.SSE4_1 = result.SSSE3 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSE4_1);
-        result.SSE4_2 = result.SSE4_1 && bit_is_open(ecx, CpuFeatureIndex_EAX1::SSE4_2);
-
-
-        const bool xsave = bit_is_open(ecx, CpuFeatureIndex_EAX1::XSAVE);
-        const bool os_xsave = bit_is_open(ecx, CpuFeatureIndex_EAX1::OS_XSAVE);
-        // 只有在 xsave 和 os_xsave 为帧的时候，才能进行 xcr0 检查
-        if (xsave && os_xsave)
-        {
-            const uint64_t xcr0 = read_xcr0();
-
-            // ------------------------- AVX family -------------------------
-            const bool os_support_avx = bit_is_open(xcr0, CpuXSaveStateIndex::SSE) &&
-                                        bit_is_open(xcr0, CpuXSaveStateIndex::AVX);
-
-            result.AVX = bit_is_open(ecx, CpuFeatureIndex_EAX1::AVX) && os_support_avx;
-            result.F16C = result.AVX && bit_is_open(ecx, CpuFeatureIndex_EAX1::F16C);
-            result.FMA3 = result.AVX && bit_is_open(ecx, CpuFeatureIndex_EAX1::FMA3);
-
-            // ------------------ EAX 7 ------------------
-            if (max_leaf < 7) // 因为要读取EAX 7，所以 max leaf 必须 >= 7
-            {
-                return result;
-            }
-
-            // EAX 7, ECX 0
-            cpuid(7, 0, abcd);
-            const uint32_t ebx = abcd[1];
-
-            result.AVX2 = result.AVX && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX2);
-            result.AVX2_FMA3 = result.AVX2 && result.FMA3;
-
-
-            // ------------------------- AVX-512 family -------------------------
-            const bool os_support_avx_512 = os_support_avx &&
-                                            bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_K0_K7) &&
-                                            bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_LOW_256) &&
-                                            bit_is_open(xcr0, CpuXSaveStateIndex::AVX_512_HIGH_256);
-
-            result.AVX512_F = result.AVX2 && bit_is_open(ebx, CpuFeatureIndex_EAX7::AVX_512_F) && os_support_avx_512;
-        }
-
-        return result;
-    }
-
 public:
-    static inline const InstructionSetSupports& get_support_info() noexcept
-    {
-        static const InstructionSetSupports& s = get_support_info_impl();
-        return s;
-    }
+    static const InstructionSetSupports& get_support_info() noexcept;
+    static size_t required_alignment() noexcept;
 
-private:
-    static inline int select_func_index()
-    {
-        using namespace detail;
-
-        const auto& supports = get_support_info();
-        
-        // 如果正在测试，则强制选择那个指令，如果那个指令不支持，则直接报错退出即可
-#if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
-        int fn_idx = underlying(SimdInstruction::TSIMD_TEST_INTRINSIC);
-        if (!supports.TSIMD_TEST_INTRINSIC)
-        {
-            std::abort();
-        }
-        return fn_idx;
-#endif
-
-        // 从最高级的指令往下判断
-        if (supports.AVX2_FMA3)
-        {
-            return underlying(SimdInstruction::AVX2_FMA3);
-        }
-
-        if (supports.AVX2)
-        {
-            return underlying(SimdInstruction::AVX2);
-        }
-
-        if (supports.AVX)
-        {
-            return underlying(SimdInstruction::AVX);
-        }
-
-        if (supports.SSE2)
-        {
-            return underlying(SimdInstruction::SSE2);
-        }
-
-        if (supports.SSE)
-        {
-            return underlying(SimdInstruction::SSE);
-        }
-
-        return underlying(SimdInstruction::Scalar);
-    }
-    
-    static inline size_t compute_alignment() noexcept
-    {
-        const auto& supports = get_support_info();
-        if (supports.AVX512_F)
-        {
-            return Alignment::AVX512_Family;
-        }
-        if (supports.AVX)
-        {
-            return Alignment::AVX_Family;
-        }
-        if (supports.SSE)
-        {
-            return Alignment::SSE_Family;
-        }
-
-        return Alignment::Scalar;
-    }
-
-public:
-    static inline int dyn_func_index() noexcept
-    {
-        static int idx = select_func_index();
-        return idx;
-    }
-    
-    static inline size_t required_alignment() noexcept
-    {
-        static size_t a = compute_alignment();
-        return a;
-    }
+    // 测试时直接返回索引即可，正式版本才使用运行时CPUID判断
+    static int dyn_func_index() noexcept;
 };
 
 
 // instruction充当命名空间
 #define TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, instruction) \
     &TSIMD_NAMESPACE_NAME::instruction::func_name,
-#define TSIMD_DETAIL_ONE_NULL_FUNC nullptr,
 
-// ---------------------------------------------- 2 Function table (x86 and arm) ----------------------------------------------
+#define TSIMD_DETAIL_ONE_EMPTY_FUNC
+
+// ---------------------------------------------- Function table ----------------------------------------------
 // Scalar
 #if defined(TSIMD_INSTRUCTION_FEATURE_SCALAR)
     #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, Scalar)
 #else
-    #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
+    #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
-#if defined(TSIMD_ARCH_X86_ANY)
-    // SSE
-    #if defined(TSIMD_INSTRUCTION_FEATURE_SSE)
-        #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE)
-    #else
-        #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
-    #endif
+// SSE
+#if defined(TSIMD_INSTRUCTION_FEATURE_SSE)
+    #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE)
+#else
+    #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
+#endif
 
-    // SSE2
-    #if defined(TSIMD_INSTRUCTION_FEATURE_SSE2)
-        #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
-    #else
-        #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
-    #endif
+// SSE2
+#if defined(TSIMD_INSTRUCTION_FEATURE_SSE2)
+    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
+#else
+    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
+#endif
 
-    // AVX
-    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
-        #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
-    #else
-        #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
-    #endif
+// AVX
+#if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
+    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
+#else
+    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
+#endif
 
-    // AVX2
-    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2)
-        #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
-    #else
-        #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
-    #endif
+// AVX2
+#if defined(TSIMD_INSTRUCTION_FEATURE_AVX2)
+    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
+#else
+    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
+#endif
 
-    // AVX_FMA3
-    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2) && defined(TSIMD_INSTRUCTION_FEATURE_FMA3)
-        #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
-    #else
-        #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
-    #endif
+// AVX_FMA3
+#if defined(TSIMD_INSTRUCTION_FEATURE_AVX2) && defined(TSIMD_INSTRUCTION_FEATURE_FMA3)
+    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
+#else
+    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // function table
-#if defined(TSIMD_ARCH_X86_ANY)
-// x86
-    #define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
-        /* ------------------------------------- scalar ------------------------------------- */ \
-        TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name)    /* 0 */ \
-        /* ------------------------------------- x86 ------------------------------------- */ \
-        TSIMD_DETAIL_SSE_FUNC_IMPL(func_name)       /* 1 */ \
-        TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name)      /* 2 */ \
-        TSIMD_DETAIL_AVX_FUNC_IMPL(func_name)       /* 3 */ \
-        TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name)      /* 4 */ \
-        TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) /* 5 */
-#else
-// arm
-#endif
+#define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
+    /* ------------------------------------- scalar ------------------------------------- */ \
+    TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) \
+    /* ------------------------------------- x86 ------------------------------------- */ \
+    TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name)
 
 #if !defined(TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY)
     #error "have not defined DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY to cache the simd function pointers"
@@ -411,8 +272,21 @@ public:
         TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
     };
 
-#define TSIMD_DYN_FUNC_POINTER(func_name) \
-    TSIMD_PFN_##func_name##_table[TSIMD_NAMESPACE_NAME::InstructionSelector::dyn_func_index()]
+// 测试时直接返回索引即可，正式版本才使用运行时CPUID判断
+#if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
+    #define TSIMD_DYN_FUNC_POINTER(func_name) \
+        []() { \
+            /* 用一个lambda表达式获取索引并判断索引是否可用，如果不可用，直接 abort */ \
+            int idx = static_cast<int>(TSIMD_NAMESPACE_NAME::detail::SimdInstructionIndex::TSIMD_TEST_INTRINSIC); \
+            const auto& supports = TSIMD_NAMESPACE_NAME::InstructionSelector::get_support_info(); \
+            if (!supports.TSIMD_TEST_INTRINSIC) { std::abort(); } \
+            return TSIMD_PFN_##func_name##_table[idx]; \
+        }()
+#else
+    #define TSIMD_DYN_FUNC_POINTER(func_name) \
+        TSIMD_PFN_##func_name##_table[TSIMD_NAMESPACE_NAME::InstructionSelector::dyn_func_index()]
+#endif
+
 
 #define TSIMD_DYN_CALL(func_name) (TSIMD_DYN_FUNC_POINTER(func_name))
 
@@ -425,6 +299,20 @@ public:
 
 
 // --------------------------------- SimdOp ---------------------------------
+// 这个枚举用于SimdOp的模板参数
+enum class SimdInstruction : int
+{
+    Scalar,
+
+    SSE,
+    SSE2,
+    AVX,
+    AVX2,
+    AVX2_FMA3,
+
+    Num
+};
+
 template<typename T>
 concept scalar_type = std::is_same_v<T, float>;
 
@@ -432,9 +320,10 @@ template<SimdInstruction Instruction, scalar_type ScalarType>
 struct SimdOp
 {
     static_assert(Instruction != SimdInstruction::Num);
+    static_assert(!std::is_polymorphic_v<SimdOp<Instruction, ScalarType>>, "SimdOp must not have virtual functions");
 };
 
-#define TSIMD_CURRENT_OP(scalar_type) \
+#define TSIMD_DYN_SIMD_OP(scalar_type) \
     SimdOp<SimdInstruction::TSIMD_DYN_INSTRUCTION, scalar_type>
 
 #define TSIMD_DETAIL_SIMD_OP_STRUCT_NAME(instruction, scalar_elem_type) \
@@ -454,6 +343,20 @@ struct SimdOp
     \
     /* static check */ \
     static_assert(Lanes % 2 == 0 || Lanes == 1, "Lanes must be 2 * N or 1");
+
+namespace detail
+{
+    template<typename T>
+    static consteval bool check_simd_op()
+    {
+        if constexpr (std::has_virtual_destructor_v<T>)
+        {
+            return false;
+        }
+        return true;
+    }
+}
+#define TSIMD_DETAIL_CHECK_SIMD_OP(...) static_assert(detail::check_simd_op<__VA_ARGS__>(), "SimdOp static check failed.");
 
 
 TSIMD_NAMESPACE_END

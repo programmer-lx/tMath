@@ -18,5 +18,6 @@ struct SimdOp<SimdInstruction::AVX2_FMA3, float> : SimdOp<SimdInstruction::AVX2,
         return _mm256_fmadd_ps(a, b, c);
     }
 };
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::AVX2_FMA3, float>)
 
 TSIMD_NAMESPACE_END

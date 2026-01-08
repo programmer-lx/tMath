@@ -5,13 +5,11 @@
 #include <string>
 
 #undef TSIMD_DISPATCH_THIS_FILE
-#define TSIMD_DISPATCH_THIS_FILE "simd_batch.cpp" // this file
+#define TSIMD_DISPATCH_THIS_FILE "simd_batch_dyn_dispatch.cpp" // this file
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
 
-#ifdef TSIMD_INSTRUCTION_FEATURE_SCALAR
-#error "hit"
-#endif
+#pragma message("dispatch target = " TMATH_STR("" TSIMD_DYN_FUNC_ATTR))
 
 namespace tsimd
 {
@@ -19,7 +17,7 @@ namespace tsimd
     {
         TSIMD_DYN_FUNC_ATTR void kernel_dyn_impl(const float* TMATH_RESTRICT arr, const float* TMATH_RESTRICT arr2, const float* TMATH_RESTRICT arr3, const size_t N, float* TMATH_RESTRICT out_result) noexcept
         {
-            using op = TSIMD_CURRENT_OP(float);
+            using op = TSIMD_DYN_SIMD_OP(float);
             using batch_t = op::batch_t;
             constexpr size_t Step = op::Lanes;
 

@@ -18,6 +18,7 @@
 #define TMATH_CONCAT(a, b) TMATH_CONCAT_IMPL(a, b)
 
 #define TMATH_NO_DISCARD [[nodiscard]]
+#define TMATH_NORETURN [[noreturn]]
 
 #if defined(TMATH_COMPILER_MSVC)
 
@@ -26,7 +27,6 @@
     #define TMATH_NOINLINE __declspec(noinline)
     #define TMATH_FORCE_INLINE __forceinline
     #define TMATH_FLATTEN
-    #define TMATH_NORETURN __declspec(noreturn)
     #define TMATH_LIKELY(expr) (expr)
     #define TMATH_UNLIKELY(expr) (expr)
     #define TMATH_PRAGMA(tokens) __pragma(tokens)
@@ -41,7 +41,6 @@
     #define TMATH_NOINLINE __attribute__((noinline))
     #define TMATH_FORCE_INLINE inline __attribute__((always_inline))
     #define TMATH_FLATTEN __attribute__((flatten))
-    #define TMATH_NORETURN __attribute__((noreturn))
     #define TMATH_LIKELY(expr) __builtin_expect(!!(expr), 1)
     #define TMATH_UNLIKELY(expr) __builtin_expect(!!(expr), 0)
     #define TMATH_PRAGMA(tokens) _Pragma(#tokens)
@@ -58,6 +57,15 @@
     #endif
 
 #endif // MSVC
+
+// dll export
+#if defined(_MSC_VER)
+    #define TMATH_API_EXPORT __declspec(dllexport)
+    #define TMATH_API_IMPORT __declspec(dllimport)
+#else
+    #define TMATH_API_EXPORT __attribute__((visibility("default")))
+    #define TMATH_API_IMPORT __attribute__((visibility("default")))
+#endif
 
 #define TMATH_DIAGNOSTICS_PUSH TMATH_DIAGNOSTICS(push)
 #define TMATH_DIAGNOSTICS_POP TMATH_DIAGNOSTICS(pop)

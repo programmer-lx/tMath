@@ -1,4 +1,4 @@
-function(example_add_o3_optimization TARGET_NAME)
+function(example_target_actions TARGET_NAME)
     if(MSVC)
         target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:/O2 /Gv>)
         target_compile_options(${TARGET_NAME} PRIVATE /WX)
@@ -6,7 +6,7 @@ function(example_add_o3_optimization TARGET_NAME)
     else()
         target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Release>:-O2>)
         target_compile_options(${TARGET_NAME} PRIVATE -Wall -Werror)
-        target_link_options(${TARGET_NAME} PRIVATE -Wl --fatal-warnings)
+#        target_link_options(${TARGET_NAME} PRIVATE -Wl --fatal-warnings)
     endif()
 endfunction()
 
@@ -18,7 +18,14 @@ if(MSVC)
     add_compile_definitions(UNICODE _UNICODE)
 endif()
 
-add_executable(example_simd_batch simd_batch.cpp)
-target_link_libraries(example_simd_batch PRIVATE tSimd)
-target_include_directories(example_simd_batch PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-example_add_o3_optimization(example_simd_batch)
+# dynamic dispatch
+add_executable(example_simd_batch_dyn_dispatch simd_batch_dyn_dispatch.cpp)
+target_link_libraries(example_simd_batch_dyn_dispatch PRIVATE tSimd)
+target_include_directories(example_simd_batch_dyn_dispatch PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+example_target_actions(example_simd_batch_dyn_dispatch)
+
+# static dispatch
+add_executable(example_simd_batch_static_dispatch simd_batch_static_dispatch.cpp)
+target_link_libraries(example_simd_batch_static_dispatch PRIVATE tSimd)
+target_include_directories(example_simd_batch_static_dispatch PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+example_target_actions(example_simd_batch_static_dispatch)
