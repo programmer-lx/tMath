@@ -6,9 +6,9 @@
 
 #undef TSIMD_DISPATCH_THIS_FILE
 #define TSIMD_DISPATCH_THIS_FILE "batch/x86/basic.cpp" // this file
-#include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
+#include <tSimd/dispatch_this_file.hpp>
 
-#include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
+#include <tSimd/batch.hpp>
 
 #pragma message("dispatch intrinsic: \"" TMATH_STR("" TSIMD_DYN_FUNC_ATTR) "\"")
 
