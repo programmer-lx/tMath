@@ -1,7 +1,3 @@
-#include <tSimd/impl/platform.hpp>
-#ifdef TSIMD_X86_ANY
-
-
 #include <iostream>
 #include <format>
 
@@ -73,9 +69,3 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
-#else
-int main(int argc, char **argv)
-{
-    return 0;
-}
-#endif

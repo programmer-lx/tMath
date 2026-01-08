@@ -59,3 +59,26 @@ private:
     std::string m_name;
     Clock::time_point m_start;
 };
+
+inline void* my_aligned_alloc(size_t size, size_t alignment) {
+    void* ptr = nullptr;
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
+    // Windows 平台
+    ptr = _aligned_malloc(size, alignment);
+#else
+    // POSIX 平台 (GCC/Clang)
+    if (posix_memalign(&ptr, alignment, size) != 0)
+    {
+        return nullptr;
+    }
+#endif
+    return ptr;
+}
+
+inline void my_aligned_free(void* ptr) {
+#if defined(_MSC_VER) || defined(__MINGW32__)
+    _aligned_free(ptr);
+#else
+    std::free(ptr);
+#endif
+}

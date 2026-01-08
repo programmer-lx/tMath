@@ -61,15 +61,6 @@
     TSIMD_AVX2_FMA3_INTRINSIC_ATTR
 
 
-
-// NEON
-#define TSIMD_NEON_INTRINSIC_ATTR
-#define TSIMD_OP_NEON_API \
-    TMATH_FORCE_INLINE \
-    TMATH_FLATTEN \
-    TSIMD_NEON_INTRINSIC_ATTR
-
-
 // func sig
 #define TSIMD_OP_SIG_SCALAR(ret, func_name, params)     TSIMD_OP_SCALAR_API     static ret TSIMD_SCALAR_CALL_CONV   func_name params noexcept
 #define TSIMD_OP_SIG_SSE(ret, func_name, params)        TSIMD_OP_SSE_API        static ret TSIMD_CALL_CONV          func_name params noexcept
@@ -77,5 +68,3 @@
 #define TSIMD_OP_SIG_AVX(ret, func_name, params)        TSIMD_OP_AVX_API        static ret TSIMD_CALL_CONV          func_name params noexcept
 #define TSIMD_OP_SIG_AVX2(ret, func_name, params)       TSIMD_OP_AVX2_API       static ret TSIMD_CALL_CONV          func_name params noexcept
 #define TSIMD_OP_SIG_AVX2_FMA3(ret, func_name, params)  TSIMD_OP_AVX2_FMA3_API  static ret TSIMD_CALL_CONV          func_name params noexcept
-
-#define TSIMD_OP_SIG_NEON(ret, func_name, params)       TSIMD_OP_NEON_API       static ret TSIMD_CALL_CONV          func_name params noexcept

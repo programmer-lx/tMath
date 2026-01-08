@@ -21,10 +21,4 @@
     // AVX-512 family
 #endif
 
-
-// NEON
-#if defined(TSIMD_ARM_ANY)
-    #include "impl/ops/ARM/NEON/NEON_float32.hpp"
-#endif
-
 // clang-format on
