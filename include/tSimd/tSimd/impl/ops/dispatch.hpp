@@ -267,10 +267,12 @@ public:
 #endif
 
 #define TSIMD_DYN_DISPATCH_FUNC(func_name) \
-    /* 构建静态数组，存储函数指针 */ \
-    static inline decltype(&TSIMD_NAMESPACE_NAME::TSIMD_DYN_INSTRUCTION::func_name) TSIMD_PFN_##func_name##_table[] = { \
-        TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
-    };
+    /* 构建静态数组，存储函数指针 (使用命名空间包裹，限定只能在类外使用) */ \
+    namespace TSIMD_NAMESPACE_NAME::PFN_table { \
+        static inline decltype(&TSIMD_NAMESPACE_NAME::TSIMD_DYN_INSTRUCTION::func_name) func_name[] = { \
+            TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
+        }; \
+    }
 
 // 测试时直接返回索引即可，正式版本才使用运行时CPUID判断
 #if defined(TSIMD_TEST_INTRINSIC) && defined(TSIMD_IS_TESTING)
@@ -280,11 +282,11 @@ public:
             int idx = static_cast<int>(TSIMD_NAMESPACE_NAME::detail::SimdInstructionIndex::TSIMD_TEST_INTRINSIC); \
             const auto& supports = TSIMD_NAMESPACE_NAME::InstructionSelector::get_support_info(); \
             if (!supports.TSIMD_TEST_INTRINSIC) { std::abort(); } \
-            return TSIMD_PFN_##func_name##_table[idx]; \
+            return TSIMD_NAMESPACE_NAME::PFN_table::func_name[idx]; \
         }()
 #else
     #define TSIMD_DYN_FUNC_POINTER(func_name) \
-        TSIMD_PFN_##func_name##_table[TSIMD_NAMESPACE_NAME::InstructionSelector::dyn_func_index()]
+        TSIMD_NAMESPACE_NAME::PFN_table::func_name[TSIMD_NAMESPACE_NAME::InstructionSelector::dyn_func_index()]
 #endif
 
 

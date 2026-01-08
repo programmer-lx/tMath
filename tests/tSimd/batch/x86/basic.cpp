@@ -73,7 +73,7 @@ TEST(dyn_dispatch, basic)
 
     EXPECT_NEAR(result, expected, 1e-5f);
 
-    EXPECT_EQ(std::size(TSIMD_PFN_kernel_dyn_impl_table), 6);
+    EXPECT_EQ(std::size(tsimd::PFN_table::kernel_dyn_impl), 6);
 }
 
 int main(int argc, char **argv)
