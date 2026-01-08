@@ -8,9 +8,9 @@ namespace detail
     {
         using namespace detail;
 
-#if defined(TSIMD_ARCH_X86_ANY)
         static InstructionSetSupports result{};
 
+#if defined(TSIMD_ARCH_X86_ANY)
         uint32_t abcd[4]; // eax, ebx, ecx, edx
 
         cpuid(0, 0, abcd);
@@ -48,7 +48,7 @@ namespace detail
             const bool os_support_avx = bit_is_open(xcr0, CpuXSaveStateIndex::SSE) &&
                                         bit_is_open(xcr0, CpuXSaveStateIndex::AVX);
 
-            result.AVX = bit_is_open(ecx, CpuFeatureIndex_EAX1::AVX) && os_support_avx;
+            result.AVX = result.SSE3 && bit_is_open(ecx, CpuFeatureIndex_EAX1::AVX) && os_support_avx;
             result.F16C = result.AVX && bit_is_open(ecx, CpuFeatureIndex_EAX1::F16C);
             result.FMA3 = result.AVX && bit_is_open(ecx, CpuFeatureIndex_EAX1::FMA3);
 
