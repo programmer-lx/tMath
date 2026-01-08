@@ -406,11 +406,8 @@ public:
 #endif
 
 #define TSIMD_DYN_DISPATCH_FUNC(func_name) \
-    /* 函数指针类型别名 */ \
-    using TSIMD_PFN_##func_name = decltype(&TSIMD_NAMESPACE_NAME::TSIMD_DYN_INSTRUCTION::func_name); \
-    \
     /* 构建静态数组，存储函数指针 */ \
-    static inline TSIMD_PFN_##func_name TSIMD_PFN_##func_name##_table[] = { \
+    static inline decltype(&TSIMD_NAMESPACE_NAME::TSIMD_DYN_INSTRUCTION::func_name) TSIMD_PFN_##func_name##_table[] = { \
         TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
     };
 
