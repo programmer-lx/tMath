@@ -5,7 +5,7 @@
 #include <string>
 
 #undef TSIMD_DISPATCH_THIS_FILE
-#define TSIMD_DISPATCH_THIS_FILE "batch/dyn_dispatch_float/x86/float32/AVX2_FMA3_float32.cpp" // this file
+#define TSIMD_DISPATCH_THIS_FILE "batch/x86/float32/AVX2_FMA3_float32.cpp" // this file
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
 

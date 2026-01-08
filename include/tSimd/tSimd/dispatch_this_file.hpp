@@ -10,73 +10,86 @@
 #undef TSIMD_ONCE
 #define TSIMD_ONCE 0
 
-// -------------------------------- x86 --------------------------------
-#if defined(TSIMD_X86_ANY)
-
-    // AVX2_FMA3
+// AVX2 + FMA3
+#if defined(TSIMD_INSTRUCTION_FEATURE_AVX2) && defined(TSIMD_INSTRUCTION_FEATURE_FMA3)
     #undef TSIMD_DYN_INSTRUCTION
     #define TSIMD_DYN_INSTRUCTION AVX2_FMA3
+
     // 此时 TSIMD_DYN_FUNC_ATTR 等于 AVX2_FMA3
     #undef TSIMD_DYN_FUNC_ATTR
     #define TSIMD_DYN_FUNC_ATTR TSIMD_AVX2_FMA3_INTRINSIC_ATTR
-    #include TSIMD_DISPATCH_THIS_FILE // dispatch
 
+    #include TSIMD_DISPATCH_THIS_FILE
+#endif
 
-    // AVX2
+// AVX2
+#if defined(TSIMD_INSTRUCTION_FEATURE_AVX2)
     #undef TSIMD_DYN_INSTRUCTION
     #define TSIMD_DYN_INSTRUCTION AVX2
+
     // 此时 TSIMD_DYN_FUNC_ATTR 等于 AVX2
     #undef TSIMD_DYN_FUNC_ATTR
     #define TSIMD_DYN_FUNC_ATTR TSIMD_AVX2_INTRINSIC_ATTR
-    #include TSIMD_DISPATCH_THIS_FILE // dispatch
 
+    #include TSIMD_DISPATCH_THIS_FILE
+#endif
 
-    // AVX
+// AVX
+#if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
     #undef TSIMD_DYN_INSTRUCTION
     #define TSIMD_DYN_INSTRUCTION AVX
+
     // 此时 TSIMD_DYN_FUNC_ATTR 等于 AVX
     #undef TSIMD_DYN_FUNC_ATTR
     #define TSIMD_DYN_FUNC_ATTR TSIMD_AVX_INTRINSIC_ATTR
-    #include TSIMD_DISPATCH_THIS_FILE // dispatch
 
+    #include TSIMD_DISPATCH_THIS_FILE
+#endif
 
-
-    // SSE2
+// SSE2 (may be fallback)
+#if defined(TSIMD_INSTRUCTION_FEATURE_SSE2)
     #undef TSIMD_DYN_INSTRUCTION
     #define TSIMD_DYN_INSTRUCTION SSE2
+
     // 此时 TSIMD_DYN_FUNC_ATTR 等于 SSE2
     #undef TSIMD_DYN_FUNC_ATTR
     #define TSIMD_DYN_FUNC_ATTR TSIMD_SSE2_INTRINSIC_ATTR
-    #include TSIMD_DISPATCH_THIS_FILE // dispatch
 
+    #if (TSIMD_INSTRUCTION_FEATURE_SSE2 != TSIMD_INSTRUCTION_FEATURE_FALLBACK_VALUE)
+        #include TSIMD_DISPATCH_THIS_FILE // dispatch if not fallback
+    #endif
+#endif
 
-
-    // SSE
+// SSE
+#if defined(TSIMD_INSTRUCTION_FEATURE_SSE)
     #undef TSIMD_DYN_INSTRUCTION
     #define TSIMD_DYN_INSTRUCTION SSE
+
     // 此时 TSIMD_DYN_FUNC_ATTR 等于 SSE
     #undef TSIMD_DYN_FUNC_ATTR
     #define TSIMD_DYN_FUNC_ATTR TSIMD_SSE_INTRINSIC_ATTR
-    #include TSIMD_DISPATCH_THIS_FILE // dispatch
 
+    #include TSIMD_DISPATCH_THIS_FILE
+#endif
 
-#endif // x86
+// Scalar (may be fallback)
+#if defined(TSIMD_INSTRUCTION_FEATURE_SCALAR)
+    #undef TSIMD_DYN_INSTRUCTION
+    #define TSIMD_DYN_INSTRUCTION Scalar
+
+    // 此时 TSIMD_DYN_FUNC_ATTR 等于 Scalar
+    #undef TSIMD_DYN_FUNC_ATTR
+    #define TSIMD_DYN_FUNC_ATTR TSIMD_SCALAR_INTRINSIC_ATTR
+
+    #if (TSIMD_INSTRUCTION_FEATURE_SCALAR != TSIMD_INSTRUCTION_FEATURE_FALLBACK_VALUE)
+        #include TSIMD_DISPATCH_THIS_FILE // dispatch if not fallback
+    #endif
+#endif
 
 
 // last dispatch
-
 // once
 #undef TSIMD_ONCE
 #define TSIMD_ONCE 1
-
-// Scalar
-#undef TSIMD_DYN_INSTRUCTION
-#define TSIMD_DYN_INSTRUCTION Scalar
-// 此时 TSIMD_DYN_FUNC_ATTR 等于 Scalar
-#undef TSIMD_DYN_FUNC_ATTR
-#define TSIMD_DYN_FUNC_ATTR TSIMD_SCALAR_INTRINSIC_ATTR
-// #include TSIMD_DISPATCH_THIS_FILE // dispatch (不需要include)
-
-
 
 #undef TSIMD_DISPATCH_THIS_FILE

@@ -160,14 +160,13 @@ enum class SimdInstruction : int
 {
     Scalar = 0,
 
-    // x86
-#if defined(TSIMD_X86_ANY)
-    SSE,
-    SSE2,
-    AVX,
-    AVX2,
-    AVX2_FMA3,
-#endif
+    // begin x86
+    SSE = 1,
+    SSE2 = 2,
+    AVX = 3,
+    AVX2 = 4,
+    AVX2_FMA3 = 5,
+    // end x86
 
     Num
 };
@@ -299,7 +298,6 @@ private:
             return underlying(SimdInstruction::SSE);
         }
 
-        // fallback to scalar
         return underlying(SimdInstruction::Scalar);
     }
     
@@ -340,36 +338,68 @@ public:
 // instruction充当命名空间
 #define TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, instruction) \
     &TSIMD_NAMESPACE_NAME::instruction::func_name,
+#define TSIMD_DETAIL_ONE_NULL_FUNC nullptr,
 
-// ---------------------------------------------- 平台判断 ----------------------------------------------
+// ---------------------------------------------- 2 Function table (x86 and arm) ----------------------------------------------
 // Scalar
-#define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, Scalar)
-
-// x86 指令集
-#if defined(TSIMD_X86_ANY)
-    #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE)
-    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
-    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
-    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
-    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
+#if defined(TSIMD_INSTRUCTION_FEATURE_SCALAR)
+    #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, Scalar)
 #else
-    #define TSIMD_DETAIL_SSE_FUNC_IMPL(...)
-    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(...)
-    #define TSIMD_DETAIL_AVX_FUNC_IMPL(...)
-    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(...)
-    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(...)
+    #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
 #endif
 
-// 不同后端的函数指针表
-#define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
-    /* ------------------------------------- scalar ------------------------------------- */ \
-    TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) \
-    /* ------------------------------------- x86 ------------------------------------- */ \
-    TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) \
-    TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name)
+#if defined(TSIMD_ARCH_X86_ANY)
+    // SSE
+    #if defined(TSIMD_INSTRUCTION_FEATURE_SSE)
+        #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE)
+    #else
+        #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
+    #endif
+
+    // SSE2
+    #if defined(TSIMD_INSTRUCTION_FEATURE_SSE2)
+        #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
+    #else
+        #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
+    #endif
+
+    // AVX
+    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
+        #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
+    #else
+        #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
+    #endif
+
+    // AVX2
+    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2)
+        #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
+    #else
+        #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
+    #endif
+
+    // AVX_FMA3
+    #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2) && defined(TSIMD_INSTRUCTION_FEATURE_FMA3)
+        #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
+    #else
+        #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_NULL_FUNC
+    #endif
+#endif
+
+// function table
+#if defined(TSIMD_ARCH_X86_ANY)
+// x86
+    #define TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY(func_name) \
+        /* ------------------------------------- scalar ------------------------------------- */ \
+        TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name)    /* 0 */ \
+        /* ------------------------------------- x86 ------------------------------------- */ \
+        TSIMD_DETAIL_SSE_FUNC_IMPL(func_name)       /* 1 */ \
+        TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name)      /* 2 */ \
+        TSIMD_DETAIL_AVX_FUNC_IMPL(func_name)       /* 3 */ \
+        TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name)      /* 4 */ \
+        TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) /* 5 */
+#else
+// arm
+#endif
 
 #if !defined(TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY)
     #error "have not defined DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY to cache the simd function pointers"

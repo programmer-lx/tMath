@@ -3,7 +3,7 @@
 #include <tSimd/aligned_allocate.hpp>
 #include <tSimd/batch.hpp>
 
-#include "../../test.hpp"
+#include "../test.hpp"
 
 
 TEST(aligned_allocate, alignment_test)

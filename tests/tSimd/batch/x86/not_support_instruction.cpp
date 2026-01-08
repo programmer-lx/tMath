@@ -3,7 +3,7 @@
 
 #include <tSimd/batch.hpp>
 
-#include "../test.hpp"
+#include "../../../test.hpp"
 
 
 #if defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG)

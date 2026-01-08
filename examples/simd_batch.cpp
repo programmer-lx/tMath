@@ -9,6 +9,10 @@
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
 
+#ifdef TSIMD_INSTRUCTION_FEATURE_SCALAR
+#error "hit"
+#endif
+
 namespace tsimd
 {
     namespace TSIMD_DYN_INSTRUCTION
@@ -22,7 +26,7 @@ namespace tsimd
             // 测试
             std::string cur_intrinsic = TMATH_STR("" TSIMD_DYN_FUNC_ATTR);
 #if defined(TMATH_COMPILER_MSVC)
-            EXPECT_TRUE(cur_intrinsic == "\"\"");
+            assert(cur_intrinsic == "\"\"");
 #elif defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG)
             assert(cur_intrinsic.contains("__attribute__((target("));
 #else

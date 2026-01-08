@@ -1,15 +1,15 @@
-#define TSIMD_TEST_INTRINSIC Scalar
+#define TSIMD_TEST_INTRINSIC AVX
 
 #include "../test.hpp"
 
 #include <string>
 
 #undef TSIMD_DISPATCH_THIS_FILE
-#define TSIMD_DISPATCH_THIS_FILE "batch/dyn_dispatch_float/Scalar/Scalar_float32.cpp" // this file
+#define TSIMD_DISPATCH_THIS_FILE "batch/x86/float32/AVX_float32.cpp" // this file
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
 
-#include "../test_float32.inl"
+#include "../../test_float32.inl"
 
 namespace tsimd
 {
@@ -22,16 +22,22 @@ namespace tsimd
             constexpr size_t Step = op::Lanes;
 
             // 测试SimdOp后端
-            bool test = std::is_same_v<op, SimdOp<SimdInstruction::Scalar, float>>;
+            bool test = std::is_same_v<op, SimdOp<SimdInstruction::AVX, float>>;
             EXPECT_TRUE(test);
-            EXPECT_TRUE(op::CurrentInstruction == SimdInstruction::Scalar);
-            EXPECT_TRUE(op::BatchSize == 4);
+            EXPECT_TRUE(op::CurrentInstruction == SimdInstruction::AVX);
+            EXPECT_TRUE(op::BatchSize == 32);
             EXPECT_TRUE(op::ElementSize == 4);
-            EXPECT_TRUE(op::Lanes == 1);
-            EXPECT_TRUE(op::BatchAlignment == 4);
+            EXPECT_TRUE(op::Lanes == 8);
+            EXPECT_TRUE(op::BatchAlignment == 32);
 
             std::string cur_intrinsic = TMATH_STR("" TSIMD_DYN_FUNC_ATTR);
+#if defined(TMATH_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
+#elif defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG)
+            EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"avx\")))");
+#else
+    #error "Unknown compiler."
+#endif
 
             batch_t sum_n = op::zero();
             for (size_t i = 0; i < N; i += Step)

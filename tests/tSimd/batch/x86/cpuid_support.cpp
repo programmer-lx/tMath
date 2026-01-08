@@ -1,6 +1,6 @@
 #include <tSimd/batch.hpp>
 
-#include "../../test.hpp"
+#include "../../../test.hpp"
 
 TEST(cpuid, support)
 {

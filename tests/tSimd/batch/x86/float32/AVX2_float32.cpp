@@ -1,17 +1,15 @@
-#define TSIMD_TEST_INTRINSIC SSE2
+#define TSIMD_TEST_INTRINSIC AVX2
 
 #include "../test.hpp"
 
 #include <string>
 
 #undef TSIMD_DISPATCH_THIS_FILE
-#define TSIMD_DISPATCH_THIS_FILE "batch/dyn_dispatch_float/basic.cpp" // this file
+#define TSIMD_DISPATCH_THIS_FILE "batch/x86/float32/AVX2_float32.cpp" // this file
 #include <tSimd/dispatch_this_file.hpp> // auto dispatch (在tSimd/batch.hpp前面)
-
 #include <tSimd/batch.hpp> // 一定要在 tSimd/dispatch_this_file.hpp 后面
 
-#pragma message("dispatch intrinsic: \"" TMATH_STR("" TSIMD_DYN_FUNC_ATTR) "\"")
-
+#include "../../test_float32.inl"
 
 namespace tsimd
 {
@@ -24,17 +22,19 @@ namespace tsimd
             constexpr size_t Step = op::Lanes;
 
             // 测试SimdOp后端
-            EXPECT_TRUE(op::CurrentInstruction == SimdInstruction::SSE2);
-            EXPECT_TRUE(op::BatchSize == 16);
+            bool test = std::is_same_v<op, SimdOp<SimdInstruction::AVX2, float>>;
+            EXPECT_TRUE(test);
+            EXPECT_TRUE(op::CurrentInstruction == SimdInstruction::AVX2);
+            EXPECT_TRUE(op::BatchSize == 32);
             EXPECT_TRUE(op::ElementSize == 4);
-            EXPECT_TRUE(op::Lanes == 4);
-            EXPECT_TRUE(op::BatchAlignment == 16);
+            EXPECT_TRUE(op::Lanes == 8);
+            EXPECT_TRUE(op::BatchAlignment == 32);
 
             std::string cur_intrinsic = TMATH_STR("" TSIMD_DYN_FUNC_ATTR);
 #if defined(TMATH_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
 #elif defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG)
-            EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"sse2\")))");
+            EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"avx2\")))");
 #else
     #error "Unknown compiler."
 #endif
