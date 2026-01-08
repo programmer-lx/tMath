@@ -8,6 +8,7 @@ namespace detail
     {
         using namespace detail;
 
+#if defined(TSIMD_ARCH_X86_ANY)
         static InstructionSetSupports result{};
 
         uint32_t abcd[4]; // eax, ebx, ecx, edx
@@ -75,11 +76,14 @@ namespace detail
         }
 
         return result;
+#else
+        // arm NEON
+#endif
     }
 
     int dyn_func_index_impl() noexcept
     {
-        const auto& supports = detail::get_support_info_impl();
+        const auto& supports = get_support_info_impl();
 
         // 从最高级的指令往下判断
 #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2) && defined(TSIMD_INSTRUCTION_FEATURE_FMA3)

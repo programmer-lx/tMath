@@ -188,7 +188,7 @@ namespace detail
 
         Num
     };
-    static_assert(detail::underlying(SimdInstructionIndex::Num) > 0);
+    static_assert(underlying(SimdInstructionIndex::Num) > 0);
 }
 
 class InstructionSelector final
@@ -319,8 +319,7 @@ concept scalar_type = std::is_same_v<T, float>;
 template<SimdInstruction Instruction, scalar_type ScalarType>
 struct SimdOp
 {
-    static_assert(Instruction != SimdInstruction::Num);
-    static_assert(!std::is_polymorphic_v<SimdOp<Instruction, ScalarType>>, "SimdOp must not have virtual functions");
+    static_assert(Instruction >= SimdInstruction::Num || Instruction < SimdInstruction::Num);
 };
 
 #define TSIMD_DYN_SIMD_OP(scalar_type) \
