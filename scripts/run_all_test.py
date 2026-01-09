@@ -102,9 +102,9 @@ def main():
                 # 3. 测试
                 run_command([
                     "ctest",
+                    "--verbose",
                     "--test-dir", str(current_build_dir),
-                    "-C", str(build_cfg),
-                    "--output-on-failure"
+                    "-C", str(build_cfg)
                 ])
 
         # --- 所有流程结束后的成功打印 ---
