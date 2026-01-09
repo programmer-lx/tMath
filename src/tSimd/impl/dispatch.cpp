@@ -1,4 +1,4 @@
-#include "dispatch.hpp"
+#include "tSimd/impl/ops/dispatch.hpp"
 
 #include <utility>
 

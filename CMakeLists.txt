@@ -21,7 +21,7 @@ target_include_directories(tMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include/t
 # tSimd library (static)
 add_library(tSimd STATIC)
 target_include_directories(tSimd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/tSimd)
-target_sources(tSimd PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/tSimd/tSimd/one_cpp.cpp)
+target_sources(tSimd PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/tSimd/one_cpp.cpp)
 # msvc utf-8
 if(MSVC)
     target_compile_options(tSimd PRIVATE /utf-8)
