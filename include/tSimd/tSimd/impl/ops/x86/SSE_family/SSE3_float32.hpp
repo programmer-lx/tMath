@@ -8,11 +8,11 @@
 TSIMD_NAMESPACE_BEGIN
 
 template<>
-struct SimdOp<SimdInstruction::SSE3, float> : SimdOp<SimdInstruction::SSE2, float>
+struct SimdOp<SimdInstruction::SSE3, float32> : SimdOp<SimdInstruction::SSE2, float32>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE3, float, __m128, Alignment::SSE_Family)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE3, float32, __m128, Alignment::SSE_Family)
 
-    TSIMD_OP_SIG_SSE3(float, reduce_sum, (batch_t v))
+    TSIMD_OP_SIG_SSE3(float32, reduce_sum, (batch_t v))
     {
         // input: [d, c, b, a]
         // hadd: [c+d, a+b, c+d, a+b]
@@ -24,6 +24,6 @@ struct SimdOp<SimdInstruction::SSE3, float> : SimdOp<SimdInstruction::SSE2, floa
         return _mm_cvtss_f32(result);
     }
 };
-TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::SSE3, float>)
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::SSE3, float32>);
 
 TSIMD_NAMESPACE_END

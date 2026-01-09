@@ -7,26 +7,26 @@
 TSIMD_NAMESPACE_BEGIN
 
 template<>
-struct SimdOp<SimdInstruction::SSE, float>
+struct SimdOp<SimdInstruction::SSE, float32>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE, float, __m128, Alignment::SSE_Family)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE, float32, __m128, Alignment::SSE_Family)
 
-    TSIMD_OP_SIG_SSE(batch_t, load, (const float* mem))
+    TSIMD_OP_SIG_SSE(batch_t, load, (const float32* mem))
     {
         return _mm_load_ps(mem);
     }
 
-    TSIMD_OP_SIG_SSE(batch_t, loadu, (const float* mem))
+    TSIMD_OP_SIG_SSE(batch_t, loadu, (const float32* mem))
     {
         return _mm_loadu_ps(mem);
     }
 
-    TSIMD_OP_SIG_SSE(void, store, (float* mem, batch_t v))
+    TSIMD_OP_SIG_SSE(void, store, (float32* mem, batch_t v))
     {
         _mm_store_ps(mem, v);
     }
 
-    TSIMD_OP_SIG_SSE(void, storeu, (float* mem, batch_t v))
+    TSIMD_OP_SIG_SSE(void, storeu, (float32* mem, batch_t v))
     {
         _mm_storeu_ps(mem, v);
     }
@@ -36,7 +36,7 @@ struct SimdOp<SimdInstruction::SSE, float>
         return _mm_setzero_ps();
     }
 
-    TSIMD_OP_SIG_SSE(batch_t, set, (float x))
+    TSIMD_OP_SIG_SSE(batch_t, set, (float32 x))
     {
         return _mm_set1_ps(x);
     }
@@ -61,7 +61,7 @@ struct SimdOp<SimdInstruction::SSE, float>
         return _mm_div_ps(lhs, rhs);
     }
 
-    TSIMD_OP_SIG_SSE(float, reduce_sum, (batch_t v))
+    TSIMD_OP_SIG_SSE(float32, reduce_sum, (batch_t v))
     {
         // [d, c, b, a]
         //       +
@@ -85,6 +85,6 @@ struct SimdOp<SimdInstruction::SSE, float>
         return _mm_add_ps(_mm_mul_ps(a, b), c);
     }
 };
-TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::SSE, float>)
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::SSE, float32>);
 
 TSIMD_NAMESPACE_END

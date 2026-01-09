@@ -8,7 +8,7 @@
 
 // Scalar
 #if defined(TSIMD_INSTRUCTION_FEATURE_SCALAR)
-    #include "impl/ops/Scalar/Scalar_float32.hpp"
+    #include "impl/ops/Scalar/Scalar_float.hpp"
 #endif
 
 

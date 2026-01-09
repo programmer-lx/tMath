@@ -1,5 +1,7 @@
 #include "dispatch.hpp"
 
+#include <utility>
+
 TSIMD_NAMESPACE_BEGIN
 
 namespace detail

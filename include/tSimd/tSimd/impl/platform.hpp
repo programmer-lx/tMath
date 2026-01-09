@@ -117,4 +117,7 @@ namespace Alignment
     static constexpr size_t AVX512_Family = TSIMD_ALIGNMENT_AVX512_FAMILY;
 }
 
+using float32 = float;
+using float64 = double;
+
 TSIMD_NAMESPACE_END

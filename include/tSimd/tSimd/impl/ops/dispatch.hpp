@@ -14,7 +14,7 @@
 
 #include <type_traits>
 #include <concepts>
-#include <utility>
+#include <limits>
 
 #include "../platform.hpp"
 #include "func_attr.hpp"
@@ -323,19 +323,14 @@ enum class SimdInstruction : int
     SSE3,
     AVX,
     AVX2,
-    AVX2_FMA3,
-
-    Num
+    AVX2_FMA3
 };
 
 template<typename T>
 concept scalar_type = std::is_same_v<T, float>;
 
 template<SimdInstruction Instruction, scalar_type ScalarType>
-struct SimdOp
-{
-    static_assert(Instruction >= SimdInstruction::Num || Instruction < SimdInstruction::Num);
-};
+struct SimdOp;
 
 #define TSIMD_DYN_SIMD_OP(scalar_type) \
     SimdOp<SimdInstruction::TSIMD_DYN_INSTRUCTION, scalar_type>
@@ -363,14 +358,65 @@ namespace detail
     template<typename T>
     static consteval bool check_simd_op()
     {
+        using scalar_t = T::scalar_t;
+
+        // 不支持 long double
+        if constexpr (std::is_same_v<long double, scalar_t>)
+        {
+            return false;
+        }
+
+        // 不能有虚函数
         if constexpr (std::has_virtual_destructor_v<T>)
         {
             return false;
         }
+
+        // 检查浮点数是否满足IEEE754标准
+        // 如果是Scalar，则跳过该检查
+        // float32 IEEE754 check
+        if constexpr (!std::numeric_limits<float32>::is_iec559)
+        {
+            return false;
+        }
+
+        // float64 IEEE754 check
+        if constexpr (!std::numeric_limits<float64>::is_iec559)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    template<typename T>
+    static consteval bool check_scalar_op()
+    {
+        using scalar_t = T::scalar_t;
+        using batch_t = T::batch_t;
+
+        // 不支持 long double
+        if constexpr (std::is_same_v<long double, scalar_t>)
+        {
+            return false;
+        }
+
+        // batch 和 scalar 类型一致
+        if constexpr (!std::is_same_v<batch_t, scalar_t>)
+        {
+            return false;
+        }
+
+        // 不能有虚函数
+        if constexpr (std::has_virtual_destructor_v<T>)
+        {
+            return false;
+        }
+
         return true;
     }
 }
-#define TSIMD_DETAIL_CHECK_SIMD_OP(...) static_assert(detail::check_simd_op<__VA_ARGS__>(), "SimdOp static check failed.");
-
+#define TSIMD_DETAIL_CHECK_SIMD_OP(...) static_assert(detail::check_simd_op<__VA_ARGS__>(), "SimdOp static check failed.")
+#define TSIMD_DETAIL_CHECK_SCALAR_OP(...) static_assert(detail::check_scalar_op<__VA_ARGS__>(), "Invalid scalar op.")
 
 TSIMD_NAMESPACE_END

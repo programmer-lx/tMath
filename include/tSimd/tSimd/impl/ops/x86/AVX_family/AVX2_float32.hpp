@@ -9,10 +9,10 @@ TSIMD_NAMESPACE_BEGIN
 
 // AVX2与AVX的浮点运算指令一致
 template<>
-struct SimdOp<SimdInstruction::AVX2, float> : SimdOp<SimdInstruction::AVX, float>
+struct SimdOp<SimdInstruction::AVX2, float32> : SimdOp<SimdInstruction::AVX, float32>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX2, float, __m256, Alignment::AVX_Family)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX2, float32, __m256, Alignment::AVX_Family)
 };
-TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::AVX, float>)
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::AVX, float32>);
 
 TSIMD_NAMESPACE_END

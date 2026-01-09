@@ -7,26 +7,26 @@
 TSIMD_NAMESPACE_BEGIN
 
 template<>
-struct SimdOp<SimdInstruction::AVX, float>
+struct SimdOp<SimdInstruction::AVX, float32>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX, float, __m256, Alignment::AVX_Family)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(AVX, float32, __m256, Alignment::AVX_Family)
 
-    TSIMD_OP_SIG_AVX(batch_t, load, (const float* mem))
+    TSIMD_OP_SIG_AVX(batch_t, load, (const float32* mem))
     {
         return _mm256_load_ps(mem);
     }
 
-    TSIMD_OP_SIG_AVX(batch_t, loadu, (const float* mem))
+    TSIMD_OP_SIG_AVX(batch_t, loadu, (const float32* mem))
     {
         return _mm256_loadu_ps(mem);
     }
 
-    TSIMD_OP_SIG_AVX(void, store, (float* mem, batch_t v))
+    TSIMD_OP_SIG_AVX(void, store, (float32* mem, batch_t v))
     {
         _mm256_store_ps(mem, v);
     }
 
-    TSIMD_OP_SIG_AVX(void, storeu, (float* mem, batch_t v))
+    TSIMD_OP_SIG_AVX(void, storeu, (float32* mem, batch_t v))
     {
         _mm256_storeu_ps(mem, v);
     }
@@ -36,7 +36,7 @@ struct SimdOp<SimdInstruction::AVX, float>
         return _mm256_setzero_ps();
     }
 
-    TSIMD_OP_SIG_AVX(batch_t, set, (float x))
+    TSIMD_OP_SIG_AVX(batch_t, set, (float32 x))
     {
         return _mm256_set1_ps(x);
     }
@@ -61,7 +61,7 @@ struct SimdOp<SimdInstruction::AVX, float>
         return _mm256_div_ps(lhs, rhs);
     }
 
-    TSIMD_OP_SIG_AVX(float, reduce_sum, (batch_t v))
+    TSIMD_OP_SIG_AVX(float32, reduce_sum, (batch_t v))
     {
         // [8, 7, 6, 5, 4, 3, 2, 1]
         // hadd
@@ -88,6 +88,6 @@ struct SimdOp<SimdInstruction::AVX, float>
         return _mm256_add_ps(_mm256_mul_ps(a, b), c);
     }
 };
-TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::AVX, float>)
+TSIMD_DETAIL_CHECK_SIMD_OP(SimdOp<SimdInstruction::AVX, float32>);
 
 TSIMD_NAMESPACE_END
