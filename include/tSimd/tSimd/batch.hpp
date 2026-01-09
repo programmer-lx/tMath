@@ -22,6 +22,11 @@
     #include "impl/ops/x86/SSE_family/SSE2_float32.hpp"
 #endif
 
+// SSE3
+#if defined(TSIMD_INSTRUCTION_FEATURE_SSE3)
+    #include "impl/ops/x86/SSE_family/SSE3_float32.hpp"
+#endif
+
 
 // AVX
 #if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
