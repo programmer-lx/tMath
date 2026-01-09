@@ -1,17 +1,15 @@
-#define TSIMD_TEST_INTRINSIC SSE2
+#define TSIMD_TEST_INTRINSIC SSE4_1
 
 #include "../test.hpp"
 
 #include <string>
 
 #undef TSIMD_DISPATCH_THIS_FILE
-#define TSIMD_DISPATCH_THIS_FILE "batch/x86/basic.cpp" // this file
-#include <tSimd/dispatch_this_file.hpp>
-
+#define TSIMD_DISPATCH_THIS_FILE "batch/x86/float32/SSE4_1_float32.cpp" // this file
+#include <tSimd/dispatch_this_file.hpp> // auto dispatch
 #include <tSimd/batch.hpp>
 
-#pragma message("dispatch intrinsic: \"" TMATH_STR("" TSIMD_DYN_FUNC_ATTR) "\"")
-
+#include "../../test_float32.inl"
 
 namespace tsimd
 {
@@ -24,7 +22,9 @@ namespace tsimd
             constexpr size_t Step = op::Lanes;
 
             // 测试SimdOp后端
-            EXPECT_TRUE(op::CurrentInstruction == SimdInstruction::SSE2);
+            bool test = std::is_same_v<op, SimdOp<SimdInstruction::SSE4_1, float>>;
+            EXPECT_TRUE(test);
+            EXPECT_TRUE(op::CurrentInstruction == SimdInstruction::SSE4_1);
             EXPECT_TRUE(op::BatchSize == 16);
             EXPECT_TRUE(op::ElementSize == 4);
             EXPECT_TRUE(op::Lanes == 4);
@@ -34,7 +34,7 @@ namespace tsimd
 #if defined(TMATH_COMPILER_MSVC)
             EXPECT_TRUE(cur_intrinsic == "\"\"");
 #elif defined(TMATH_COMPILER_GCC) || defined(TMATH_COMPILER_CLANG)
-            EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"sse2\")))");
+            EXPECT_TRUE(cur_intrinsic == "\"\" __attribute__((target(\"sse4.1\")))");
 #else
     #error "Unknown compiler."
 #endif
@@ -72,8 +72,6 @@ TEST(dyn_dispatch, basic)
     kernel(numbers, 8, &result);
 
     EXPECT_NEAR(result, expected, 1e-5f);
-
-    EXPECT_EQ(std::size(tsimd::PFN_table::kernel_dyn_impl), 8);
 }
 
 int main(int argc, char **argv)

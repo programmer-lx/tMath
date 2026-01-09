@@ -178,6 +178,10 @@ namespace detail
         SSE3,
     #endif
 
+    #if defined(TSIMD_INSTRUCTION_FEATURE_SSE4_1)
+        SSE4_1,
+    #endif
+
     #if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
         AVX,
     #endif
@@ -235,10 +239,17 @@ public:
 #endif
 
 // SSE3
-#if defined(TSIMD_INSTRUCTION_FEATURE_SSE2)
+#if defined(TSIMD_INSTRUCTION_FEATURE_SSE3)
     #define TSIMD_DETAIL_SSE3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE3)
 #else
     #define TSIMD_DETAIL_SSE3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
+#endif
+
+// SSE4.1
+#if defined(TSIMD_INSTRUCTION_FEATURE_SSE4_1)
+    #define TSIMD_DETAIL_SSE4_1_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE4_1)
+#else
+    #define TSIMD_DETAIL_SSE4_1_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // AVX
@@ -270,6 +281,7 @@ public:
     TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_SSE3_FUNC_IMPL(func_name) \
+    TSIMD_DETAIL_SSE4_1_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) \
     TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name)
@@ -321,6 +333,7 @@ enum class SimdInstruction : int
     SSE,
     SSE2,
     SSE3,
+    SSE4_1,
     AVX,
     AVX2,
     AVX2_FMA3
