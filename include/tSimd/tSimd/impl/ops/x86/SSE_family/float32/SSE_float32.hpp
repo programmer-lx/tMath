@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../_SSE_family_types.hpp"
+#include "_SSE_family_float32_type.hpp"
 
 TSIMD_NAMESPACE_BEGIN
 
