@@ -6,126 +6,13 @@
     #include <cstdlib> // std::abort
 #endif
 
-#if defined(_MSC_VER)
-    #include <intrin.h>
-#else
-    #include <cpuid.h>
-#endif
-
 #include <type_traits>
 #include <concepts>
-#include <limits>
 
 #include "../platform.hpp"
 #include "func_attr.hpp"
 
 TSIMD_NAMESPACE_BEGIN
-
-namespace detail
-{
-    // leaf: EAX, sub_leaf: ECX
-    inline void cpuid(const uint32_t leaf, const uint32_t sub_leaf, uint32_t* abcd)
-    {
-#if defined(_MSC_VER)
-        int regs[4];
-        __cpuidex(regs, static_cast<int>(leaf), static_cast<int>(sub_leaf));
-        for (int i = 0; i < 4; ++i)
-        {
-            abcd[i] = static_cast<uint32_t>(regs[i]);
-        }
-#else
-        uint32_t a;
-        uint32_t b;
-        uint32_t c;
-        uint32_t d;
-        __cpuid_count(leaf, sub_leaf, a, b, c, d);
-        abcd[0] = a;
-        abcd[1] = b;
-        abcd[2] = c;
-        abcd[3] = d;
-#endif
-    }
-
-    inline uint64_t read_xcr0()
-    {
-#if defined(_MSC_VER)
-        return _xgetbv(0);
-#else
-        uint32_t eax, edx;
-        __asm__ volatile("xgetbv" : "=a"(eax), "=d"(edx) : "c"(0));
-        return (static_cast<uint64_t>(edx) << 32) | eax;
-#endif
-    }
-
-    // 首先需要读取 EAX 1 寄存器，接下来才能用下面的枚举判断
-    enum class CpuFeatureIndex_EAX1 : uint32_t
-    {
-        // see https://en.wikipedia.org/wiki/CPUID
-
-        // ECX 寄存器的 feature
-        SSE3        = 0 , // EAX 1, ECX  0
-        SSSE3       = 9 , // EAX 1, ECX  9
-        FMA3        = 12, // EAX 1, ECX 12
-        SSE4_1      = 19, // EAX 1, ECX 19
-        SSE4_2      = 20, // EAX 1, ECX 20
-        XSAVE       = 26, // EAX 1, ECX 26
-        OS_XSAVE    = 27, // EAX 1, ECX 27
-        AVX         = 28, // EAX 1, ECX 28
-        F16C        = 29, // EAX 1, ECX 29
-
-        // EDX 寄存器的 feature
-        SSE         = 25, // EAX 1, EDX 25
-        SSE2        = 26, // EAX 1, EDX 26
-    };
-
-    enum class CpuFeatureIndex_EAX7 : uint32_t
-    {
-        AVX2        = 5 , // EAX 7, EBX  5
-        AVX_512_F   = 16, // EAX 7, EBX 16
-    };
-
-    enum class CpuXSaveStateIndex : uint64_t
-    {
-        // see https://en.wikipedia.org/wiki/CPUID XSAVE State-components
-
-        // bit 1: SSE state: XMM0-XMM15 and MXCSR
-        // bit 2: AVX: YMM0-YMM15
-        // bit 5: AVX-512: opmask registers k0-k7
-        // bit 6: AVX-512: ZMM_Hi256 ZMM0-ZMM15
-        // bit 7: AVX-512: Hi16_ZMM ZMM16-ZMM31
-
-        SSE                 = 1 , // XMM0-XMM15 and MXCSR
-        AVX                 = 2 , // YMM0-YMM15
-        AVX_512_K0_K7       = 5 , // opmask registers k0-k7
-        AVX_512_LOW_256     = 6 , // ZMM0-ZMM15
-        AVX_512_HIGH_256    = 7 , // ZMM16-ZMM31
-    };
-
-    template<typename T>
-    using underlying_t =
-        std::conditional_t<
-            std::is_enum_v<T>,
-            std::underlying_type_t<T>,
-            T
-        >;
-
-    template<typename T>
-        requires (std::is_enum_v<T> || std::is_integral_v<T>)
-    static constexpr underlying_t<T> underlying(const T val) noexcept
-    {
-        return static_cast<underlying_t<T>>(val);
-    }
-
-    template<typename T, typename U>
-    static constexpr bool bit_is_open(T data, U bit_pos) noexcept
-    {
-        static_assert(sizeof(T) == sizeof(U));
-
-        using Type = underlying_t<U>;
-        return (static_cast<Type>(data) & (static_cast<Type>(1) << static_cast<Type>(bit_pos))) != 0;
-    }
-} // namespace detail
-
 
 struct InstructionSetSupports
 {
@@ -155,8 +42,35 @@ struct InstructionSetSupports
     bool AVX512_F   = false; // AVX512F支持FMA运算，不需要单独划分FMA3支持
 };
 
+// --------------------------------- TSIMD_DYN_INSTRUCTION str ---------------------------------
+#define TSIMD_DYN_INSTRUCTION_SCALAR     Scalar
+#define TSIMD_DYN_INSTRUCTION_SSE        SSE
+#define TSIMD_DYN_INSTRUCTION_SSE2       SSE2
+#define TSIMD_DYN_INSTRUCTION_SSE3       SSE3
+#define TSIMD_DYN_INSTRUCTION_SSSE3      SSSE3
+#define TSIMD_DYN_INSTRUCTION_SSE4_1     SSE4_1
+#define TSIMD_DYN_INSTRUCTION_SSE4_2     SSE4_2
+#define TSIMD_DYN_INSTRUCTION_AVX        AVX
+#define TSIMD_DYN_INSTRUCTION_AVX2       AVX2
+#define TSIMD_DYN_INSTRUCTION_AVX2_FMA3  AVX2_FMA3
+
 namespace detail
 {
+    template<typename T>
+    using underlying_t =
+        std::conditional_t<
+            std::is_enum_v<T>,
+            std::underlying_type_t<T>,
+            T
+        >;
+
+    template<typename T>
+        requires (std::is_enum_v<T> || std::is_integral_v<T>)
+    static constexpr underlying_t<T> underlying(const T val) noexcept
+    {
+        return static_cast<underlying_t<T>>(val);
+    }
+
     // 这个枚举的值就是函数指针表的索引
     enum class SimdInstructionIndex : int
     {
@@ -199,17 +113,6 @@ namespace detail
     static_assert(underlying(SimdInstructionIndex::Num) > 0);
 }
 
-class InstructionSelector final
-{
-public:
-    static const InstructionSetSupports& get_support_info() noexcept;
-    static size_t required_alignment() noexcept;
-
-    // 测试时直接返回索引即可，正式版本才使用运行时CPUID判断
-    static int dyn_func_index() noexcept;
-};
-
-
 // instruction充当命名空间
 #define TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, instruction) \
     &TSIMD_NAMESPACE_NAME::instruction::func_name,
@@ -219,56 +122,56 @@ public:
 // ---------------------------------------------- Function table ----------------------------------------------
 // Scalar
 #if defined(TSIMD_INSTRUCTION_FEATURE_SCALAR)
-    #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, Scalar)
+    #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_SCALAR)
 #else
     #define TSIMD_DETAIL_SCALAR_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // SSE
 #if defined(TSIMD_INSTRUCTION_FEATURE_SSE)
-    #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE)
+    #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_SSE)
 #else
     #define TSIMD_DETAIL_SSE_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // SSE2
 #if defined(TSIMD_INSTRUCTION_FEATURE_SSE2)
-    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE2)
+    #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_SSE2)
 #else
     #define TSIMD_DETAIL_SSE2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // SSE3
 #if defined(TSIMD_INSTRUCTION_FEATURE_SSE3)
-    #define TSIMD_DETAIL_SSE3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE3)
+    #define TSIMD_DETAIL_SSE3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_SSE3)
 #else
     #define TSIMD_DETAIL_SSE3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // SSE4.1
 #if defined(TSIMD_INSTRUCTION_FEATURE_SSE4_1)
-    #define TSIMD_DETAIL_SSE4_1_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, SSE4_1)
+    #define TSIMD_DETAIL_SSE4_1_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_SSE4_1)
 #else
     #define TSIMD_DETAIL_SSE4_1_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // AVX
 #if defined(TSIMD_INSTRUCTION_FEATURE_AVX)
-    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX)
+    #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_AVX)
 #else
     #define TSIMD_DETAIL_AVX_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // AVX2
 #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2)
-    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2)
+    #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_AVX2)
 #else
     #define TSIMD_DETAIL_AVX2_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
 
 // AVX_FMA3
 #if defined(TSIMD_INSTRUCTION_FEATURE_AVX2) && defined(TSIMD_INSTRUCTION_FEATURE_FMA3)
-    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, AVX2_FMA3)
+    #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_FUNC_IMPL(func_name, TSIMD_DYN_INSTRUCTION_AVX2_FMA3)
 #else
     #define TSIMD_DETAIL_AVX2_FMA3_FUNC_IMPL(func_name) TSIMD_DETAIL_ONE_EMPTY_FUNC
 #endif
@@ -289,6 +192,18 @@ public:
 #if !defined(TSIMD_DETAIL_DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY)
     #error "have not defined DYN_DISPATCH_FUNC_POINTER_STATIC_ARRAY to cache the simd function pointers"
 #endif
+
+
+// -------------------------- dispatch function ---------------------------
+class InstructionSelector final
+{
+public:
+    static const InstructionSetSupports& get_support_info() noexcept;
+    static size_t required_alignment() noexcept;
+
+    // 测试时直接返回索引即可，正式版本才使用运行时CPUID判断
+    static int dyn_func_index() noexcept;
+};
 
 #define TSIMD_DYN_DISPATCH_FUNC(func_name) \
     /* 构建静态数组，存储函数指针 (使用命名空间包裹，限定只能在类外使用) */ \
@@ -385,51 +300,10 @@ namespace detail
             return false;
         }
 
-        // 检查浮点数是否满足IEEE754标准
-        // 如果是Scalar，则跳过该检查
-        // float32 IEEE754 check
-        if constexpr (!std::numeric_limits<float32>::is_iec559)
-        {
-            return false;
-        }
-
-        // float64 IEEE754 check
-        if constexpr (!std::numeric_limits<float64>::is_iec559)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    template<typename T>
-    static consteval bool check_scalar_op()
-    {
-        using scalar_t = T::scalar_t;
-        using batch_t = T::batch_t;
-
-        // 不支持 long double
-        if constexpr (std::is_same_v<long double, scalar_t>)
-        {
-            return false;
-        }
-
-        // batch 和 scalar 类型一致
-        if constexpr (!std::is_same_v<batch_t, scalar_t>)
-        {
-            return false;
-        }
-
-        // 不能有虚函数
-        if constexpr (std::has_virtual_destructor_v<T>)
-        {
-            return false;
-        }
-
         return true;
     }
 }
 #define TSIMD_DETAIL_CHECK_SIMD_OP(...) static_assert(detail::check_simd_op<__VA_ARGS__>(), "SimdOp static check failed.")
-#define TSIMD_DETAIL_CHECK_SCALAR_OP(...) static_assert(detail::check_scalar_op<__VA_ARGS__>(), "Invalid scalar op.")
+#define TSIMD_DETAIL_CHECK_SCALAR_OP(...) static_assert(detail::check_simd_op<__VA_ARGS__>(), "Invalid scalar op.")
 
 TSIMD_NAMESPACE_END

@@ -2,6 +2,8 @@
 
 #include "../common_macros.hpp"
 
+#include <limits>
+
 // compiler
 #if !defined(TMATH_COMPILER_MSVC) && !defined(TMATH_COMPILER_GCC) && !defined(TMATH_COMPILER_CLANG)
     #error "Unknown compiler, tSimd only support MSVC, GCC, clang"
@@ -102,10 +104,10 @@
 #define TSIMD_NAMESPACE_END }
 
 
-#define TSIMD_ALIGNMENT_SCALAR 4
-#define TSIMD_ALIGNMENT_SSE_FAMILY 16
-#define TSIMD_ALIGNMENT_AVX_FAMILY 32
-#define TSIMD_ALIGNMENT_AVX512_FAMILY 64
+#define TSIMD_ALIGNMENT_SCALAR          4
+#define TSIMD_ALIGNMENT_SSE_FAMILY      16
+#define TSIMD_ALIGNMENT_AVX_FAMILY      32
+#define TSIMD_ALIGNMENT_AVX512_FAMILY   64
 
 TSIMD_NAMESPACE_BEGIN
 
@@ -119,5 +121,8 @@ namespace Alignment
 
 using float32 = float;
 using float64 = double;
+
+static_assert(sizeof(float32) == 4 && std::numeric_limits<float32>::is_iec559);
+static_assert(sizeof(float64) == 8 && std::numeric_limits<float64>::is_iec559);
 
 TSIMD_NAMESPACE_END

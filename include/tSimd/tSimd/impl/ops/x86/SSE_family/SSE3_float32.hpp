@@ -1,8 +1,5 @@
 #pragma once
 
-#include <pmmintrin.h> // SSE3
-
-#include "../../dispatch.hpp"
 #include "SSE2_float32.hpp"
 
 TSIMD_NAMESPACE_BEGIN
@@ -10,7 +7,7 @@ TSIMD_NAMESPACE_BEGIN
 template<>
 struct SimdOp<SimdInstruction::SSE3, float32> : SimdOp<SimdInstruction::SSE2, float32>
 {
-    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE3, float32, __m128, Alignment::SSE_Family)
+    TSIMD_DETAIL_SIMD_OP_TRAITS_AND_CONSTANTS(SSE3, float32, SSE_family::Batch<float32>, Alignment::SSE_Family)
 
     TSIMD_OP_SIG_SSE3(float32, reduce_sum, (batch_t v))
     {
@@ -19,7 +16,7 @@ struct SimdOp<SimdInstruction::SSE3, float32> : SimdOp<SimdInstruction::SSE2, fl
         // hadd: [a+b+c+d, .........]
         // get lane[0]
 
-        __m128 result = _mm_hadd_ps(v, v);
+        __m128 result = _mm_hadd_ps(v.v, v.v);
         result = _mm_hadd_ps(result, result);
         return _mm_cvtss_f32(result);
     }

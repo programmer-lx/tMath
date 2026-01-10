@@ -1,11 +1,108 @@
 #include "tSimd/impl/ops/dispatch.hpp"
 
+
+#if defined(_MSC_VER)
+    #include <intrin.h>
+#else
+    #include <cpuid.h>
+#endif
+
+
 #include <utility>
 
 TSIMD_NAMESPACE_BEGIN
 
 namespace detail
 {
+    // 首先需要读取 EAX 1 寄存器，接下来才能用下面的枚举判断
+    enum class CpuFeatureIndex_EAX1 : uint32_t
+    {
+        // see https://en.wikipedia.org/wiki/CPUID
+
+        // ECX 寄存器的 feature
+        SSE3        = 0 , // EAX 1, ECX  0
+        SSSE3       = 9 , // EAX 1, ECX  9
+        FMA3        = 12, // EAX 1, ECX 12
+        SSE4_1      = 19, // EAX 1, ECX 19
+        SSE4_2      = 20, // EAX 1, ECX 20
+        XSAVE       = 26, // EAX 1, ECX 26
+        OS_XSAVE    = 27, // EAX 1, ECX 27
+        AVX         = 28, // EAX 1, ECX 28
+        F16C        = 29, // EAX 1, ECX 29
+
+        // EDX 寄存器的 feature
+        SSE         = 25, // EAX 1, EDX 25
+        SSE2        = 26, // EAX 1, EDX 26
+    };
+
+    enum class CpuFeatureIndex_EAX7 : uint32_t
+    {
+        AVX2        = 5 , // EAX 7, EBX  5
+        AVX_512_F   = 16, // EAX 7, EBX 16
+    };
+
+    enum class CpuXSaveStateIndex : uint64_t
+    {
+        // see https://en.wikipedia.org/wiki/CPUID XSAVE State-components
+
+        // bit 1: SSE state: XMM0-XMM15 and MXCSR
+        // bit 2: AVX: YMM0-YMM15
+        // bit 5: AVX-512: opmask registers k0-k7
+        // bit 6: AVX-512: ZMM_Hi256 ZMM0-ZMM15
+        // bit 7: AVX-512: Hi16_ZMM ZMM16-ZMM31
+
+        SSE                 = 1 , // XMM0-XMM15 and MXCSR
+        AVX                 = 2 , // YMM0-YMM15
+        AVX_512_K0_K7       = 5 , // opmask registers k0-k7
+        AVX_512_LOW_256     = 6 , // ZMM0-ZMM15
+        AVX_512_HIGH_256    = 7 , // ZMM16-ZMM31
+    };
+
+    template<typename T, typename U>
+    static constexpr bool bit_is_open(T data, U bit_pos) noexcept
+    {
+        static_assert(sizeof(T) == sizeof(U));
+
+        using Type = underlying_t<U>;
+        return (static_cast<Type>(data) & (static_cast<Type>(1) << static_cast<Type>(bit_pos))) != 0;
+    }
+
+#if defined(TSIMD_ARCH_X86_ANY)
+    // leaf: EAX, sub_leaf: ECX
+    inline void cpuid(const uint32_t leaf, const uint32_t sub_leaf, uint32_t* abcd)
+    {
+#if defined(_MSC_VER)
+        int regs[4];
+        __cpuidex(regs, static_cast<int>(leaf), static_cast<int>(sub_leaf));
+        for (int i = 0; i < 4; ++i)
+        {
+            abcd[i] = static_cast<uint32_t>(regs[i]);
+        }
+#else
+        uint32_t a;
+        uint32_t b;
+        uint32_t c;
+        uint32_t d;
+        __cpuid_count(leaf, sub_leaf, a, b, c, d);
+        abcd[0] = a;
+        abcd[1] = b;
+        abcd[2] = c;
+        abcd[3] = d;
+#endif
+    }
+
+    inline uint64_t read_xcr0()
+    {
+#if defined(_MSC_VER)
+        return _xgetbv(0);
+#else
+        uint32_t eax, edx;
+        __asm__ volatile("xgetbv" : "=a"(eax), "=d"(edx) : "c"(0));
+        return (static_cast<uint64_t>(edx) << 32) | eax;
+#endif
+    }
+#endif // arch x86 any
+
     const InstructionSetSupports& get_support_info_impl() noexcept
     {
         using namespace detail;
